@@ -1,0 +1,27 @@
+{
+  "name": "vue-codemod",
+  "version": "0.0.1",
+  "description": "Vue codemod scripts",
+  "main": "index.js",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/vuejs/vue-codemod.git"
+  },
+  "author": "Haoqun Jiang",
+  "license": "MIT",
+  "dependencies": {
+    "commander": "^4.1.0",
+    "execa": "^4.0.0",
+    "globby": "^11.0.0",
+    "inquirer": "^7.0.3",
+    "jscodeshift": "^0.7.0",
+    "vue-jscodeshift-adapter": "^2.0.3"
+  },
+  "devDependencies": {
+    "@types/jest": "^24.0.25",
+    "@types/jscodeshift": "^0.6.3",
+    "@types/node": "^13.1.6",
+    "jest": "^24.9.0",
+    "typescript": "^3.7.4"
+  }
+}

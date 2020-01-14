@@ -8,7 +8,7 @@ Inspired by [react-codemod](https://github.com/reactjs/react-codemod).
 
 ## Usage
 
-`npx vue-codemod -t <transformation> -f <path> [...options]
+`npx vue-codemod -t <transformation> -f <path> [...options]`
 
 - `transformation` - name of transformation, see available transformations below. Or you can provide a path to a custom transformation module.
 - `path` - files or directory to transform
@@ -34,7 +34,7 @@ Alias of [`new-vue-to-create-app`](#new-vue-to-create-app)
 ### rfc-0013
 
 **WIP**
-Runs [`object-to-composition-api`](#object-to-composition-api)
+Runs [`object-to-composition-api`](#object-to-composition-api) and [`remove-composition-api-plugin`](#remove-composition-api-plugin)
 
 ### new-vue-to-create-app
 
@@ -46,6 +46,10 @@ Converts `new Vue(...).$mount('#app')` calls to `createApp(...).mount(App, '#app
 **WIP**
 Implements [RFC-0013 Composition API](https://github.com/vuejs/rfcs/blob/master/active-rfcs/0013-composition-api.md).
 Migrated from https://github.com/vuejs/function-api-converter
+
+### remove-composition-api-plugin
+
+**TODO**: remove the usage of `@vue/composition-api` package as it's supported by default in Vue 3.
 
 ## Custom Transformation
 

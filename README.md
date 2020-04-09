@@ -6,50 +6,33 @@ This repository contains a collection of codemod scripts for use with [JSCodeshi
 
 Inspired by [react-codemod](https://github.com/reactjs/react-codemod).
 
-## Usage
+## Command Line Usage
 
-`npx vue-codemod -t <transformation> -f <path> [...options]`
+`npx vue-codemod -t <transformation> --params [transformation params] <path> [...additional options]`
 
-- `transformation` - name of transformation, see available transformations below. Or you can provide a path to a custom transformation module.
-- `path` - files or directory to transform
-- use the `--dry` options for a dry-run
+- `transformation` (required) - name of transformation, see available transformations below; or you can provide a path to a custom transformation module.
+- `path` (required) - files or directory to transform.
+- `--params` (optional) - additional transformation specific args	.
+- use the `--dry` options for a dry-run.
 
-## TODOs
+## Programmatic API
+
+TODO
+
+## Roadmap
 
 (Sort by priority)
 
-- [ ] Basic testing setup and an MVP
+- [ ] Basic testing setup and a dummy CLI
+- [ ] Support applying `jscodeshift` codemods to `.vue` files
+- [ ] Provide a programmatic interface for usage in `vue-cli-plugin-vue-next`
 - [ ] Define an interface for transformation of template blocks
-- [ ] Automatically apply transformations to `.vue` file without explicitly depending on `vue-jscodeshift-adapter` (should open source this repo after finishing this one)
 - [ ] A playground for writing transformations
 - [ ] Implement more transformations for [active RFCs](https://github.com/vuejs/rfcs/tree/master/active-rfcs)
-- [ ] Support `.ts` and `<script lang="ts">`
 
 ## Included Transformations
 
-### rfc-0009
-
-Alias of [`new-vue-to-create-app`](#new-vue-to-create-app)
-
-### rfc-0013
-
-**WIP**
-Runs [`object-to-composition-api`](#object-to-composition-api) and [`remove-composition-api-plugin`](#remove-composition-api-plugin)
-
-### new-vue-to-create-app
-
-Implements [RFC-0009 Global API Change](https://github.com/vuejs/rfcs/blob/master/active-rfcs/0009-global-api-change.md).
-Converts `new Vue(...).$mount('#app')` calls to `createApp(...).mount(App, '#app')`.
-
-### object-to-composition-api
-
-**WIP**
-Implements [RFC-0013 Composition API](https://github.com/vuejs/rfcs/blob/master/active-rfcs/0013-composition-api.md).
-Migrated from https://github.com/vuejs/function-api-converter
-
-### remove-composition-api-plugin
-
-**TODO**: remove the usage of `@vue/composition-api` package as it's supported by default in Vue 3.
+TODO
 
 ## Custom Transformation
 

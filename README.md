@@ -8,11 +8,11 @@ Inspired by [react-codemod](https://github.com/reactjs/react-codemod).
 
 ## Command Line Usage
 
-`npx vue-codemod -t <transformation> --params [transformation params] <path> [...additional options]`
+`npx vue-codemod <path> -t <transformation> --params [transformation params] [...additional options]`
 
 - `transformation` (required) - name of transformation, see available transformations below; or you can provide a path to a custom transformation module.
 - `path` (required) - files or directory to transform.
-- `--params` (optional) - additional transformation specific args	.
+- `--params` (optional) - additional transformation specific args.
 - use the `--dry` options for a dry-run.
 
 ## Programmatic API
@@ -23,9 +23,9 @@ TODO
 
 (Sort by priority)
 
-- [ ] Basic testing setup and a dummy CLI
-- [ ] Support applying `jscodeshift` codemods to `.vue` files
-- [ ] Provide a programmatic interface for usage in `vue-cli-plugin-vue-next`
+- [x] Basic testing setup and a dummy CLI
+- [x] Support applying `jscodeshift` codemods to `.vue` files
+- [x] Provide a programmatic interface for usage in `vue-cli-plugin-vue-next`
 - [ ] Define an interface for transformation of template blocks
 - [ ] A playground for writing transformations
 - [ ] Implement more transformations for [active RFCs](https://github.com/vuejs/rfcs/tree/master/active-rfcs)

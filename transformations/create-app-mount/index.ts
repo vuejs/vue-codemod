@@ -1,5 +1,4 @@
-import { Transform } from "jscodeshift"
-import adapt from '../../utils/adapter'
+import { Transform } from 'jscodeshift'
 
 import removeProductionTip from './remove-production-tip'
 import transformMount from './transformMount'
@@ -11,8 +10,8 @@ const transform: Transform = (file, api) => {
   // add a `createApp` import
   const vueImportExpr = root.find(j.ImportDeclaration, {
     source: {
-      value: 'vue'
-    }
+      value: 'vue',
+    },
   })
   vueImportExpr.forEach(({ node }) => {
     node.specifiers.push(j.importSpecifier(j.identifier('createApp')))
@@ -30,4 +29,4 @@ const transform: Transform = (file, api) => {
   return root.toSource({ lineTerminator: '\n' })
 }
 
-export default adapt(transform)
+export default transform

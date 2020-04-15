@@ -33,6 +33,8 @@ Inspired by [react-codemod](https://github.com/reactjs/react-codemod).
 
 ### Migrating from Vue 2 to Vue 3
 
+> Note: even though most of the migration process can be automated, please be aware there might still be subtle differences between Vue 3 and Vue 2 runtime, please double check before deploying your Vue 3 app into production.
+
 #### Fixable in ESLint
 
 - [RFC05: Replace `v-bind`'s `.sync` with a `v-model` argument](https://github.com/vuejs/rfcs/blob/master/active-rfcs/0005-replace-v-bind-sync-with-v-model-argument.md)

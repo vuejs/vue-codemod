@@ -39,8 +39,10 @@ Inspired by [react-codemod](https://github.com/reactjs/react-codemod).
 
 - [RFC05: Replace `v-bind`'s `.sync` with a `v-model` argument](https://github.com/vuejs/rfcs/blob/master/active-rfcs/0005-replace-v-bind-sync-with-v-model-argument.md)
   - Can be detected and fixed by the [`vue/no-deprecated-v-bind-sync`](https://eslint.vuejs.org/rules/no-deprecated-v-bind-sync.html) ESLint rule
+- [RFC14: Remove `keyCode` support in `v-on`](https://github.com/vuejs/rfcs/blob/master/active-rfcs/0014-drop-keycode-support.md)
+  - Can be detected and fixed by the [`vue/no-deprecated-v-on-number-modifiers`](https://github.com/vuejs/eslint-plugin-vue/pull/1079) ESLint rule
 - [RFC19: Remove `data` object declaration](https://github.com/vuejs/rfcs/blob/master/active-rfcs/0019-remove-data-object-declaration.md)
-  - Can be detected and fixed by the [`vue/no-shared-component-data`](https://eslint.vuejs.org/rules/no-shared-component-data.html) ESLint rule
+  - Can be detected and fixed by the [`vue/no-shared-component-data`](https://eslint.vuejs.org/rules/no-shared-component-data.html) and the [`vue/no-deprecated-data-object-declaration`](https://github.com/vuejs/eslint-plugin-vue/pull/1083) ESLint rules
 
 #### Codemods
 
@@ -74,8 +76,6 @@ Inspired by [react-codemod](https://github.com/reactjs/react-codemod).
 - [RFC13: Composition API](https://github.com/vuejs/rfcs/blob/master/active-rfcs/0013-composition-api.md)
   - `import ... from '@vue/composition-api'` -> `import ... from 'vue'`
   - TODO: Other subtle differences between `@vue/composition-api` and the Vue 3 implementation.
-- [RFC14: Remove `keyCode` support in `v-on`](https://github.com/vuejs/rfcs/blob/master/active-rfcs/0014-drop-keycode-support.md)
-  - TODO
 - [RFC16: Remove `inline-template`](https://github.com/vuejs/rfcs/blob/master/active-rfcs/0016-remove-inline-templates.md)
   - TODO
 - [RFC18: Transition class name adjustments](https://github.com/vuejs/rfcs/blob/master/active-rfcs/0018-transition-class-change.md)

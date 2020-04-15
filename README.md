@@ -78,10 +78,6 @@ Inspired by [react-codemod](https://github.com/reactjs/react-codemod).
   - Can be detected by the [`vue/no-deprecated-events-api`](https://github.com/vuejs/eslint-plugin-vue/pull/1097) ESLint rule
   - It will still be supported in compatibility builds
   - A codemod can be implemented to use other libraries like [tiny-emitter](https://github.com/scottcorgan/tiny-emitter) for the events API (low priority, though)
-- [rfc21-router-link-scoped-slot](https://github.com/vuejs/rfcs/blob/master/active-rfcs/0021-router-link-scoped-slot.md)
-  - TODO
-- [rfc22-router-merge-meta-routelocation](https://github.com/vuejs/rfcs/blob/master/active-rfcs/0022-router-merge-meta-routelocation.md)
-  - Seems no codemod is applicable to this breaking change
 - [rfc23-scoped-styles-changes](https://github.com/vuejs/rfcs/blob/master/active-rfcs/0023-scoped-styles-changes.md)
   - The new behavior should be opt-in
 - [rfc24-attribute-coercion-behavior](https://github.com/vuejs/rfcs/blob/master/active-rfcs/0024-attribute-coercion-behavior.md)
@@ -101,6 +97,10 @@ Inspired by [react-codemod](https://github.com/reactjs/react-codemod).
   - `Vue.use(VueRouter)` & `new Vue({ router })` -> `app.use(router)`
   - `new VueRouter()` -> `createRouter()`
   - `mode: 'history', base: BASE_URL` etc. -> `history: createWebHistory(BASE_URL)` etc.
+  - [rfc21-router-link-scoped-slot](https://github.com/vuejs/rfcs/blob/master/active-rfcs/0021-router-link-scoped-slot.md)
+    - TODO
+  - [rfc22-router-merge-meta-routelocation](https://github.com/vuejs/rfcs/blob/master/active-rfcs/0022-router-merge-meta-routelocation.md)
+    - Seems no codemod is applicable to this breaking change
 
 ## Custom Transformation
 

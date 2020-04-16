@@ -24,8 +24,9 @@ Inspired by [react-codemod](https://github.com/reactjs/react-codemod).
 - [x] Basic testing setup and a dummy CLI
 - [x] Support applying `jscodeshift` codemods to `.vue` files
 - [x] Provide a programmatic interface for usage in `vue-cli-plugin-vue-next`
-- [ ] Implement more transformations for [active RFCs](https://github.com/vuejs/rfcs/tree/master/active-rfcs)
-- [ ] Support TypeScript
+- [ ] Set up tests
+- [ ] Implement the transformations described below for migration usage
+- [ ] Built-in transformations need to support TypeScript
 - [ ] Define an interface for transformation of template blocks
 - [ ] A playground for writing transformations
 
@@ -62,7 +63,7 @@ Inspired by [react-codemod](https://github.com/reactjs/react-codemod).
   - Detect and warn on `optionMergeStrategies` behavior change
 - [RFC06: Slots unification](https://github.com/vuejs/rfcs/blob/master/active-rfcs/0006-slots-unification.md)
   1. During the transition period, should warn users when they use `this.$slots`, recommending `this.$scopedSlots` as a replacement
-  2. Transform all `this.$slots` to `this.$scopedSlots` with an inline warning comment
+  2. Transform all `this.$slots` to `this.$scopedSlots` with an inline warning comment so that users can manually verify the behavior later
   3. Replace all `this.$scopedSlots` occurrences with `this.$slots`
 - [RFC07: Functional and async components API change](https://github.com/vuejs/rfcs/blob/master/active-rfcs/0007-functional-async-api-change.md)
   - Note: a PR is proposed to amend this RFC: https://github.com/vuejs/rfcs/pull/154
@@ -90,7 +91,7 @@ Inspired by [react-codemod](https://github.com/reactjs/react-codemod).
   - There should be an ESLint rule to detect such usages
   - Possible alternatives are addressed [in the RFC](https://github.com/vuejs/rfcs/blob/master/active-rfcs/0016-remove-inline-templates.md#adoption-strategy)
 - [RFC25: Built-in `<Teleport>` component](https://github.com/vuejs/rfcs/blob/master/active-rfcs/0025-teleport.md)
-  - Detect all the presence of `teleport` components, renaming them to some other name like `TeleportComp`
+  - Detect all the presence of `<Teleport>` components, renaming them to some other name like `<TeleportComp>`
 - [RFC26: New async component API](https://github.com/vuejs/rfcs/blob/master/active-rfcs/0026-async-component-api.md)
   - In the compat build, it is possible to check the return value of functional components and warn legacy async components usage. This should cover all Promise-based use cases.
   - The syntax conversion is mechanical and can be performed via a codemod. The challenge is in determining which plain functions should be considered async components. Some basic heuristics can be used (note this may not cover 100% of the existing usage):
@@ -144,7 +145,10 @@ Some of them can be automatically migrated with the help of codemods.
 - [RFC23-scoped-styles-changes](https://github.com/vuejs/rfcs/blob/master/active-rfcs/0023-scoped-styles-changes.md)
   - The new behavior should be opt-in
 - [RFC27: Custom Elements Interop Improvements](https://github.com/vuejs/rfcs/blob/master/active-rfcs/0027-custom-elements-interop.md)
-  - TODO
+  - (Covered by the Global API RFCs): `Vue.config.ignoredElements` -> `app.config.isCustomElement`
+  - Non `<component>` tags with `is` usage ->
+    - `<component is>` (for SFC templates)
+    - `v-is` (for in-DOM templates).
 
 ## Custom Transformation
 

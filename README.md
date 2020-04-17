@@ -47,6 +47,9 @@ Inspired by [react-codemod](https://github.com/reactjs/react-codemod).
 
 #### Codemods
 
+- [RFC01: New slot syntax](https://github.com/vuejs/rfcs/blob/master/active-rfcs/0001-new-slot-syntax.md)
+  - Can be detected and partially fixed by the [`vue/no-deprecated-slot-attribute`](https://eslint.vuejs.org/rules/no-deprecated-slot-attribute.html) and [`vue/no-deprecated-slot-scope-attribute`](https://eslint.vuejs.org/rules/no-deprecated-slot-scope-attribute.html)
+  - Need to cover edge cases that can't be fixed by ESLint
 - [RFC04: Global API treeshaking](https://github.com/vuejs/rfcs/blob/master/active-rfcs/0004-global-api-treeshaking.md) & [RFC09: Global mounting/configuration API change](https://github.com/vuejs/rfcs/blob/master/active-rfcs/0009-global-api-change.md)
   - `import Vue from 'vue'` -> `import * as Vue from 'vue'`
   - `Vue.extend` and `new Vue` -> `defineComponent`

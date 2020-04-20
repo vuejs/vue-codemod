@@ -47,9 +47,13 @@ Inspired by [react-codemod](https://github.com/reactjs/react-codemod).
 
 #### Codemods
 
-- [RFC01: New slot syntax](https://github.com/vuejs/rfcs/blob/master/active-rfcs/0001-new-slot-syntax.md)
+- [RFC01: New slot syntax](https://github.com/vuejs/rfcs/blob/master/active-rfcs/0001-new-slot-syntax.md) and [RFC06: Slots unification](https://github.com/vuejs/rfcs/blob/master/active-rfcs/0006-slots-unification.md)
   - Can be detected and partially fixed by the [`vue/no-deprecated-slot-attribute`](https://eslint.vuejs.org/rules/no-deprecated-slot-attribute.html) and [`vue/no-deprecated-slot-scope-attribute`](https://eslint.vuejs.org/rules/no-deprecated-slot-scope-attribute.html)
-  - Need to cover edge cases that can't be fixed by ESLint
+  - During the transition period:
+    - With the 2 ESLint rules enabled, it will warn users when they use `this.$slots`, recommending `this.$scopedSlots` as a replacement
+    - Transform all `this.$slots` to `this.$scopedSlots` with an inline warning comment so that users can manually verify the behavior later
+    - May need to cover edge cases that can't be fixed by ESLint
+  - When upgrading to Vue 3, replace all `this.$scopedSlots` occurrences with `this.$slots`
 - [RFC04: Global API treeshaking](https://github.com/vuejs/rfcs/blob/master/active-rfcs/0004-global-api-treeshaking.md) & [RFC09: Global mounting/configuration API change](https://github.com/vuejs/rfcs/blob/master/active-rfcs/0009-global-api-change.md)
   - `import Vue from 'vue'` -> `import * as Vue from 'vue'`
   - `Vue.extend` and `new Vue` -> `defineComponent`
@@ -64,10 +68,6 @@ Inspired by [react-codemod](https://github.com/reactjs/react-codemod).
   - `Vue.config.productionTip` -> removed
   - `Vue.config.ignoredElements` -> `app.config.isCustomElement`
   - Detect and warn on `optionMergeStrategies` behavior change
-- [RFC06: Slots unification](https://github.com/vuejs/rfcs/blob/master/active-rfcs/0006-slots-unification.md)
-  1. During the transition period, should warn users when they use `this.$slots`, recommending `this.$scopedSlots` as a replacement
-  2. Transform all `this.$slots` to `this.$scopedSlots` with an inline warning comment so that users can manually verify the behavior later
-  3. Replace all `this.$scopedSlots` occurrences with `this.$slots`
 - [RFC07: Functional and async components API change](https://github.com/vuejs/rfcs/blob/master/active-rfcs/0007-functional-async-api-change.md)
   - Note: a PR is proposed to amend this RFC: https://github.com/vuejs/rfcs/pull/154
   - TODO

@@ -1,3 +1,4 @@
+// TODO: migrate code from vue-cli-plugin-vue-next
 import { Transform } from 'jscodeshift'
 
 import removeProductionTip from './remove-production-tip'

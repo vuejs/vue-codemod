@@ -24,10 +24,10 @@ Inspired by [react-codemod](https://github.com/reactjs/react-codemod).
 - [x] Basic testing setup and a dummy CLI
 - [x] Support applying `jscodeshift` codemods to `.vue` files
 - [x] Provide a programmatic interface for usage in `vue-cli-plugin-vue-next`
-- [ ] Set up tests
-- [ ] Implement the transformations described below for migration usage
+- [ ] (WIP) Set up tests
+- [ ] (WIP) Implement the transformations described below for migration usage
 - [ ] Built-in transformations need to support TypeScript
-- [ ] Define an interface for transformation of template blocks
+- [ ] Define an interface for transformation of template blocks (may use [`vue-eslint-parser`](https://github.com/mysticatea/vue-eslint-parser/) for this)
 - [ ] A playground for writing transformations
 
 ## Included Transformations

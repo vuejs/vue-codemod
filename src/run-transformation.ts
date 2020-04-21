@@ -18,11 +18,35 @@ type JSTransformation = Transform & {
   parser?: string | Parser
 }
 
+type JSTransformationModule =
+  | JSTransformation
+  | {
+      default: Transform
+      parser?: string | Parser
+    }
+
+type VueTransformationModule =
+  | VueTransformation
+  | {
+      default: VueTransformation
+    }
+
+type TransformationModule = JSTransformationModule | VueTransformationModule
+
 export default function runTransformation(
   fileInfo: FileInfo,
-  transformation: VueTransformation | JSTransformation,
+  transformationModule: TransformationModule,
   params: object = {}
 ) {
+  let transformation: VueTransformation | JSTransformation
+  // @ts-ignore
+  if (typeof transformationModule.default !== 'undefined') {
+    // @ts-ignore
+    transformation = transformationModule.default
+  } else {
+    transformation = transformationModule
+  }
+
   if (transformation instanceof VueTransformation) {
     debug('TODO: Running VueTransformation')
     return
@@ -31,11 +55,10 @@ export default function runTransformation(
   debug('Running jscodeshift transform')
 
   let parser = getParser()
-  if (transformation.parser) {
+  const parserOption = (transformationModule as JSTransformationModule).parser
+  if (parserOption) {
     parser =
-      typeof transformation.parser === 'string'
-        ? getParser(transformation.parser)
-        : transformation.parser
+      typeof parserOption === 'string' ? getParser(parserOption) : parserOption
   }
   const j = jscodeshift.withParser(parser)
   const api = {
@@ -65,7 +88,6 @@ export default function runTransformation(
       return source // skipped
     }
     descriptor.script.content = out
-    // TODO: preserve indentation
     return descriptorToString(descriptor, {
       indents: {
         template: 0,

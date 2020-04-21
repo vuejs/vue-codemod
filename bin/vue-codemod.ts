@@ -32,7 +32,7 @@ const { _: files, transformation: transformationName, params } = yargs
 // TODO: port the `Runner` interface of jscodeshift
 async function main() {
   const resolvedPaths = globby.sync(files)
-  const transformation = loadTransformation(transformationName)
+  const transformationModule = loadTransformationModule(transformationName)
 
   log(`Processing ${resolvedPaths.length} files…`)
 
@@ -45,7 +45,7 @@ async function main() {
     try {
       const result = runTransformation(
         fileInfo,
-        transformation,
+        transformationModule,
         params as object
       )
       fs.writeFileSync(p, result)
@@ -60,7 +60,7 @@ main().catch((err) => {
   process.exit(1)
 })
 
-function loadTransformation(nameOrPath: string) {
+function loadTransformationModule(nameOrPath: string) {
   let transformation = builtInTransformations[nameOrPath]
   if (transformation) {
     return transformation
@@ -73,10 +73,7 @@ function loadTransformation(nameOrPath: string) {
     )
     // TODO: interop with ES module
     // TODO: fix absolute path
-    const module = requireFunc(`./${nameOrPath}`)
-    const transformation =
-      typeof module.default === 'function' ? module.default : module
-    return transformation
+    return requireFunc(`./${nameOrPath}`)
   }
 
   throw new Error(`Cannot find transformation module ${nameOrPath}`)

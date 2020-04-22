@@ -9,7 +9,8 @@
   ],
   "scripts": {
     "build": "tsc",
-    "prepublishOnly": "tsc"
+    "prepublishOnly": "tsc",
+    "test": "jest"
   },
   "repository": {
     "type": "git",
@@ -29,14 +30,14 @@
     "yargs": "^15.3.1"
   },
   "devDependencies": {
-    "@types/jest": "^24.0.25",
+    "@types/jest": "^25.2.1",
     "@types/jscodeshift": "^0.6.3",
     "@types/node": "^13.1.6",
     "@types/yargs": "^15.0.4",
-    "jest": "^24.9.0",
+    "jest": "^25.4.0",
     "prettier": "^2.0.4",
     "ts-jest": "^25.4.0",
-    "typescript": "^3.7.4"
+    "typescript": "^3.8.3"
   },
   "prettier": {
     "semi": false,

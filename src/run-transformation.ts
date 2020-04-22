@@ -1,6 +1,6 @@
 import jscodeshift, { Transform, Parser } from 'jscodeshift'
 // @ts-ignore
-import getParser from 'jscodeshift/dist/getParser'
+import getParser from 'jscodeshift/src/getParser'
 import { parse } from '@vue/compiler-sfc'
 import descriptorToString from 'vue-sfc-descriptor-to-string'
 import createDebug from 'debug'

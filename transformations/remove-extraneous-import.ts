@@ -95,3 +95,4 @@ export const transformAST: ASTTransformation<Params> = (
 }
 
 export default wrap(transformAST)
+export const parser = 'babylon'

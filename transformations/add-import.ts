@@ -12,6 +12,7 @@ type Params = {
   source: string
 }
 
+// TODO: add namespaced import
 export const transformAST: ASTTransformation<Params> = (
   { root, j },
   { specifier, source }
@@ -69,3 +70,4 @@ export const transformAST: ASTTransformation<Params> = (
 }
 
 export default wrap(transformAST)
+export const parser = 'babylon'

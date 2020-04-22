@@ -57,20 +57,19 @@ Inspired by [react-codemod](https://github.com/reactjs/react-codemod).
 - [RFC04: Global API treeshaking](https://github.com/vuejs/rfcs/blob/master/active-rfcs/0004-global-api-treeshaking.md) & [RFC09: Global mounting/configuration API change](https://github.com/vuejs/rfcs/blob/master/active-rfcs/0009-global-api-change.md)
   - `import Vue from 'vue'` -> `import * as Vue from 'vue'`
   - `Vue.extend` and `new Vue` -> `defineComponent`
-    - `Vue.extend` can be supported in a compat runtime as an alias to `defineComponent` (Need to propose an RFC)
   - `new HelloWorld().$mount` -> `createApp(HelloWorld).$mount`
   - `render(h)` -> `render()` and `import { h } from 'vue'`
   - `Vue.config`, `Vue.use`, `Vue.mixin`, `Vue.component`, `Vue.directive`, etc
+    - It's possible to provide a runtime compatibility layer for single-root apps
     - -> `app.**`
-    - Maybe we can provide a runtime compatibility layer for apps with one single root instance? (Need to propose an RFC)
   - `Vue.prototype.customProperty` -> `app.config.globalProperties.customProperty`
     - Again, a runtime compatibility layer is possible
   - `Vue.config.productionTip` -> removed
   - `Vue.config.ignoredElements` -> `app.config.isCustomElement`
   - Detect and warn on `optionMergeStrategies` behavior change
 - [RFC07: Functional and async components API change](https://github.com/vuejs/rfcs/blob/master/active-rfcs/0007-functional-async-api-change.md)
-  - Note: a PR is proposed to amend this RFC: https://github.com/vuejs/rfcs/pull/154
-  - TODO
+  - a compatibility mode can be provided for functional components for one-at-a-time migration
+  - SFCs using `<template functional>` should be converted to normal SFCs
 - [RFC08: Render function API change](https://github.com/vuejs/rfcs/blob/master/active-rfcs/0008-render-function-api-change.md)
   - Template users won't be affected
   - JSX plugin will be rewritten to cover most use cases
@@ -78,8 +77,6 @@ Inspired by [react-codemod](https://github.com/reactjs/react-codemod).
     - It's possible to provide a compat plugin that patches render functions and make them expose a 2.x compatible arguments, and can be turned off in each component for a one-at-a-time migration process.
     - It's also possible to provide a codemod that auto-converts `h` calls to use the new VNode data format, since the mapping is pretty mechanical.
   - Functional components using context will likely have to be manually migrated, but a similar adaptor can be provided.
-- [RFC11: Component `v-model` API change](https://github.com/vuejs/rfcs/blob/master/active-rfcs/0011-v-model-api-change.md)
-  - TODO
 - [RFC12: Custom directive API change](https://github.com/vuejs/rfcs/blob/master/active-rfcs/0012-custom-directive-api-change.md)
   - `bind` -> `beforeMount`
   - `inserted` -> `mounted`
@@ -126,6 +123,14 @@ Inspired by [react-codemod](https://github.com/reactjs/react-codemod).
   - Seems no codemod or ESLint rule is applicable to this breaking change
 - [RFC24: Attribute coercion behavior change](https://github.com/vuejs/rfcs/blob/master/active-rfcs/0024-attribute-coercion-behavior.md)
   - Codemod is not likely to help in this case
+
+#### RFCs that May Need Amendments to Simplify the Migration
+
+- [RFC04: Global API treeshaking](https://github.com/vuejs/rfcs/blob/master/active-rfcs/0004-global-api-treeshaking.md) & [RFC09: Global mounting/configuration API change](https://github.com/vuejs/rfcs/blob/master/active-rfcs/0009-global-api-change.md)
+  - `Vue.extend` can be supported in a compat runtime as an alias to `defineComponent`
+  - For the changes in the form of `Vue.*`->`app.*`, it may be not easy to transform all apperances correctly, because there would be many cross references to the root app instance. So in the runtime, we can alias `Vue.*` to `app.*` if there's only one `createApp` call in the whole app lifecycle, and throws if there are more than one root app instance detected. This can greatly ease the migration cost for most single-root apps.
+- [RFC11: Component `v-model` API change](https://github.com/vuejs/rfcs/blob/master/active-rfcs/0011-v-model-api-change.md)
+  - I don't have a clear idea on how to progressively migrate the `v-model` API because both the author and consumer of the components need to change their ways to use this API, according to the current RFC. So we might need a compatibility layer in the runtime.
 
 #### Other Opt-In Changes
 

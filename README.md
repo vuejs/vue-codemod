@@ -121,7 +121,9 @@ Legend of annotations:
   - [RFC28: Change active and exact-active behavior for `router-link`](https://github.com/vuejs/rfcs/blob/master/active-rfcs/0028-router-active-link.md)
     - TODO
 - 🔴 [`vue-class-component` 7.x to 8](https://github.com/vuejs/vue-class-component/issues/406)
-  - TODO
+  - `import { Component } from 'vue-class-component'` -> `import { Options as Component } from 'vue-class-component'`
+  - `import Vue from 'vue'` -> `import { Vue } from 'vue-class-component'` (Need to avoid name collision if there's any reference to `Vue` besides `extends Vue`)
+  - `Component.registerHooks` -> `Vue.registerHooks`
 
 #### Breaking Changes that Can Only Be Manually Migrated
 

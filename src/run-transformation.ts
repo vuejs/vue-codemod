@@ -94,4 +94,6 @@ export default function runTransformation(
       },
     })
   }
+
+  return source
 }

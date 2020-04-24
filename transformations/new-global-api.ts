@@ -19,9 +19,9 @@ export const transformAST: ASTTransformation = (context) => {
   removeVueUse(context)
   removeContextualHFromRender(context)
 
-  removeExtraneousImport(context, { localName: 'Vue' })
-  removeExtraneousImport(context, { localName: 'Vuex' })
-  removeExtraneousImport(context, { localName: 'VueRouter' })
+  removeExtraneousImport(context, { localBinding: 'Vue' })
+  removeExtraneousImport(context, { localBinding: 'Vuex' })
+  removeExtraneousImport(context, { localBinding: 'VueRouter' })
 }
 
 export default wrap(transformAST)

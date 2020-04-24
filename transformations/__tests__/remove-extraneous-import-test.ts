@@ -4,7 +4,7 @@ const transform = require('../remove-extraneous-import')
 defineInlineTest(
   transform,
   {
-    localName: 'Vue',
+    localBinding: 'Vue',
   },
   `import Vue from "vue";`,
   ``,
@@ -14,7 +14,7 @@ defineInlineTest(
 defineInlineTest(
   transform,
   {
-    localName: 'createApp',
+    localBinding: 'createApp',
   },
   `import { createApp } from "vue";`,
   ``,
@@ -24,7 +24,7 @@ defineInlineTest(
 defineInlineTest(
   transform,
   {
-    localName: 'createVueApp',
+    localBinding: 'createVueApp',
   },
   `import { createApp as createVueApp } from "vue";`,
   ``,
@@ -34,7 +34,7 @@ defineInlineTest(
 defineInlineTest(
   transform,
   {
-    localName: 'Vue',
+    localBinding: 'Vue',
   },
   `import * as Vue from "vue";`,
   ``,
@@ -44,7 +44,7 @@ defineInlineTest(
 defineInlineTest(
   transform,
   {
-    localName: 'style',
+    localBinding: 'style',
   },
   `import style from "./style.css";`,
   `import "./style.css";`,
@@ -54,7 +54,7 @@ defineInlineTest(
 defineInlineTest(
   transform,
   {
-    localName: 'Vue',
+    localBinding: 'Vue',
   },
   `import Vue from "vue";\nnew Vue()`,
   `import Vue from "vue";\nnew Vue()`,

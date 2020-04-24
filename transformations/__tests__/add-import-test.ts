@@ -4,7 +4,10 @@ const transform = require('../add-import')
 defineInlineTest(
   transform,
   {
-    specifier: 'Vue',
+    specifier: {
+      type: 'default',
+      local: 'Vue',
+    },
     source: 'vue',
   },
   ``,
@@ -16,6 +19,7 @@ defineInlineTest(
   transform,
   {
     specifier: {
+      type: 'named',
       imported: 'createApp',
     },
     source: 'vue',
@@ -29,6 +33,7 @@ defineInlineTest(
   transform,
   {
     specifier: {
+      type: 'named',
       imported: 'createApp',
       local: 'createVueApp',
     },
@@ -42,7 +47,24 @@ defineInlineTest(
 defineInlineTest(
   transform,
   {
-    specifier: 'Vue',
+    specifier: {
+      type: 'namespace',
+      local: 'Vue',
+    },
+    source: 'vue',
+  },
+  ``,
+  `import * as Vue from "vue";`,
+  'Add namespace import'
+)
+
+defineInlineTest(
+  transform,
+  {
+    specifier: {
+      type: 'default',
+      local: 'Vue',
+    },
     source: 'vue',
   },
   `import Vue from "vue";`,
@@ -54,6 +76,7 @@ defineInlineTest(
   transform,
   {
     specifier: {
+      type: 'named',
       imported: 'createApp',
     },
     source: 'vue',
@@ -67,6 +90,7 @@ defineInlineTest(
   transform,
   {
     specifier: {
+      type: 'named',
       imported: 'createApp',
     },
     source: 'vue',
@@ -80,6 +104,7 @@ defineInlineTest(
   transform,
   {
     specifier: {
+      type: 'named',
       imported: 'h',
     },
     source: 'vue',

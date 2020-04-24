@@ -27,7 +27,7 @@ export const transformAST: ASTTransformation = (context) => {
     })
 
     addImport(context, {
-      specifier: { imported: 'createRouter' },
+      specifier: { type: 'named', imported: 'createRouter' },
       source: 'vue-router',
     })
     newVueRouter.replaceWith(({ node }) => {
@@ -71,7 +71,7 @@ export const transformAST: ASTTransformation = (context) => {
 
       // add the default mode with a hash history
       addImport(context, {
-        specifier: { imported: historyMode },
+        specifier: { type: 'named', imported: historyMode },
         source: 'vue-router',
       })
       node.arguments[0].properties = node.arguments[0].properties.filter(
@@ -90,7 +90,7 @@ export const transformAST: ASTTransformation = (context) => {
       return j.callExpression(j.identifier('createRouter'), node.arguments)
     })
     removeExtraneousImport(context, {
-      localName: localVueRouter,
+      localBinding: localVueRouter,
     })
   }
 }

@@ -1,10 +1,14 @@
 import wrap from '../src/wrap-ast-transformation'
 import type { ASTTransformation } from '../src/wrap-ast-transformation'
-import type { ImportSpecifier, ImportDefaultSpecifier } from 'jscodeshift'
+import type {
+  ImportSpecifier,
+  ImportDefaultSpecifier,
+  ImportNamespaceSpecifier,
+} from 'jscodeshift'
 import type { Collection } from 'jscodeshift/src/Collection'
 
 type Params = {
-  localName: string
+  localBinding: string
 }
 
 /**
@@ -17,17 +21,18 @@ type Params = {
  */
 export const transformAST: ASTTransformation<Params> = (
   { root, j },
-  { localName }
+  { localBinding }
 ) => {
   const usages = root
-    .find(j.Identifier, { name: localName })
+    .find(j.Identifier, { name: localBinding })
     .filter((identifierPath) => {
       const parent = identifierPath.parent.node
 
       // Ignore the import specifier
       if (
         j.ImportDefaultSpecifier.check(parent) ||
-        j.ImportSpecifier.check(parent)
+        j.ImportSpecifier.check(parent) ||
+        j.ImportNamespaceSpecifier.check(parent)
       ) {
         return false
       }
@@ -54,22 +59,28 @@ export const transformAST: ASTTransformation<Params> = (
 
   if (!usages.length) {
     let specifier: Collection<
-      ImportSpecifier | ImportDefaultSpecifier
+      ImportSpecifier | ImportDefaultSpecifier | ImportNamespaceSpecifier
     > = root.find(j.ImportSpecifier, {
       local: {
-        name: localName,
+        name: localBinding,
       },
     })
 
     if (!specifier.length) {
       specifier = root.find(j.ImportDefaultSpecifier, {
         local: {
-          name: localName,
+          name: localBinding,
         },
       })
     }
 
-    // TODO: namespace specifier
+    if (!specifier.length) {
+      specifier = root.find(j.ImportNamespaceSpecifier, {
+        local: {
+          name: localBinding,
+        },
+      })
+    }
 
     if (!specifier.length) {
       return

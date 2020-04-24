@@ -1,31 +1,52 @@
 import wrap from '../src/wrap-ast-transformation'
 import type { ASTTransformation } from '../src/wrap-ast-transformation'
-import type { ImportSpecifier, ImportDefaultSpecifier } from 'jscodeshift'
+import type {
+  ImportSpecifier,
+  ImportDefaultSpecifier,
+  ImportNamespaceSpecifier,
+} from 'jscodeshift'
+
+type DefaultSpecifierParam = {
+  type: 'default'
+  local: string
+}
+type NamedSpecifierParam = {
+  type: 'named'
+  imported: string
+  local?: string
+}
+type NamespaceSpecifierParam = {
+  type: 'namespaced'
+  local: string
+}
 
 type Params = {
   specifier:
-    | string
-    | {
-        local?: string
-        imported: string
-      }
+    | DefaultSpecifierParam
+    | NamedSpecifierParam
+    | NamespaceSpecifierParam
   source: string
 }
 
-// TODO: add namespaced import
 export const transformAST: ASTTransformation<Params> = (
   { root, j },
   { specifier, source }
 ) => {
-  const localName =
-    typeof specifier === 'string'
-      ? specifier
-      : specifier.local || specifier.imported
+  let localBinding: string
+  if (specifier.type === 'named') {
+    localBinding = specifier.local || specifier.imported
+  } else {
+    localBinding = specifier.local
+  }
 
   const duplicate = root.find(j.ImportDeclaration, {
-    specifiers: (arr: Array<ImportSpecifier | ImportDefaultSpecifier>) =>
+    specifiers: (
+      arr: Array<
+        ImportSpecifier | ImportDefaultSpecifier | ImportNamespaceSpecifier
+      >
+    ) =>
       // @ts-ignore there's a bug in ast-types definition, the `local` should be non-nullable
-      arr.some((s) => s.local.name === localName),
+      arr.some((s) => s.local.name === localBinding),
     source: {
       value: source,
     },
@@ -35,13 +56,16 @@ export const transformAST: ASTTransformation<Params> = (
   }
 
   let newImportSpecifier
-  if (typeof specifier === 'string') {
-    newImportSpecifier = j.importDefaultSpecifier(j.identifier(specifier))
-  } else {
+  if (specifier.type === 'default') {
+    newImportSpecifier = j.importDefaultSpecifier(j.identifier(specifier.local))
+  } else if (specifier.type === 'named') {
     newImportSpecifier = j.importSpecifier(
       j.identifier(specifier.imported),
-      j.identifier(specifier.local || specifier.imported)
+      j.identifier(localBinding)
     )
+  } else {
+    // namespaced
+    newImportSpecifier = j.importNamespaceSpecifier(j.identifier(localBinding))
   }
 
   const matchedDecl = root.find(j.ImportDeclaration, {

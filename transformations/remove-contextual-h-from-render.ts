@@ -18,7 +18,7 @@ export const transformAST: ASTTransformation = (context) => {
 
   if (renderFns.length) {
     addImport(context, {
-      specifier: { imported: 'h' },
+      specifier: { type: 'named', imported: 'h' },
       source: 'vue',
     })
 

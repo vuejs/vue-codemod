@@ -58,6 +58,7 @@ export const transformAST: ASTTransformation = (context) => {
 
     addImport(context, {
       specifier: {
+        type: 'named',
         imported: 'createStore',
       },
       source: 'vuex',
@@ -65,7 +66,7 @@ export const transformAST: ASTTransformation = (context) => {
     newStore.replaceWith(({ node }) => {
       return j.callExpression(j.identifier('createStore'), node.arguments)
     })
-    removeExtraneousImport(context, { localName: localStore })
+    removeExtraneousImport(context, { localBinding: localStore })
   }
 }
 

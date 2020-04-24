@@ -57,14 +57,14 @@ export const transformAST: ASTTransformation<Params> = (
       ImportSpecifier | ImportDefaultSpecifier
     > = root.find(j.ImportSpecifier, {
       local: {
-        localName,
+        name: localName,
       },
     })
 
     if (!specifier.length) {
       specifier = root.find(j.ImportDefaultSpecifier, {
         local: {
-          localName,
+          name: localName,
         },
       })
     }

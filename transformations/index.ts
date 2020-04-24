@@ -1,4 +1,3 @@
-import createAppMount from './create-app-mount'
 import vueRouter3to4 from './vue-router-3-to-4'
 import vuex3to4 from './vuex-3-to-4'
 

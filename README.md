@@ -55,24 +55,25 @@ Legend of annotations:
 
 #### Codemods
 
-- 🔴 [RFC01: New slot syntax](https://github.com/vuejs/rfcs/blob/master/active-rfcs/0001-new-slot-syntax.md) and [RFC06: Slots unification](https://github.com/vuejs/rfcs/blob/master/active-rfcs/0006-slots-unification.md)
-  - Can be detected and partially fixed by the [`vue/no-deprecated-slot-attribute`](https://eslint.vuejs.org/rules/no-deprecated-slot-attribute.html) and [`vue/no-deprecated-slot-scope-attribute`](https://eslint.vuejs.org/rules/no-deprecated-slot-scope-attribute.html)
-  - During the transition period:
-    - With the 2 ESLint rules enabled, it will warn users when they use `this.$slots`, recommending `this.$scopedSlots` as a replacement
-    - Transform all `this.$slots` to `this.$scopedSlots` with an inline warning comment so that users can manually verify the behavior later
-    - May need to cover edge cases that can't be fixed by ESLint
-  - When upgrading to Vue 3, replace all `this.$scopedSlots` occurrences with `this.$slots`
+- 🟠 [RFC01: New slot syntax](https://github.com/vuejs/rfcs/blob/master/active-rfcs/0001-new-slot-syntax.md) and [RFC06: Slots unification](https://github.com/vuejs/rfcs/blob/master/active-rfcs/0006-slots-unification.md)
+  - 🟢 Can be detected and partially fixed by the [`vue/no-deprecated-slot-attribute`](https://eslint.vuejs.org/rules/no-deprecated-slot-attribute.html) and [`vue/no-deprecated-slot-scope-attribute`](https://eslint.vuejs.org/rules/no-deprecated-slot-scope-attribute.html)
+  - 🟠 During the transition period:
+    - 🟢 With the 2 ESLint rules enabled, it will warn users when they use `this.$slots`, recommending `this.$scopedSlots` as a replacement
+    - 🔴 Transform all `this.$slots` to `this.$scopedSlots` with an inline warning comment so that users can manually verify the behavior later
+    - 🔴 May need to cover edge cases that can't be fixed by ESLint
+  - 🔴 When upgrading to Vue 3, replace all `this.$scopedSlots` occurrences with `this.$slots`
 - 🟠 [RFC04: Global API treeshaking](https://github.com/vuejs/rfcs/blob/master/active-rfcs/0004-global-api-treeshaking.md) & [RFC09: Global mounting/configuration API change](https://github.com/vuejs/rfcs/blob/master/active-rfcs/0009-global-api-change.md)
+  - **implemented as `new-global-api`**
   - 🔴 `import Vue from 'vue'` -> `import * as Vue from 'vue'`
   - 🔴 `Vue.extend` and `new Vue` -> `defineComponent`
-  - 🟢 `new HelloWorld().$mount` -> `createApp(HelloWorld).$mount`
-  - 🟢 `render(h)` -> `render()` and `import { h } from 'vue'`
+  - 🟢 `new HelloWorld().$mount` -> `createApp(HelloWorld).$mount` (implemented as `create-app-mount`)
+  - 🟢 `render(h)` -> `render()` and `import { h } from 'vue'` (implemented as `remove-contextual-h-from-render`)
   - 🔴 `Vue.config`, `Vue.use`, `Vue.mixin`, `Vue.component`, `Vue.directive`, etc
     - -> `app.**`
     - It's possible to provide a runtime compatibility layer for single-root apps
   - 🔴 `Vue.prototype.customProperty` -> `app.config.globalProperties.customProperty`
     - Again, a runtime compatibility layer is possible
-  - 🟢 `Vue.config.productionTip` -> removed
+  - 🟢 `Vue.config.productionTip` -> removed (implemented as `remove-production-tip`)
   - 🔴 `Vue.config.ignoredElements` -> `app.config.isCustomElement`
   - 🔴 Detect and warn on `optionMergeStrategies` behavior change
 - 🔴 [RFC07: Functional and async components API change](https://github.com/vuejs/rfcs/blob/master/active-rfcs/0007-functional-async-api-change.md)
@@ -110,9 +111,11 @@ Legend of annotations:
   - There could be potential naming conflicts with existing component-level `emits` options, so we need to scan and warn on such usages
   - To better utilize the new `emits` option, we can provide a codemod that automatically scans all instances of `$emit` calls in a component and generate the `emits` option
 - 🟢 [Vuex 3.x to 4](https://github.com/vuejs/vuex/tree/4.0)
+  - **implemented as in combination of `new-global-api` and `vuex-3-to-4`**
   - 🟢 `Vue.use(Vuex)` & `new Vue({ store })` -> `app.use(store)`
   - 🟢 `new Store()` -> `createStore()`
 - 🟠 [Vue Router 3.x to 4](https://github.com/vuejs/vue-router-next)
+  - **implemented as in combination of `new-global-api` and `vue-router-3-to-4`**
   - 🟢 `Vue.use(VueRouter)` & `new Vue({ router })` -> `app.use(router)`
   - 🟢 `new VueRouter()` -> `createRouter()`
   - 🟢 `mode: 'history', base: BASE_URL` etc. -> `history: createWebHistory(BASE_URL)` etc.
@@ -167,6 +170,13 @@ Some of them can be automatically migrated with the help of codemods.
   - Non `<component>` tags with `is` usage ->
     - `<component is>` (for SFC templates)
     - `v-is` (for in-DOM templates).
+
+### Generic Transformations
+
+Aside from migrating Vue 2 apps to Vue 3, this repository also includes some generic transformations that can help clean up your codebase.
+
+- `remove-trivial-root`
+  - this transformation removes trivial root components like `{ render: () => h(App) }` and use `App` as the direct root
 
 ## Custom Transformation
 

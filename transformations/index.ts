@@ -11,7 +11,7 @@ const transformationMap: {
   'remove-production-tip': require('./remove-production-tip'),
   'remove-trivial-root': require('./remove-trivial-root'),
 
-  // utility tranformations
+  // generic utility tranformations
   'add-import': require('./add-import'),
   'remove-extraneous-import': require('./remove-extraneous-import'),
 }

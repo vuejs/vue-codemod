@@ -38,11 +38,12 @@ Inspired by [react-codemod](https://github.com/reactjs/react-codemod).
 
 Legend of annotations:
 
-| Mark | Description                                 |
-| ---- | ------------------------------------------- |
-| 🔴   | work not started                            |
-| 🟠   | on-going work                               |
-| 🟢   | implemented (may have uncovered edge cases) |
+| Mark | Description                                   |
+| ---- | --------------------------------------------- |
+| 🔴   | work not started                              |
+| 🟠   | on-going work                                 |
+| 🟢   | implemented (may have uncovered edge cases)   |
+| 🔵   | needs to be implemented in the compat runtime |
 
 #### Fixable in ESLint
 
@@ -69,23 +70,23 @@ Legend of annotations:
   - 🟢 `new HelloWorld().$mount` -> `createApp(HelloWorld).$mount` (implemented as `create-app-mount`)
   - 🟢 `render(h)` -> `render()` and `import { h } from 'vue'` (implemented as `remove-contextual-h-from-render`)
   - 🔴 `Vue.config`, `Vue.use`, `Vue.mixin`, `Vue.component`, `Vue.directive`, etc
-    - -> `app.**`
-    - It's possible to provide a runtime compatibility layer for single-root apps
+    - 🔴 -> `app.**`
+    - 🔵 It's possible to provide a runtime compatibility layer for single-root apps
   - 🔴 `Vue.prototype.customProperty` -> `app.config.globalProperties.customProperty`
-    - Again, a runtime compatibility layer is possible
+    - 🔵 Again, a runtime compatibility layer is possible
   - 🟢 `Vue.config.productionTip` -> removed (implemented as `remove-production-tip`)
   - 🔴 `Vue.config.ignoredElements` -> `app.config.isCustomElement`
   - 🔴 Detect and warn on `optionMergeStrategies` behavior change
 - 🔴 [RFC07: Functional and async components API change](https://github.com/vuejs/rfcs/blob/master/active-rfcs/0007-functional-async-api-change.md)
-  - a compatibility mode can be provided for functional components for one-at-a-time migration
-  - SFCs using `<template functional>` should be converted to normal SFCs
+  - 🔵 a compatibility mode can be provided for functional components for one-at-a-time migration
+  - 🔴 SFCs using `<template functional>` should be converted to normal SFCs
 - 🔴 [RFC08: Render function API change](https://github.com/vuejs/rfcs/blob/master/active-rfcs/0008-render-function-api-change.md)
-  - Template users won't be affected
-  - JSX plugin will be rewritten to cover most use cases
-  - For Users who manually write render functions using `h`
-    - It's possible to provide a compat plugin that patches render functions and make them expose a 2.x compatible arguments, and can be turned off in each component for a one-at-a-time migration process.
-    - It's also possible to provide a codemod that auto-converts `h` calls to use the new VNode data format, since the mapping is pretty mechanical.
-  - Functional components using context will likely have to be manually migrated, but a similar adaptor can be provided.
+  - 🟢 Template users won't be affected
+  - 🔴 JSX plugin will be rewritten to cover most use cases
+  - 🔴 For Users who manually write render functions using `h`
+    - 🔵 It's possible to provide a compat plugin that patches render functions and make them expose a 2.x compatible arguments, and can be turned off in each component for a one-at-a-time migration process.
+    - 🔴 It's also possible to provide a codemod that auto-converts `h` calls to use the new VNode data format, since the mapping is pretty mechanical.
+  - 🔴 Functional components using context will likely have to be manually migrated, but a similar adaptor can be provided.
 - 🔴 [RFC12: Custom directive API change](https://github.com/vuejs/rfcs/blob/master/active-rfcs/0012-custom-directive-api-change.md)
   - `bind` -> `beforeMount`
   - `inserted` -> `mounted`
@@ -139,10 +140,10 @@ Legend of annotations:
 
 #### RFCs that May Need Amendments to Simplify the Migration
 
-- [RFC04: Global API treeshaking](https://github.com/vuejs/rfcs/blob/master/active-rfcs/0004-global-api-treeshaking.md) & [RFC09: Global mounting/configuration API change](https://github.com/vuejs/rfcs/blob/master/active-rfcs/0009-global-api-change.md)
+- 🔵 [RFC04: Global API treeshaking](https://github.com/vuejs/rfcs/blob/master/active-rfcs/0004-global-api-treeshaking.md) & [RFC09: Global mounting/configuration API change](https://github.com/vuejs/rfcs/blob/master/active-rfcs/0009-global-api-change.md)
   - `Vue.extend` can be supported in a compat runtime as an alias to `defineComponent`
   - For the changes in the form of `Vue.*`->`app.*`, it may be not easy to transform all apperances correctly, because there would be many cross references to the root app instance. So in the runtime, we can alias `Vue.*` to `app.*` if there's only one `createApp` call in the whole app lifecycle, and throws if there are more than one root app instance detected. This can greatly ease the migration cost for most single-root apps.
-- [RFC11: Component `v-model` API change](https://github.com/vuejs/rfcs/blob/master/active-rfcs/0011-v-model-api-change.md)
+- 🔵 [RFC11: Component `v-model` API change](https://github.com/vuejs/rfcs/blob/master/active-rfcs/0011-v-model-api-change.md)
   - I don't have a clear idea on how to progressively migrate the `v-model` API because both the author and consumer of the components need to change their ways to use this API, according to the current RFC. So we might need a compatibility layer in the runtime.
 
 #### Other Opt-In Changes
@@ -151,21 +152,21 @@ These features are only deprecated but still supported in the compatiblity build
 There will be runtime warnings and ESLint rules to detect their usages.
 Some of them can be automatically migrated with the help of codemods.
 
-- [RFC15: Remove filters](https://github.com/vuejs/rfcs/blob/master/active-rfcs/0015-remove-filters.md)
+- 🟢 [RFC15: Remove filters](https://github.com/vuejs/rfcs/blob/master/active-rfcs/0015-remove-filters.md)
   - Can be detected by the [`vue/no-deprecated-filter`](https://eslint.vuejs.org/rules/no-deprecated-filter.html) ESLint rule
-- [RFC18: Transition class name adjustments](https://github.com/vuejs/rfcs/blob/master/active-rfcs/0018-transition-class-change.md)
+- 🔴 [RFC18: Transition class name adjustments](https://github.com/vuejs/rfcs/blob/master/active-rfcs/0018-transition-class-change.md)
   - For `<transition>` components with custom `enter-class` or `leave-class`:
     - `enter-class` -> `enter-from-class`
     - `leave-class` -> `leave-from-class`
   - Otherwise, there are two possible solutions:
     - Change every `.v-enter` and `.v-leave` selector in the stylesheets to `.v-enter-from` and `.v-leave-from`
     - Or, attach `enter-from-class="v-enter v-enter-from" leave-from-class="v-leave v-leave-from"` to these `<transition>` components. Users can delete these attributes after they updated the corresponding stylesheets
-- [RFC20: Events API Change](https://github.com/vuejs/rfcs/blob/master/active-rfcs/0020-events-api-change.md)
-  - Can be detected by the [`vue/no-deprecated-events-api`](https://eslint.vuejs.org/rules/no-deprecated-events-api.html) ESLint rule
-  - A codemod can be implemented to use other libraries like [tiny-emitter](https://github.com/scottcorgan/tiny-emitter) for the events API
-- [RFC23-scoped-styles-changes](https://github.com/vuejs/rfcs/blob/master/active-rfcs/0023-scoped-styles-changes.md)
+- 🟠 [RFC20: Events API Change](https://github.com/vuejs/rfcs/blob/master/active-rfcs/0020-events-api-change.md)
+  - 🟢 Can be detected by the [`vue/no-deprecated-events-api`](https://eslint.vuejs.org/rules/no-deprecated-events-api.html) ESLint rule
+  - 🔴 A codemod can be implemented to use other libraries like [tiny-emitter](https://github.com/scottcorgan/tiny-emitter) for the events API
+- 🟢 [RFC23-scoped-styles-changes](https://github.com/vuejs/rfcs/blob/master/active-rfcs/0023-scoped-styles-changes.md)
   - The new behavior should be opt-in
-- [RFC27: Custom Elements Interop Improvements](https://github.com/vuejs/rfcs/blob/master/active-rfcs/0027-custom-elements-interop.md)
+- 🔴 [RFC27: Custom Elements Interop Improvements](https://github.com/vuejs/rfcs/blob/master/active-rfcs/0027-custom-elements-interop.md)
   - (Covered by the Global API RFCs): `Vue.config.ignoredElements` -> `app.config.isCustomElement`
   - Non `<component>` tags with `is` usage ->
     - `<component is>` (for SFC templates)

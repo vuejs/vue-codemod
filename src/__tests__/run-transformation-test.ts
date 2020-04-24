@@ -7,7 +7,7 @@ const unreachableTransform: Transform = () => {
   throw new Error('This transform should never be invoked')
 }
 
-const addUseStrct: Transform = (file, api, options) => {
+const addUseStrict: Transform = (file, api, options) => {
   const j = api.jscodeshift
 
   const hasStrictMode = (body) =>

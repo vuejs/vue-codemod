@@ -41,9 +41,10 @@ export const transformAST: ASTTransformation = (context) => {
         )
       }
 
-      ;(node.arguments[0] as ObjectExpression).properties.forEach((p) => {
+      const routerConfig: ObjectExpression = node.arguments[0]
+      routerConfig.properties = routerConfig.properties.filter((p) => {
         if (!j.ObjectProperty.check(p) && !j.Property.check(p)) {
-          return
+          return true
         }
 
         if ((p.key as any).name === 'mode') {
@@ -59,9 +60,13 @@ export const transformAST: ASTTransformation = (context) => {
               `mode must be one of 'hash', 'history', or 'abstract'`
             )
           }
+          return false
         } else if ((p.key as any).name === 'base') {
           baseValue = p.value
+          return false
         }
+
+        return true
       })
 
       // add the default mode with a hash history

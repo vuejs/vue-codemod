@@ -1,23 +1,19 @@
-import vueRouter3to4 from './vue-router-3-to-4'
-import vuex3to4 from './vuex-3-to-4'
-
-import addImport from './add-import'
-import removeExtraneousImport from './remove-extraneous-import'
-
 const transformationMap: {
   [name: string]: Function
 } = {
-  // 'new-global-api': newGlobalAPI,
-  // 'rfc04-and-09': newGlobalAPI,
-  'vue-router-3-to-4': vueRouter3to4,
-  'vuex-4-to-4': vuex3to4,
+  'new-global-api': require('./new-global-api'),
+  'vue-router-3-to-4': require('./vue-router-3-to-4'),
+  'vuex-4-to-4': require('./vuex-3-to-4'),
 
   // atomic ones
-  'create-app-mount': createAppMount,
+  'create-app-mount': require('./create-app-mount'),
+  'remove-contextual-h': require('./remove-contextual-h'),
+  'remove-production-tip': require('./remove-production-tip'),
+  'remove-trivial-root': require('./remove-trivial-root'),
 
   // utility tranformations
-  'add-import': addImport,
-  'remove-extraneous-import': removeExtraneousImport,
+  'add-import': require('./add-import'),
+  'remove-extraneous-import': require('./remove-extraneous-import'),
 }
 
 export default transformationMap

@@ -63,18 +63,18 @@ Legend of annotations:
     - May need to cover edge cases that can't be fixed by ESLint
   - When upgrading to Vue 3, replace all `this.$scopedSlots` occurrences with `this.$slots`
 - 🟠 [RFC04: Global API treeshaking](https://github.com/vuejs/rfcs/blob/master/active-rfcs/0004-global-api-treeshaking.md) & [RFC09: Global mounting/configuration API change](https://github.com/vuejs/rfcs/blob/master/active-rfcs/0009-global-api-change.md)
-  - `import Vue from 'vue'` -> `import * as Vue from 'vue'`
-  - `Vue.extend` and `new Vue` -> `defineComponent`
-  - `new HelloWorld().$mount` -> `createApp(HelloWorld).$mount`
-  - `render(h)` -> `render()` and `import { h } from 'vue'`
-  - `Vue.config`, `Vue.use`, `Vue.mixin`, `Vue.component`, `Vue.directive`, etc
-    - It's possible to provide a runtime compatibility layer for single-root apps
+  - 🔴 `import Vue from 'vue'` -> `import * as Vue from 'vue'`
+  - 🔴 `Vue.extend` and `new Vue` -> `defineComponent`
+  - 🟢 `new HelloWorld().$mount` -> `createApp(HelloWorld).$mount`
+  - 🟢 `render(h)` -> `render()` and `import { h } from 'vue'`
+  - 🔴 `Vue.config`, `Vue.use`, `Vue.mixin`, `Vue.component`, `Vue.directive`, etc
     - -> `app.**`
-  - `Vue.prototype.customProperty` -> `app.config.globalProperties.customProperty`
+    - It's possible to provide a runtime compatibility layer for single-root apps
+  - 🔴 `Vue.prototype.customProperty` -> `app.config.globalProperties.customProperty`
     - Again, a runtime compatibility layer is possible
-  - `Vue.config.productionTip` -> removed
-  - `Vue.config.ignoredElements` -> `app.config.isCustomElement`
-  - Detect and warn on `optionMergeStrategies` behavior change
+  - 🟢 `Vue.config.productionTip` -> removed
+  - 🔴 `Vue.config.ignoredElements` -> `app.config.isCustomElement`
+  - 🔴 Detect and warn on `optionMergeStrategies` behavior change
 - 🔴 [RFC07: Functional and async components API change](https://github.com/vuejs/rfcs/blob/master/active-rfcs/0007-functional-async-api-change.md)
   - a compatibility mode can be provided for functional components for one-at-a-time migration
   - SFCs using `<template functional>` should be converted to normal SFCs
@@ -110,15 +110,15 @@ Legend of annotations:
   - There could be potential naming conflicts with existing component-level `emits` options, so we need to scan and warn on such usages
   - To better utilize the new `emits` option, we can provide a codemod that automatically scans all instances of `$emit` calls in a component and generate the `emits` option
 - 🟢 [Vuex 3.x to 4](https://github.com/vuejs/vuex/tree/4.0)
-  - `Vue.use(Vuex)` & `new Vue({ store })` -> `app.use(store)`
-  - `new Store()` -> `createStore()`
+  - 🟢 `Vue.use(Vuex)` & `new Vue({ store })` -> `app.use(store)`
+  - 🟢 `new Store()` -> `createStore()`
 - 🟠 [Vue Router 3.x to 4](https://github.com/vuejs/vue-router-next)
-  - `Vue.use(VueRouter)` & `new Vue({ router })` -> `app.use(router)`
-  - `new VueRouter()` -> `createRouter()`
-  - `mode: 'history', base: BASE_URL` etc. -> `history: createWebHistory(BASE_URL)` etc.
-  - [RFC21: Scoped slot API for `router-link`](https://github.com/vuejs/rfcs/blob/master/active-rfcs/0021-router-link-scoped-slot.md)
+  - 🟢 `Vue.use(VueRouter)` & `new Vue({ router })` -> `app.use(router)`
+  - 🟢 `new VueRouter()` -> `createRouter()`
+  - 🟢 `mode: 'history', base: BASE_URL` etc. -> `history: createWebHistory(BASE_URL)` etc.
+  - 🔴 [RFC21: Scoped slot API for `router-link`](https://github.com/vuejs/rfcs/blob/master/active-rfcs/0021-router-link-scoped-slot.md)
     - TODO
-  - [RFC28: Change active and exact-active behavior for `router-link`](https://github.com/vuejs/rfcs/blob/master/active-rfcs/0028-router-active-link.md)
+  - 🔴 [RFC28: Change active and exact-active behavior for `router-link`](https://github.com/vuejs/rfcs/blob/master/active-rfcs/0028-router-active-link.md)
     - TODO
 - 🔴 [`vue-class-component` 7.x to 8](https://github.com/vuejs/vue-class-component/issues/406)
   - `import { Component } from 'vue-class-component'` -> `import { Options as Component } from 'vue-class-component'`

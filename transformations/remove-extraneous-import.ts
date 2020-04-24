@@ -20,7 +20,7 @@ export const transformAST: ASTTransformation<Params> = (
   { localName }
 ) => {
   const usages = root
-    .find(j.Identifier, { localName })
+    .find(j.Identifier, { name: localName })
     .filter((identifierPath) => {
       const parent = identifierPath.parent.node
 

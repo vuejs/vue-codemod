@@ -58,10 +58,7 @@ Legend of annotations:
 
 - 🟠 [RFC01: New slot syntax](https://github.com/vuejs/rfcs/blob/master/active-rfcs/0001-new-slot-syntax.md) and [RFC06: Slots unification](https://github.com/vuejs/rfcs/blob/master/active-rfcs/0006-slots-unification.md)
   - 🟢 Can be detected and partially fixed by the [`vue/no-deprecated-slot-attribute`](https://eslint.vuejs.org/rules/no-deprecated-slot-attribute.html) and [`vue/no-deprecated-slot-scope-attribute`](https://eslint.vuejs.org/rules/no-deprecated-slot-scope-attribute.html)
-  - 🟠 During the transition period:
-    - 🟢 With the 2 ESLint rules enabled, it will warn users when they use `this.$slots`, recommending `this.$scopedSlots` as a replacement
-    - 🔴 Transform all `this.$slots` to `this.$scopedSlots` with an inline warning comment so that users can manually verify the behavior later
-    - 🔴 May need to cover edge cases that can't be fixed by ESLint
+  - 🟢 During the transition period, with the 2 ESLint rules enabled, it will warn users when they use `this.$slots`, recommending `this.$scopedSlots` as a replacement
   - 🔴 When upgrading to Vue 3, replace all `this.$scopedSlots` occurrences with `this.$slots`
 - 🟠 [RFC04: Global API treeshaking](https://github.com/vuejs/rfcs/blob/master/active-rfcs/0004-global-api-treeshaking.md) & [RFC09: Global mounting/configuration API change](https://github.com/vuejs/rfcs/blob/master/active-rfcs/0009-global-api-change.md)
   - **implemented as `new-global-api`**
@@ -69,8 +66,7 @@ Legend of annotations:
   - 🔴 `Vue.extend` and `new Vue` -> `defineComponent`
   - 🟢 `new HelloWorld().$mount` -> `createApp(HelloWorld).$mount` (implemented as `create-app-mount`)
   - 🟢 `render(h)` -> `render()` and `import { h } from 'vue'` (implemented as `remove-contextual-h-from-render`)
-  - 🔴 `Vue.config`, `Vue.use`, `Vue.mixin`, `Vue.component`, `Vue.directive`, etc
-    - 🔴 -> `app.**`
+  - 🔴 `Vue.config`, `Vue.use`, `Vue.mixin`, `Vue.component`, `Vue.directive`, etc -> `app.**`
     - 🔵 It's possible to provide a runtime compatibility layer for single-root apps
   - 🔴 `Vue.prototype.customProperty` -> `app.config.globalProperties.customProperty`
     - 🔵 Again, a runtime compatibility layer is possible
@@ -97,9 +93,9 @@ Legend of annotations:
 - 🔴 [RFC13: Composition API](https://github.com/vuejs/rfcs/blob/master/active-rfcs/0013-composition-api.md)
   - `import ... from '@vue/composition-api'` -> `import ... from 'vue'`
   - TODO: Other subtle differences between `@vue/composition-api` and the Vue 3 implementation.
-- 🔴 [RFC16: Remove `inline-template`](https://github.com/vuejs/rfcs/blob/master/active-rfcs/0016-remove-inline-templates.md)
-  - There should be an ESLint rule to detect such usages
-  - Possible alternatives are addressed [in the RFC](https://github.com/vuejs/rfcs/blob/master/active-rfcs/0016-remove-inline-templates.md#adoption-strategy)
+- 🟠 [RFC16: Remove `inline-template`](https://github.com/vuejs/rfcs/blob/master/active-rfcs/0016-remove-inline-templates.md)
+  - 🟢 Can be detected by the [`no-deprecated-inline-template`](https://eslint.vuejs.org/rules/no-deprecated-inline-template.html) ESLint rule
+  - 🔴 Possible alternatives are addressed [in the RFC](https://github.com/vuejs/rfcs/blob/master/active-rfcs/0016-remove-inline-templates.md#adoption-strategy)
 - 🔴 [RFC25: Built-in `<Teleport>` component](https://github.com/vuejs/rfcs/blob/master/active-rfcs/0025-teleport.md)
   - Detect all the presence of `<Teleport>` components, renaming them to some other name like `<TeleportComp>`
 - 🔴 [RFC26: New async component API](https://github.com/vuejs/rfcs/blob/master/active-rfcs/0026-async-component-api.md)

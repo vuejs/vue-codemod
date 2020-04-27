@@ -35,16 +35,18 @@ Inspired by [react-codemod](https://github.com/reactjs/react-codemod).
 
 ### Migrating from Vue 2 to Vue 3
 
+(To be integrated in a new version of [`vue-migration-helper`](https://github.com/vuejs/vue-migration-helper))
+
 > Note: even though most of the migration process can be automated, please be aware there might still be subtle differences between Vue 3 and Vue 2 runtime. Please double check before deploying your Vue 3 app into production.
 
 Legend of annotations:
 
-| Mark | Description                                   |
-| ---- | --------------------------------------------- |
-| 🔴   | work not started                              |
-| 🟠   | on-going work                                 |
-| 🟢   | implemented (may have uncovered edge cases)   |
-| 🔵   | needs to be implemented in the compat runtime |
+| Mark | Description                                          |
+| ---- | ---------------------------------------------------- |
+| 🔴   | work not started                                     |
+| 🟠   | on-going work                                        |
+| 🟢   | implemented (may have uncovered edge cases)          |
+| 🔵   | needs to or can be implemented in the compat runtime |
 
 #### Fixable in ESLint
 
@@ -60,21 +62,19 @@ Legend of annotations:
 - 🟠 [RFC01: New slot syntax](https://github.com/vuejs/rfcs/blob/master/active-rfcs/0001-new-slot-syntax.md) and [RFC06: Slots unification](https://github.com/vuejs/rfcs/blob/master/active-rfcs/0006-slots-unification.md)
   - 🟢 Can be detected and partially fixed by the [`vue/no-deprecated-slot-attribute`](https://eslint.vuejs.org/rules/no-deprecated-slot-attribute.html) and [`vue/no-deprecated-slot-scope-attribute`](https://eslint.vuejs.org/rules/no-deprecated-slot-scope-attribute.html)
   - 🟢 During the transition period, with the 2 ESLint rules enabled, it will warn users when they use `this.$slots`, recommending `this.$scopedSlots` as a replacement
-  - 🔴 When upgrading to Vue 3, replace all `this.$scopedSlots` occurrences with `this.$slots` (should pass the abovementioned ESLint checks before running this codemod)
+  - 🔴 When upgrading to Vue 3, replace all `this.$scopedSlots` occurrences with `this.$slots` (should pass the abovementioned ESLint checks before running this codemod) (implemented as `scoped-slots-to-slots`)
 - 🟠 [RFC04: Global API treeshaking](https://github.com/vuejs/rfcs/blob/master/active-rfcs/0004-global-api-treeshaking.md) & [RFC09: Global mounting/configuration API change](https://github.com/vuejs/rfcs/blob/master/active-rfcs/0009-global-api-change.md)
   - **implemented as `new-global-api`**
   - 🟢 `import Vue from 'vue'` -> `import * as Vue from 'vue'` (implemented as `tree-shakable-vue`)
-  - 🔴 `Vue.extend` -> `defineComponent`
-  - 🔴 `new Vue()` -> `createApp()`
+  - 🔴 `Vue.extend` -> `defineComponent` (implemented as `define-component`)
+  - 🔴 `new Vue()` -> `createApp()` (implemented as `new-vue-to-create-app`)
   - 🟢 `new Vue({ el })`, `new Vue().$mount`, `new HelloWorld({ el })`, `new HelloWorld().$mount` -> `createApp(HelloWorld).$mount` (implemented as `create-app-mount`)
   - 🟢 `render(h)` -> `render()` and `import { h } from 'vue'` (implemented as `remove-contextual-h-from-render`)
-  - 🔴 `Vue.config`, `Vue.use`, `Vue.mixin`, `Vue.component`, `Vue.directive`, etc -> `app.**`
-    - 🔵 It's possible to provide a runtime compatibility layer for single-root apps
-  - 🔴 `Vue.prototype.customProperty` -> `app.config.globalProperties.customProperty`
-    - 🔵 Again, a runtime compatibility layer is possible
+  - 🔵 `Vue.config`, `Vue.use`, `Vue.mixin`, `Vue.component`, `Vue.directive`, etc -> `app.**` (It's possible to provide a runtime compatibility layer for single-root apps)
+  - 🔵 `Vue.prototype.customProperty` -> `app.config.globalProperties.customProperty`
   - 🟢 `Vue.config.productionTip` -> removed (implemented as `remove-production-tip`)
-  - 🔴 `Vue.config.ignoredElements` -> `app.config.isCustomElement`
-  - 🔴 Detect and warn on `optionMergeStrategies` behavior change
+  - 🔵 `Vue.config.ignoredElements` -> `app.config.isCustomElement`
+  - 🔵 Detect and warn on `optionMergeStrategies` behavior change
 - 🔴 [RFC07: Functional and async components API change](https://github.com/vuejs/rfcs/blob/master/active-rfcs/0007-functional-async-api-change.md)
   - 🔵 a compatibility mode can be provided for functional components for one-at-a-time migration
   - 🔴 SFCs using `<template functional>` should be converted to normal SFCs
@@ -101,8 +101,8 @@ Legend of annotations:
 - 🔴 [RFC25: Built-in `<Teleport>` component](https://github.com/vuejs/rfcs/blob/master/active-rfcs/0025-teleport.md)
   - Detect all the presence of `<Teleport>` components, renaming them to some other name like `<TeleportComp>`
 - 🔴 [RFC26: New async component API](https://github.com/vuejs/rfcs/blob/master/active-rfcs/0026-async-component-api.md)
-  - In the compat build, it is possible to check the return value of functional components and warn legacy async components usage. This should cover all Promise-based use cases.
-  - The syntax conversion is mechanical and can be performed via a codemod. The challenge is in determining which plain functions should be considered async components. Some basic heuristics can be used (note this may not cover 100% of the existing usage):
+  - 🔵 In the compat build, it is possible to check the return value of functional components and warn legacy async components usage. This should cover all Promise-based use cases.
+  - 🔴 The syntax conversion is mechanical and can be performed via a codemod. The challenge is in determining which plain functions should be considered async components. Some basic heuristics can be used (note this may not cover 100% of the existing usage):
     - Arrow functions that returns dynamic `import` call to `.vue` files
     - Arrow functions that returns an object with the `component` property being a dynamic `import` call.
   - The only case that cannot be easily detected is 2.x async components using manual `resolve/reject` instead of returning promises. Manual upgrade will be required for such cases but they should be relatively rare.
@@ -110,11 +110,11 @@ Legend of annotations:
   - There could be potential naming conflicts with existing component-level `emits` options, so we need to scan and warn on such usages
   - To better utilize the new `emits` option, we can provide a codemod that automatically scans all instances of `$emit` calls in a component and generate the `emits` option
 - 🟢 [Vuex 3.x to 4](https://github.com/vuejs/vuex/tree/4.0)
-  - **implemented as in combination of `new-global-api` and `vuex-3-to-4`**
+  - **implemented as in combination of `new-global-api` and `vuex-v4`**
   - 🟢 `Vue.use(Vuex)` & `new Vue({ store })` -> `app.use(store)`
   - 🟢 `new Store()` -> `createStore()`
 - 🟠 [Vue Router 3.x to 4](https://github.com/vuejs/vue-router-next)
-  - **implemented as in combination of `new-global-api` and `vue-router-3-to-4`**
+  - **implemented as in combination of `new-global-api` and `vue-router-v4`**
   - 🟢 `Vue.use(VueRouter)` & `new Vue({ router })` -> `app.use(router)`
   - 🟢 `new VueRouter()` -> `createRouter()`
   - 🟢 `mode: 'history', base: BASE_URL` etc. -> `history: createWebHistory(BASE_URL)` etc.

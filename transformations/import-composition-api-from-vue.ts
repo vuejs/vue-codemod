@@ -2,7 +2,6 @@
 import wrap from '../src/wrap-ast-transformation'
 import type { ASTTransformation } from '../src/wrap-ast-transformation'
 
-// TODO: support fix namespace specifier
 // TODO: SetupContext.refs does not exist in Vue 3.0
 export const transformAST: ASTTransformation = ({ root, j }) => {
   const importDecl = root.find(j.ImportDeclaration, {
@@ -15,26 +14,45 @@ export const transformAST: ASTTransformation = ({ root, j }) => {
   const namespaceSpecifier = importDecl.find(j.ImportNamespaceSpecifier)
 
   const newImportDecl = j.importDeclaration(
-    [...specifiers.nodes(), ...namespaceSpecifier.nodes()],
+    [...specifiers.nodes()],
     j.stringLiteral('vue')
   )
+  let namespaceImportDecl
+  if (namespaceSpecifier.length) {
+    namespaceImportDecl = j.importDeclaration(
+      [...specifiers.nodes()],
+      j.stringLiteral('vue')
+    )
+  }
 
   const lastImportDecl = root.find(j.ImportDeclaration).at(-1)
   if (lastImportDecl.length) {
     // add the new import declaration after all other import declarations
     lastImportDecl.insertAfter(newImportDecl)
+
+    if (namespaceImportDecl) {
+      lastImportDecl.insertAfter(namespaceImportDecl)
+    }
   } else {
     // add new import declaration at the beginning of the file
-    root.get().node.program.body.unshift(newImportDecl)
+    const { body } = root.get().node.program
+    body.unshift(newImportDecl)
+
+    if (namespaceImportDecl) {
+      body.unshift(namespaceImportDecl)
+    }
   }
 
-  if (importDecl.find(j.ImportDefaultSpecifier).length) {
+  importDecl.forEach((path) => {
     // the default import should be left untouched to be taken care of by `remove-vue-use`
-    specifiers.remove()
-    namespaceSpecifier.remove()
-  } else {
-    importDecl.remove()
-  }
+    path.node.specifiers = path.node.specifiers.filter((s) =>
+      j.ImportDefaultSpecifier.check(s)
+    )
+
+    if (!path.node.specifiers.length) {
+      path.prune()
+    }
+  })
 }
 
 export default wrap(transformAST)

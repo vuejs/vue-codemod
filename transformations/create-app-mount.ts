@@ -12,11 +12,14 @@ type Params = {
 }
 
 // Limitations: cannot transform expressions like `vm = new Vue(); vm.$mount('#app')`
-export const transformAST: ASTTransformation<Params> = (
+export const transformAST: ASTTransformation<Params | void> = (
   context,
-  { includeMaybeComponents = true }: Params = {}
+  params: Params = {
+    includeMaybeComponents: true,
+  }
 ) => {
   const { j, root } = context
+  const { includeMaybeComponents = true } = params
 
   let mountCalls = root.find(j.CallExpression, (n: N.CallExpression) => {
     return (

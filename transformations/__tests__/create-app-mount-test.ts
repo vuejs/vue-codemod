@@ -33,20 +33,26 @@ defineInlineTest(
   'do not transform `new MyComponent().$mount` if `includeMaybeComponents` disabled'
 )
 
-// defineInlineTest(transform, {}, ``, ``, 'transform `new Vue` with `el` prop')
+defineInlineTest(
+  transform,
+  {},
+  `new Vue({ el: "#app", render: h => h(App) })`,
+  `import { createApp } from "vue";\ncreateApp({\n  render: h => h(App)\n}).mount("#app")`,
+  'transform `new Vue` with `el` prop'
+)
 
-// defineInlineTest(
-//   transform,
-//   {},
-//   ``,
-//   ``,
-//   'transform `new MyComponent` with `el` prop'
-// )
+defineInlineTest(
+  transform,
+  {},
+  `new MyComponent({ el: "#app" })`,
+  `import { createApp } from "vue";\ncreateApp(MyComponent).mount("#app")`,
+  'transform `new MyComponent` with `el` prop'
+)
 
-// defineInlineTest(
-//   transform,
-//   {},
-//   ``,
-//   ``,
-//   'do not transform `new Vue()` without .$mount or `el` prop'
-// )
+defineInlineTest(
+  transform,
+  {},
+  `const vm = new Vue({ render: h => h(App) })`,
+  `const vm = new Vue({ render: h => h(App) })`,
+  'do not transform `new Vue()` without `.$mount` or `el` prop'
+)

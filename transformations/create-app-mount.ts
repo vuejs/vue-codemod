@@ -76,7 +76,79 @@ export const transformAST: ASTTransformation<Params> = (
     })
   }
 
-  // TODO: new MyComponent({ el: '#app' })
+  let newWithEl = root.find(j.NewExpression, (n: N.NewExpression) => {
+    return (
+      n.arguments.length === 1 &&
+      j.ObjectExpression.check(n.arguments[0]) &&
+      n.arguments[0].properties.some(
+        (prop) =>
+          j.ObjectProperty.check(prop) &&
+          j.Identifier.check(prop.key) &&
+          prop.key.name === 'el'
+      )
+    )
+  })
+
+  if (!includeMaybeComponents) {
+    newWithEl = newWithEl.filter((path) => {
+      const ctor = path.node.callee
+      return j.Identifier.check(ctor) && ctor.name === 'Vue'
+    })
+  }
+
+  if (newWithEl.length) {
+    addImport(context, {
+      specifier: {
+        type: 'named',
+        imported: 'createApp',
+      },
+      source: 'vue',
+    })
+
+    newWithEl.replaceWith(({ node }) => {
+      const rootProps = node.arguments[0] as N.ObjectExpression
+      const elIndex = rootProps.properties.findIndex(
+        (p) =>
+          j.ObjectProperty.check(p) &&
+          j.Identifier.check(p.key) &&
+          p.key.name === 'el'
+      )
+      const elProperty = rootProps.properties.splice(
+        elIndex,
+        1
+      )[0] as N.ObjectProperty
+      const elExpr = elProperty.value
+
+      const ctor = node.callee
+      if (j.Identifier.check(ctor) && ctor.name === 'Vue') {
+        return j.callExpression(
+          j.memberExpression(
+            j.callExpression(j.identifier('createApp'), [rootProps]),
+            j.identifier('mount')
+          ),
+          // @ts-ignore I'm not sure what the edge cases are
+          [elExpr]
+        )
+      } else {
+        return j.callExpression(
+          j.memberExpression(
+            j.callExpression(j.identifier('createApp'), [
+              ctor,
+              // additional props, and skip empty objects
+              ...(rootProps.properties.length > 0 ? [rootProps] : []),
+            ]),
+            j.identifier('mount')
+          ),
+          // @ts-ignore I'm not sure what the edge cases are
+          [elExpr]
+        )
+      }
+    })
+
+    // new MyComponent({ el: '#app' })
+    // 1. split `el` value and other props
+    // 2. contruct new expressions
+  }
 }
 
 export default wrap(transformAST)

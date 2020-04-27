@@ -27,6 +27,7 @@ Inspired by [react-codemod](https://github.com/reactjs/react-codemod).
 - [ ] (WIP) Set up tests
 - [ ] (WIP) Implement the transformations described below for migration usage
 - [ ] Built-in transformations need to support TypeScript
+- [ ] Built-in transformations need to support module systems other than ES module, and those without modules
 - [ ] Define an interface for transformation of template blocks (may use [`vue-eslint-parser`](https://github.com/mysticatea/vue-eslint-parser/) for this)
 - [ ] A playground for writing transformations
 
@@ -59,12 +60,13 @@ Legend of annotations:
 - 🟠 [RFC01: New slot syntax](https://github.com/vuejs/rfcs/blob/master/active-rfcs/0001-new-slot-syntax.md) and [RFC06: Slots unification](https://github.com/vuejs/rfcs/blob/master/active-rfcs/0006-slots-unification.md)
   - 🟢 Can be detected and partially fixed by the [`vue/no-deprecated-slot-attribute`](https://eslint.vuejs.org/rules/no-deprecated-slot-attribute.html) and [`vue/no-deprecated-slot-scope-attribute`](https://eslint.vuejs.org/rules/no-deprecated-slot-scope-attribute.html)
   - 🟢 During the transition period, with the 2 ESLint rules enabled, it will warn users when they use `this.$slots`, recommending `this.$scopedSlots` as a replacement
-  - 🔴 When upgrading to Vue 3, replace all `this.$scopedSlots` occurrences with `this.$slots`
+  - 🔴 When upgrading to Vue 3, replace all `this.$scopedSlots` occurrences with `this.$slots` (should pass the abovementioned ESLint checks before running this codemod)
 - 🟠 [RFC04: Global API treeshaking](https://github.com/vuejs/rfcs/blob/master/active-rfcs/0004-global-api-treeshaking.md) & [RFC09: Global mounting/configuration API change](https://github.com/vuejs/rfcs/blob/master/active-rfcs/0009-global-api-change.md)
   - **implemented as `new-global-api`**
-  - 🔴 `import Vue from 'vue'` -> `import * as Vue from 'vue'`
-  - 🔴 `Vue.extend` and `new Vue` -> `defineComponent`
-  - 🟢 `new HelloWorld().$mount` -> `createApp(HelloWorld).$mount` (implemented as `create-app-mount`)
+  - 🟢 `import Vue from 'vue'` -> `import * as Vue from 'vue'` (implemented as `tree-shakable-vue`)
+  - 🔴 `Vue.extend` -> `defineComponent`
+  - 🔴 `new Vue()` -> `createApp()`
+  - 🟢 `new Vue({ el })`, `new Vue().$mount`, `new HelloWorld({ el })`, `new HelloWorld().$mount` -> `createApp(HelloWorld).$mount` (implemented as `create-app-mount`)
   - 🟢 `render(h)` -> `render()` and `import { h } from 'vue'` (implemented as `remove-contextual-h-from-render`)
   - 🔴 `Vue.config`, `Vue.use`, `Vue.mixin`, `Vue.component`, `Vue.directive`, etc -> `app.**`
     - 🔵 It's possible to provide a runtime compatibility layer for single-root apps
@@ -89,10 +91,10 @@ Legend of annotations:
   - move `update` logic into `updated` and insert a note about this change
   - `componentUpdated` -> `updated`
   - `unbind` -> `unmounted`
-  - TODO: VNode interface change
-- 🔴 [RFC13: Composition API](https://github.com/vuejs/rfcs/blob/master/active-rfcs/0013-composition-api.md)
-  - `import ... from '@vue/composition-api'` -> `import ... from 'vue'`
-  - TODO: Other subtle differences between `@vue/composition-api` and the Vue 3 implementation.
+  - TODO: VNode interface change (a runtime compat plugin is also possible, see the notes for RFC08)
+- 🟠 [RFC13: Composition API](https://github.com/vuejs/rfcs/blob/master/active-rfcs/0013-composition-api.md)
+  - 🟢 `import ... from '@vue/composition-api'` -> `import ... from 'vue'` (implemented as `import-composition-api-from-vue`)
+  - 🔴 Other subtle differences between `@vue/composition-api` and the Vue 3 implementation.
 - 🟠 [RFC16: Remove `inline-template`](https://github.com/vuejs/rfcs/blob/master/active-rfcs/0016-remove-inline-templates.md)
   - 🟢 Can be detected by the [`no-deprecated-inline-template`](https://eslint.vuejs.org/rules/no-deprecated-inline-template.html) ESLint rule
   - 🔴 Possible alternatives are addressed [in the RFC](https://github.com/vuejs/rfcs/blob/master/active-rfcs/0016-remove-inline-templates.md#adoption-strategy)
@@ -117,9 +119,7 @@ Legend of annotations:
   - 🟢 `new VueRouter()` -> `createRouter()`
   - 🟢 `mode: 'history', base: BASE_URL` etc. -> `history: createWebHistory(BASE_URL)` etc.
   - 🔴 [RFC21: Scoped slot API for `router-link`](https://github.com/vuejs/rfcs/blob/master/active-rfcs/0021-router-link-scoped-slot.md)
-    - TODO
   - 🔴 [RFC28: Change active and exact-active behavior for `router-link`](https://github.com/vuejs/rfcs/blob/master/active-rfcs/0028-router-active-link.md)
-    - TODO
 - 🔴 [`vue-class-component` 7.x to 8](https://github.com/vuejs/vue-class-component/issues/406)
   - `import { Component } from 'vue-class-component'` -> `import { Options as Component } from 'vue-class-component'`
   - `import Vue from 'vue'` -> `import { Vue } from 'vue-class-component'` (Need to avoid name collision if there's any reference to `Vue` besides `extends Vue`)
@@ -174,6 +174,9 @@ Aside from migrating Vue 2 apps to Vue 3, this repository also includes some gen
 
 - `remove-trivial-root`
   - this transformation removes trivial root components like `{ render: () => h(App) }` and use `App` as the direct root
+- `define-component`
+  - `--param.useCompositionAPI`: `false` by default. When set to `true`, it will import the `defineComponent` helper from `@vue/composition-api` instead of `vue`
+  - this transformation adds `defineComponent()` wrapper to `.vue` files, replaces `Vue.extend` calls to `defineComponent`
 
 ## Custom Transformation
 

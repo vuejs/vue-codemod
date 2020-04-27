@@ -13,10 +13,17 @@ export const transformAST: ASTTransformation = ({ root, j }) => {
   const specifiers = importDecl.find(j.ImportSpecifier)
   const namespaceSpecifier = importDecl.find(j.ImportNamespaceSpecifier)
 
-  const newImportDecl = j.importDeclaration(
-    [...specifiers.nodes()],
-    j.stringLiteral('vue')
-  )
+  if (!specifiers.length && !namespaceSpecifier.length) {
+    return
+  }
+
+  let newImportDecl
+  if (specifiers.length) {
+    newImportDecl = j.importDeclaration(
+      [...specifiers.nodes()],
+      j.stringLiteral('vue')
+    )
+  }
   let namespaceImportDecl
   if (namespaceSpecifier.length) {
     namespaceImportDecl = j.importDeclaration(
@@ -28,7 +35,9 @@ export const transformAST: ASTTransformation = ({ root, j }) => {
   const lastImportDecl = root.find(j.ImportDeclaration).at(-1)
   if (lastImportDecl.length) {
     // add the new import declaration after all other import declarations
-    lastImportDecl.insertAfter(newImportDecl)
+    if (newImportDecl) {
+      lastImportDecl.insertAfter(newImportDecl)
+    }
 
     if (namespaceImportDecl) {
       lastImportDecl.insertAfter(namespaceImportDecl)
@@ -36,7 +45,9 @@ export const transformAST: ASTTransformation = ({ root, j }) => {
   } else {
     // add new import declaration at the beginning of the file
     const { body } = root.get().node.program
-    body.unshift(newImportDecl)
+    if (newImportDecl) {
+      body.unshift(newImportDecl)
+    }
 
     if (namespaceImportDecl) {
       body.unshift(namespaceImportDecl)

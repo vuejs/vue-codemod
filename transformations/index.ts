@@ -2,8 +2,8 @@ const transformationMap: {
   [name: string]: Function
 } = {
   'new-global-api': require('./new-global-api'),
-  'vue-router-3-to-4': require('./vue-router-3-to-4'),
-  'vuex-4-to-4': require('./vuex-3-to-4'),
+  'vue-router-v4': require('./vue-router-v4'),
+  'vuex-v4': require('./vuex-v4'),
 
   // atomic ones
   'create-app-mount': require('./create-app-mount'),

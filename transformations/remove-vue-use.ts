@@ -9,8 +9,10 @@
  */
 import wrap from '../src/wrap-ast-transformation'
 import type { ASTTransformation } from '../src/wrap-ast-transformation'
+import { transformAST as removeExtraneousImport } from './remove-extraneous-import'
 
-export const transformAST: ASTTransformation = ({ j, root }) => {
+export const transformAST: ASTTransformation = (context) => {
+  const { j, root } = context
   const vueUseCalls = root.find(j.CallExpression, {
     callee: {
       type: 'MemberExpression',
@@ -22,7 +24,21 @@ export const transformAST: ASTTransformation = ({ j, root }) => {
       },
     },
   })
+
+  const pluginNames: string[] = []
+  vueUseCalls.forEach(({ node }) => {
+    if (j.Identifier.check(node.arguments[0])) {
+      pluginNames.push(node.arguments[0].name)
+    }
+  })
+
   vueUseCalls.remove()
+
+  pluginNames.forEach((name) =>
+    removeExtraneousImport(context, {
+      localBinding: name,
+    })
+  )
 }
 
 export default wrap(transformAST)

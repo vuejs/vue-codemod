@@ -1,6 +1,7 @@
 import wrap from '../src/wrap-ast-transformation'
 import type { ASTTransformation } from '../src/wrap-ast-transformation'
 
+import { transformAST as treeShakableVue } from './tree-shakable-vue'
 import { transformAST as createAppMount } from './create-app-mount'
 import { transformAST as rootPropToUse } from './root-prop-to-use'
 import { transformAST as removeTrivialRoot } from './remove-trivial-root'
@@ -11,6 +12,7 @@ import { transformAST as removeContextualHFromRender } from './remove-contextual
 import { transformAST as removeExtraneousImport } from './remove-extraneous-import'
 
 export const transformAST: ASTTransformation = (context) => {
+  treeShakableVue(context)
   createAppMount(context)
   rootPropToUse(context, { rootPropName: 'store' })
   rootPropToUse(context, { rootPropName: 'router' })

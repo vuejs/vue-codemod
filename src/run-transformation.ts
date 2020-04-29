@@ -2,7 +2,7 @@ import jscodeshift, { Transform, Parser } from 'jscodeshift'
 // @ts-ignore
 import getParser from 'jscodeshift/src/getParser'
 import { parse } from '@vue/compiler-sfc'
-import descriptorToString from 'vue-sfc-descriptor-to-string'
+import stringifySFCDescriptor from './stringify-sfc-descriptor'
 import createDebug from 'debug'
 
 import VueTransformation from './VueTransformation'
@@ -88,11 +88,7 @@ export default function runTransformation(
       return source // skipped
     }
     descriptor.script.content = out
-    return descriptorToString(descriptor, {
-      indents: {
-        template: 0,
-      },
-    })
+    return stringifySFCDescriptor(descriptor)
   }
 
   return source

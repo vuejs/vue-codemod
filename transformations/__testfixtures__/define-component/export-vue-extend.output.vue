@@ -1,6 +1,7 @@
 <template>
   <p>{{ greeting }} World!</p>
 </template>
+
 <script>
 import { defineComponent } from "vue";
 
@@ -12,6 +13,7 @@ export default defineComponent({
   }
 });
 </script>
+
 <style scoped>
 p {
   font-size: 2em;

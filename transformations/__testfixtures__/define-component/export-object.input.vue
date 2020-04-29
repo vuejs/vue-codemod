@@ -1,6 +1,7 @@
 <template>
   <p>{{ greeting }} World!</p>
 </template>
+
 <script>
 export default {
   data() {
@@ -10,6 +11,7 @@ export default {
   }
 };
 </script>
+
 <style scoped>
 p {
   font-size: 2em;

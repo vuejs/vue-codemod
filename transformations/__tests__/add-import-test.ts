@@ -113,3 +113,17 @@ defineInlineTest(
   `import { createApp, h } from "vue";`,
   'Add a named import as a sibling to another named import'
 )
+
+defineInlineTest(
+  transform,
+  {
+    specifier: {
+      type: 'named',
+      imported: 'h',
+    },
+    source: 'vue',
+  },
+  `import * as Vue from "vue";`,
+  `import * as Vue from "vue";\nimport { h } from "vue";`,
+  'Do not add imports alongside a namespace import'
+)

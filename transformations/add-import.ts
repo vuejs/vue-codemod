@@ -73,7 +73,10 @@ export const transformAST: ASTTransformation<Params> = (
       value: source,
     },
   })
-  if (matchedDecl.length) {
+  if (
+    matchedDecl.length &&
+    !matchedDecl.find(j.ImportNamespaceSpecifier).length
+  ) {
     // add new specifier to the existing import declaration
     matchedDecl.get(0).node.specifiers.push(newImportSpecifier)
   } else {

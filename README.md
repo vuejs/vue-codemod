@@ -78,10 +78,11 @@ Legend of annotations:
     - 🟢 `new Vue({ el })`, `new Vue().$mount` -> `Vue.createApp().mount`
     - 🟢 `new HelloWorld({ el })`, `new HelloWorld().$mount` -> `createApp(HelloWorld).mount`
   - 🟢 `render(h)` -> `render()` and `import { h } from 'vue'` (implemented as `remove-contextual-h-from-render`)
-  - 🔵 `Vue.config`, `Vue.use`, `Vue.mixin`, `Vue.component`, `Vue.directive`, etc -> `app.**` (It's possible to provide a runtime compatibility layer for single-root apps)
-  - 🔵 `Vue.prototype.customProperty` -> `app.config.globalProperties.customProperty`
   - 🟢 `Vue.config.productionTip` -> removed (implemented as `remove-production-tip`)
-  - 🔵 `Vue.config.ignoredElements` -> `app.config.isCustomElement`
+  - 🔵 Some global APIs now can only be used on the app instances, while it's possible to support the legacy usage in a compat build (need to propose an RFC amendment), we will provide a codemod to help migration. (`global-to-per-app-api`)
+    - `Vue.config`, `Vue.use`, `Vue.mixin`, `Vue.component`, `Vue.directive`, etc -> `app.**` (It's possible to provide a runtime compatibility layer for single-root apps)
+    - `Vue.prototype.customProperty` -> `app.config.globalProperties.customProperty`
+    - `Vue.config.ignoredElements` -> `app.config.isCustomElement`
   - 🔵 Detect and warn on `optionMergeStrategies` behavior change
 - 🔴 [RFC07: Functional and async components API change](https://github.com/vuejs/rfcs/blob/master/active-rfcs/0007-functional-async-api-change.md)
   - 🔵 a compatibility mode can be provided for functional components for one-at-a-time migration
@@ -144,9 +145,11 @@ Legend of annotations:
 
 #### RFCs that May Need Amendments to Simplify the Migration
 
+> Note: there are just rough ideas. Amendments may or may not be proposed, depending on the implementation progress of this repo.
+
 - 🔵 [RFC04: Global API treeshaking](https://github.com/vuejs/rfcs/blob/master/active-rfcs/0004-global-api-treeshaking.md) & [RFC09: Global mounting/configuration API change](https://github.com/vuejs/rfcs/blob/master/active-rfcs/0009-global-api-change.md)
   - `Vue.extend` can be supported in a compat runtime as an alias to `defineComponent`
-  - For the changes in the form of `Vue.*`->`app.*`, it may be not easy to transform all apperances correctly, because there would be many cross references to the root app instance. So in the runtime, we can alias `Vue.*` to `app.*` if there's only one `createApp` call in the whole app lifecycle, and throws if there are more than one root app instance detected. This can greatly ease the migration cost for most single-root apps.
+  - For the changes in the form of `Vue.*`->`app.*`, it may be not easy to transform all apperances correctly, because there would be many cross references to the root app instance. So in the runtime, we can alias `Vue.*` to `app.*` if there's only one `createApp` call in the whole app lifecycle, and throws if there are more than one root app instance detected. This can greatly ease the migration cost for most single-root apps. The compat layer won't apply to multi-root apps because that would defeat the purpose of the API change.
 - 🔵 [RFC11: Component `v-model` API change](https://github.com/vuejs/rfcs/blob/master/active-rfcs/0011-v-model-api-change.md)
   - I don't have a clear idea on how to progressively migrate the `v-model` API because both the author and consumer of the components need to change their ways to use this API, according to the current RFC. So we might need a compatibility layer in the runtime.
 

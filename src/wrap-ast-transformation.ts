@@ -3,6 +3,7 @@ import type { JSCodeshift, Transform, Core } from 'jscodeshift'
 export type Context = {
   root: ReturnType<Core>
   j: JSCodeshift
+  filename: string
 }
 
 export type ASTTransformation<Params = void> = {
@@ -16,7 +17,7 @@ export default function astTransformationToJSCodeshiftModule<Params = any>(
     const j = api.jscodeshift
     const root = j(file.source)
 
-    transformAST({ root, j }, options)
+    transformAST({ root, j, filename: file.path }, options)
 
     return root.toSource({ lineTerminator: '\n' })
   }

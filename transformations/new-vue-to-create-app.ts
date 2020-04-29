@@ -10,6 +10,8 @@ type Params = {
 }
 
 // Limitations: cannot transform expressions like `new HelloWorld()`
+// FIXME: for ES modules, should use `createApp` instead of `Vue.createApp`
+// because the latter makes it difficult to tree-shake the vue module
 // FIXME: need to ensure there will be a Vue import if needed.
 export const transformAST: ASTTransformation<Params | void> = (
   context,

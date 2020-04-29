@@ -1,6 +1,8 @@
 import wrap from '../src/wrap-ast-transformation'
 import type { ASTTransformation } from '../src/wrap-ast-transformation'
 
+import type * as N from 'jscodeshift'
+
 /**
  * It is expected to be run after the `createApp` transformataion
  * if a root component is trivial, that is, it contains only one simple prop,
@@ -10,11 +12,25 @@ import type { ASTTransformation } from '../src/wrap-ast-transformation'
  * move all other rootProps to the second argument of `createApp`
  */
 export const transformAST: ASTTransformation = ({ root, j }) => {
-  const appRoots = root.find(j.CallExpression, {
-    callee: { name: 'createApp' },
-    // @ts-ignore
-    arguments: (args) =>
-      args.length === 1 && args[0].type === 'ObjectExpression',
+  const appRoots = root.find(j.CallExpression, (node: N.CallExpression) => {
+    if (
+      node.arguments.length === 1 &&
+      j.ObjectExpression.check(node.arguments[0])
+    ) {
+      if (j.Identifier.check(node.callee) && node.callee.name === 'createApp') {
+        return true
+      }
+
+      if (
+        j.MemberExpression.check(node.callee) &&
+        j.Identifier.check(node.callee.object) &&
+        node.callee.object.name === 'Vue' &&
+        j.Identifier.check(node.callee.property) &&
+        node.callee.property.name === 'createApp'
+      ) {
+        return true
+      }
+    }
   })
   appRoots.forEach(({ node: createAppCall }) => {
     if (!j.ObjectExpression.check(createAppCall.arguments[0])) {

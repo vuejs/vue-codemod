@@ -15,13 +15,25 @@ export const transformAST: ASTTransformation<Params> = (
   { root, j },
   { rootPropName }
 ) => {
-  const appRoots = root.find(j.CallExpression, {
-    callee: { name: 'createApp' },
-    arguments: (args: N.ASTNode[]) =>
-      args.length === 1 &&
-      j.ObjectExpression.check(args[0]) &&
-      // @ts-ignore
-      args[0].properties.find((p) => p.key && p.key.name === rootPropName),
+  const appRoots = root.find(j.CallExpression, (node: N.CallExpression) => {
+    if (
+      node.arguments.length === 1 &&
+      j.ObjectExpression.check(node.arguments[0])
+    ) {
+      if (j.Identifier.check(node.callee) && node.callee.name === 'createApp') {
+        return true
+      }
+
+      if (
+        j.MemberExpression.check(node.callee) &&
+        j.Identifier.check(node.callee.object) &&
+        node.callee.object.name === 'Vue' &&
+        j.Identifier.check(node.callee.property) &&
+        node.callee.property.name === 'createApp'
+      ) {
+        return true
+      }
+    }
   })
 
   appRoots.replaceWith(({ node: createAppCall }) => {
@@ -37,10 +49,7 @@ export const transformAST: ASTTransformation<Params> = (
     )
 
     return j.callExpression(
-      j.memberExpression(
-        j.callExpression(j.identifier('createApp'), [rootProps]),
-        j.identifier('use')
-      ),
+      j.memberExpression(createAppCall, j.identifier('use')),
       [pluginInstance]
     )
   })

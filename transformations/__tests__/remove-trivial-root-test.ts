@@ -12,6 +12,14 @@ defineInlineTest(
 defineInlineTest(
   transform,
   {},
+  `Vue.createApp({ render: () => h(App) });`,
+  `Vue.createApp(App);`,
+  'Can recognize Vue.createApp'
+)
+
+defineInlineTest(
+  transform,
+  {},
   `createApp({ render() { return h(App) } });`,
   `createApp(App);`,
   'remove trivial object method render'

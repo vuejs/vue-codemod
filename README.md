@@ -72,7 +72,7 @@ Legend of annotations:
   - 🟢 When upgrading to Vue 3, replace all `.$scopedSlots` occurrences with `.$slots` (should pass the abovementioned ESLint checks before running this codemod) (implemented as `scoped-slots-to-slots`)
 - 🟠 [RFC04: Global API treeshaking](https://github.com/vuejs/rfcs/blob/master/active-rfcs/0004-global-api-treeshaking.md) & [RFC09: Global mounting/configuration API change](https://github.com/vuejs/rfcs/blob/master/active-rfcs/0009-global-api-change.md)
   - **implemented as `new-global-api`**
-  - 🟢 `import Vue from 'vue'` -> `import * as Vue from 'vue'` (implemented as `tree-shakable-vue`)
+  - 🟢 `import Vue from 'vue'` -> `import * as Vue from 'vue'` (implemented as `vue-as-namespace-import`)
   - 🟢 `Vue.extend` -> `defineComponent` (implemented as `define-component`)
   - 🟢 `new Vue()` -> `Vue.createApp()` (implemented as `new-vue-to-create-app`)
     - 🟢 `new Vue({ el })`, `new Vue().$mount` -> `Vue.createApp().mount`

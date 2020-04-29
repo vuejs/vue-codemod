@@ -1,7 +1,7 @@
 import wrap from '../src/wrap-ast-transformation'
 import type { ASTTransformation } from '../src/wrap-ast-transformation'
 
-import { transformAST as treeShakableVue } from './tree-shakable-vue'
+import { transformAST as vueAsNamespaceImport } from './vue-as-namespace-import'
 import { transformAST as importCompositionApiFromVue } from './import-composition-api-from-vue'
 import { transformAST as newVueTocreateApp } from './new-vue-to-create-app'
 import { transformAST as rootPropToUse } from './root-prop-to-use'
@@ -13,7 +13,7 @@ import { transformAST as removeContextualHFromRender } from './remove-contextual
 import { transformAST as removeExtraneousImport } from './remove-extraneous-import'
 
 export const transformAST: ASTTransformation = (context) => {
-  treeShakableVue(context)
+  vueAsNamespaceImport(context)
   importCompositionApiFromVue(context)
   newVueTocreateApp(context)
   rootPropToUse(context, { rootPropName: 'store' })

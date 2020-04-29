@@ -16,7 +16,7 @@ type NamedSpecifierParam = {
   local?: string
 }
 type NamespaceSpecifierParam = {
-  type: 'namespaced'
+  type: 'namespace'
   local: string
 }
 
@@ -64,7 +64,7 @@ export const transformAST: ASTTransformation<Params> = (
       j.identifier(localBinding)
     )
   } else {
-    // namespaced
+    // namespace
     newImportSpecifier = j.importNamespaceSpecifier(j.identifier(localBinding))
   }
 

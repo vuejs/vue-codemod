@@ -3,7 +3,7 @@ import type { ASTTransformation } from '../src/wrap-ast-transformation'
 
 import { transformAST as treeShakableVue } from './tree-shakable-vue'
 import { transformAST as importCompositionApiFromVue } from './import-composition-api-from-vue'
-import { transformAST as createAppMount } from './create-app-mount'
+import { transformAST as newVueTocreateApp } from './new-vue-to-create-app'
 import { transformAST as rootPropToUse } from './root-prop-to-use'
 import { transformAST as removeTrivialRoot } from './remove-trivial-root'
 import { transformAST as removeProductionTip } from './remove-production-tip'
@@ -15,7 +15,7 @@ import { transformAST as removeExtraneousImport } from './remove-extraneous-impo
 export const transformAST: ASTTransformation = (context) => {
   treeShakableVue(context)
   importCompositionApiFromVue(context)
-  createAppMount(context)
+  newVueTocreateApp(context)
   rootPropToUse(context, { rootPropName: 'store' })
   rootPropToUse(context, { rootPropName: 'router' })
   removeTrivialRoot(context)

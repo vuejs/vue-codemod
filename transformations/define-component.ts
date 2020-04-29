@@ -1,4 +1,3 @@
-// this file is served as a boilerplate template for writing more complex transformations
 import wrap from '../src/wrap-ast-transformation'
 import type { ASTTransformation } from '../src/wrap-ast-transformation'
 
@@ -8,6 +7,7 @@ type Params = {
   useCompositionApi: boolean
 }
 
+// TODO: process export default in .vue files
 export const transformAST: ASTTransformation<Params | undefined> = (
   context,
   { useCompositionApi }: Params = {

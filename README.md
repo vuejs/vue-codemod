@@ -35,7 +35,14 @@ Inspired by [react-codemod](https://github.com/reactjs/react-codemod).
 
 ### Migrating from Vue 2 to Vue 3
 
-(To be integrated in a new version of [`vue-migration-helper`](https://github.com/vuejs/vue-migration-helper))
+The migration path (to be integrated in a new version of [`vue-migration-helper`](https://github.com/vuejs/vue-migration-helper)):
+
+1. Install eslint-plugin-vue@7, turn on the `vue3-essential` category
+2. Run `eslint --fix` to fix all auto-fixable issues; if there are any remaining errors, fix them manually
+3. Run the codemods below
+4. Install vue@3, vue-loader@16, etc.
+5. Make sure to use the compat build of vue@3
+6. Serve the app in development mode, fix the runtime deprecation warnings
 
 > Note: even though most of the migration process can be automated, please be aware there might still be subtle differences between Vue 3 and Vue 2 runtime. Please double check before deploying your Vue 3 app into production.
 
@@ -59,16 +66,17 @@ Legend of annotations:
 
 #### Codemods
 
-- 🟠 [RFC01: New slot syntax](https://github.com/vuejs/rfcs/blob/master/active-rfcs/0001-new-slot-syntax.md) and [RFC06: Slots unification](https://github.com/vuejs/rfcs/blob/master/active-rfcs/0006-slots-unification.md)
+- 🟢 [RFC01: New slot syntax](https://github.com/vuejs/rfcs/blob/master/active-rfcs/0001-new-slot-syntax.md) and [RFC06: Slots unification](https://github.com/vuejs/rfcs/blob/master/active-rfcs/0006-slots-unification.md)
   - 🟢 Can be detected and partially fixed by the [`vue/no-deprecated-slot-attribute`](https://eslint.vuejs.org/rules/no-deprecated-slot-attribute.html) and [`vue/no-deprecated-slot-scope-attribute`](https://eslint.vuejs.org/rules/no-deprecated-slot-scope-attribute.html)
   - 🟢 During the transition period, with the 2 ESLint rules enabled, it will warn users when they use `this.$slots`, recommending `this.$scopedSlots` as a replacement
-  - 🔴 When upgrading to Vue 3, replace all `this.$scopedSlots` occurrences with `this.$slots` (should pass the abovementioned ESLint checks before running this codemod) (implemented as `scoped-slots-to-slots`)
+  - 🟢 When upgrading to Vue 3, replace all `.$scopedSlots` occurrences with `.$slots` (should pass the abovementioned ESLint checks before running this codemod) (implemented as `scoped-slots-to-slots`)
 - 🟠 [RFC04: Global API treeshaking](https://github.com/vuejs/rfcs/blob/master/active-rfcs/0004-global-api-treeshaking.md) & [RFC09: Global mounting/configuration API change](https://github.com/vuejs/rfcs/blob/master/active-rfcs/0009-global-api-change.md)
   - **implemented as `new-global-api`**
   - 🟢 `import Vue from 'vue'` -> `import * as Vue from 'vue'` (implemented as `tree-shakable-vue`)
-  - 🔴 `Vue.extend` -> `defineComponent` (implemented as `define-component`)
-  - 🔴 `new Vue()` -> `createApp()` (implemented as `new-vue-to-create-app`)
-  - 🟢 `new Vue({ el })`, `new Vue().$mount`, `new HelloWorld({ el })`, `new HelloWorld().$mount` -> `createApp(HelloWorld).$mount` (implemented as `create-app-mount`)
+  - 🟢 `Vue.extend` -> `defineComponent` (implemented as `define-component`)
+  - 🟢 `new Vue()` -> `Vue.createApp()` (implemented as `new-vue-to-create-app`)
+    - 🟢 `new Vue({ el })`, `new Vue().$mount` -> `Vue.createApp().mount`
+    - 🟢 `new HelloWorld({ el })`, `new HelloWorld().$mount` -> `createApp(HelloWorld).mount`
   - 🟢 `render(h)` -> `render()` and `import { h } from 'vue'` (implemented as `remove-contextual-h-from-render`)
   - 🔵 `Vue.config`, `Vue.use`, `Vue.mixin`, `Vue.component`, `Vue.directive`, etc -> `app.**` (It's possible to provide a runtime compatibility layer for single-root apps)
   - 🔵 `Vue.prototype.customProperty` -> `app.config.globalProperties.customProperty`
@@ -77,7 +85,7 @@ Legend of annotations:
   - 🔵 Detect and warn on `optionMergeStrategies` behavior change
 - 🔴 [RFC07: Functional and async components API change](https://github.com/vuejs/rfcs/blob/master/active-rfcs/0007-functional-async-api-change.md)
   - 🔵 a compatibility mode can be provided for functional components for one-at-a-time migration
-  - 🔴 SFCs using `<template functional>` should be converted to normal SFCs
+  - 🔴 SFCs using `<template functional>` should be converted to normal SFCs (Can be partially implemented as an ESLint rule, may need further transformation)
 - 🔴 [RFC08: Render function API change](https://github.com/vuejs/rfcs/blob/master/active-rfcs/0008-render-function-api-change.md)
   - 🟢 Template users won't be affected
   - 🔴 JSX plugin will be rewritten to cover most use cases
@@ -96,10 +104,10 @@ Legend of annotations:
   - 🟢 `import ... from '@vue/composition-api'` -> `import ... from 'vue'` (implemented as `import-composition-api-from-vue`)
   - 🔴 Other subtle differences between `@vue/composition-api` and the Vue 3 implementation.
 - 🟠 [RFC16: Remove `inline-template`](https://github.com/vuejs/rfcs/blob/master/active-rfcs/0016-remove-inline-templates.md)
-  - 🟢 Can be detected by the [`no-deprecated-inline-template`](https://eslint.vuejs.org/rules/no-deprecated-inline-template.html) ESLint rule
+  - 🟢 Can be detected by the [`vue/no-deprecated-inline-template`](https://eslint.vuejs.org/rules/no-deprecated-inline-template.html) ESLint rule
   - 🔴 Possible alternatives are addressed [in the RFC](https://github.com/vuejs/rfcs/blob/master/active-rfcs/0016-remove-inline-templates.md#adoption-strategy)
 - 🔴 [RFC25: Built-in `<Teleport>` component](https://github.com/vuejs/rfcs/blob/master/active-rfcs/0025-teleport.md)
-  - Detect all the presence of `<Teleport>` components, renaming them to some other name like `<TeleportComp>`
+  - Detect all the presence of `<Teleport>` components, renaming them to some other name like `<TeleportComp>`. Should be covered by the [`vue/no-reserved-component-names`](https://eslint.vuejs.org/rules/no-reserved-component-names.html) ESLint rule
 - 🔴 [RFC26: New async component API](https://github.com/vuejs/rfcs/blob/master/active-rfcs/0026-async-component-api.md)
   - 🔵 In the compat build, it is possible to check the return value of functional components and warn legacy async components usage. This should cover all Promise-based use cases.
   - 🔴 The syntax conversion is mechanical and can be performed via a codemod. The challenge is in determining which plain functions should be considered async components. Some basic heuristics can be used (note this may not cover 100% of the existing usage):
@@ -164,7 +172,7 @@ Some of them can be automatically migrated with the help of codemods.
   - The new behavior should be opt-in
 - 🔴 [RFC27: Custom Elements Interop Improvements](https://github.com/vuejs/rfcs/blob/master/active-rfcs/0027-custom-elements-interop.md)
   - (Covered by the Global API RFCs): `Vue.config.ignoredElements` -> `app.config.isCustomElement`
-  - Non `<component>` tags with `is` usage ->
+  - 🔴 (There'll be an ESLint rule for this) Non `<component>` tags with `is` usage ->
     - `<component is>` (for SFC templates)
     - `v-is` (for in-DOM templates).
 
@@ -176,7 +184,7 @@ Aside from migrating Vue 2 apps to Vue 3, this repository also includes some gen
   - this transformation removes trivial root components like `{ render: () => h(App) }` and use `App` as the direct root
 - `define-component`
   - `--param.useCompositionAPI`: `false` by default. When set to `true`, it will import the `defineComponent` helper from `@vue/composition-api` instead of `vue`
-  - this transformation adds `defineComponent()` wrapper to `.vue` files, replaces `Vue.extend` calls to `defineComponent`
+  - this transformation adds `defineComponent()` wrapper to `.vue` file exports, and replaces `Vue.extend` calls to `defineComponent`
 
 ## Custom Transformation
 

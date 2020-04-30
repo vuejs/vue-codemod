@@ -17,41 +17,19 @@ export const transformAST: ASTTransformation = ({ root, j }) => {
     return
   }
 
-  let newImportDecl
+  const lastVCAImportDecl = importDecl.at(-1)
   if (specifiers.length) {
-    newImportDecl = j.importDeclaration(
-      [...specifiers.nodes()],
-      j.stringLiteral('vue')
+    lastVCAImportDecl.insertAfter(
+      j.importDeclaration([...specifiers.nodes()], j.stringLiteral('vue'))
     )
   }
-  let namespaceImportDecl
   if (namespaceSpecifier.length) {
-    namespaceImportDecl = j.importDeclaration(
-      [...specifiers.nodes()],
-      j.stringLiteral('vue')
+    lastVCAImportDecl.insertAfter(
+      j.importDeclaration(
+        [...namespaceSpecifier.nodes()],
+        j.stringLiteral('vue')
+      )
     )
-  }
-
-  const lastImportDecl = root.find(j.ImportDeclaration).at(-1)
-  if (lastImportDecl.length) {
-    // add the new import declaration after all other import declarations
-    if (newImportDecl) {
-      lastImportDecl.insertAfter(newImportDecl)
-    }
-
-    if (namespaceImportDecl) {
-      lastImportDecl.insertAfter(namespaceImportDecl)
-    }
-  } else {
-    // add new import declaration at the beginning of the file
-    const { body } = root.get().node.program
-    if (newImportDecl) {
-      body.unshift(newImportDecl)
-    }
-
-    if (namespaceImportDecl) {
-      body.unshift(namespaceImportDecl)
-    }
   }
 
   importDecl.forEach((path) => {

@@ -86,9 +86,9 @@ Legend of annotations:
     - The migration path would be a two-pass approach:
       1. Scan the entire project to collect all the usages of the abovementioned global properties / methods
       2. Depending on the result of the first scan:
-         2.1 If there's only one entry file using these global APIs, then transform it;
-         2.2 If there's exactly one entry file and one root instance, but several other files are also using `Vue.*`, then transform the entry file to export the root instance, import it in other files and transform them with the imported root instance;
-         2.3 If there are more than one entry file or root instances, then the user needs to manually export the root instances, re-apply this codemod to those non-entry files with an argument designating the root instance.
+         1. If there's only one entry file using these global APIs, then transform it;
+         2. If there's exactly one entry file and one root instance, but several other files are also using `Vue.*`, then transform the entry file to export the root instance, import it in other files and transform them with the imported root instance;
+         3. If there are more than one entry file or root instances, then the user needs to manually export the root instances, re-apply this codemod to those non-entry files with an argument designating the root instance.
   - 🔵 Detect and warn on `optionMergeStrategies` behavior change
 - 🔴 [RFC07: Functional and async components API change](https://github.com/vuejs/rfcs/blob/master/active-rfcs/0007-functional-async-api-change.md)
   - 🔵 a compatibility mode can be provided for functional components for one-at-a-time migration

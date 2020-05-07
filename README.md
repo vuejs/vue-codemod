@@ -100,13 +100,13 @@ Legend of annotations:
     - 🔵 It's possible to provide a compat plugin that patches render functions and make them expose a 2.x compatible arguments, and can be turned off in each component for a one-at-a-time migration process.
     - 🔴 It's also possible to provide a codemod that auto-converts `h` calls to use the new VNode data format, since the mapping is pretty mechanical.
   - 🔴 Functional components using context will likely have to be manually migrated, but a similar adaptor can be provided.
-- 🔴 [RFC12: Custom directive API change](https://github.com/vuejs/rfcs/blob/master/active-rfcs/0012-custom-directive-api-change.md)
-  - `bind` -> `beforeMount`
-  - `inserted` -> `mounted`
-  - move `update` logic into `updated` and insert a note about this change
-  - `componentUpdated` -> `updated`
-  - `unbind` -> `unmounted`
-  - TODO: VNode interface change (a runtime compat plugin is also possible, see the notes for RFC08)
+- 🟠 [RFC12: Custom directive API change](https://github.com/vuejs/rfcs/blob/master/active-rfcs/0012-custom-directive-api-change.md)
+  - 🟢 `bind` -> `beforeMount`
+  - 🟢 `inserted` -> `mounted`
+  - 🟢 remove `update` hook and insert a comment to note the user about the change
+  - 🟢 `componentUpdated` -> `updated`
+  - 🟢 `unbind` -> `unmounted`
+  - 🔴 VNode interface change (a runtime compat plugin is also possible, see the notes for RFC08)
 - 🟠 [RFC13: Composition API](https://github.com/vuejs/rfcs/blob/master/active-rfcs/0013-composition-api.md)
   - 🟢 `import ... from '@vue/composition-api'` -> `import ... from 'vue'` (implemented as `import-composition-api-from-vue`)
   - 🔴 Other subtle differences between `@vue/composition-api` and the Vue 3 implementation.

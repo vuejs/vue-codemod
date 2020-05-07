@@ -7,6 +7,7 @@ const transformationMap: {
   'define-component': require('./define-component'),
   'new-vue-to-create-app': require('./new-vue-to-create-app'),
   'scoped-slots-to-slots': require('./scoped-slots-to-slots'),
+  'new-directive-api': require('./new-directive-api'),
 
   // atomic ones
   'remove-contextual-h-from-render': require('./remove-contextual-h-from-render'),

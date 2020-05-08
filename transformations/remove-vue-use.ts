@@ -11,7 +11,14 @@ import wrap from '../src/wrap-ast-transformation'
 import type { ASTTransformation } from '../src/wrap-ast-transformation'
 import { transformAST as removeExtraneousImport } from './remove-extraneous-import'
 
-export const transformAST: ASTTransformation = (context) => {
+type Params = {
+  removablePlugins: string[]
+}
+
+export const transformAST: ASTTransformation<Params> = (
+  context,
+  { removablePlugins }
+) => {
   const { j, root } = context
   const vueUseCalls = root.find(j.CallExpression, {
     callee: {
@@ -25,16 +32,22 @@ export const transformAST: ASTTransformation = (context) => {
     },
   })
 
-  const pluginNames: string[] = []
-  vueUseCalls.forEach(({ node }) => {
+  const removedPlugins: string[] = []
+  const removableUseCalls = vueUseCalls.filter(({ node }) => {
     if (j.Identifier.check(node.arguments[0])) {
-      pluginNames.push(node.arguments[0].name)
+      const plugin = node.arguments[0].name
+      if (removablePlugins.includes(plugin)) {
+        removedPlugins.push(plugin)
+        return true
+      }
     }
+
+    return false
   })
 
-  vueUseCalls.remove()
+  removableUseCalls.remove()
 
-  pluginNames.forEach((name) =>
+  removedPlugins.forEach((name) =>
     removeExtraneousImport(context, {
       localBinding: name,
     })

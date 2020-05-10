@@ -61,6 +61,7 @@ Legend of annotations:
   - Can be detected and fixed by the [`vue/no-deprecated-v-bind-sync`](https://eslint.vuejs.org/rules/no-deprecated-v-bind-sync.html) ESLint rule
 - 🟢 [RFC14: Remove `keyCode` support in `v-on`](https://github.com/vuejs/rfcs/blob/master/active-rfcs/0014-drop-keycode-support.md)
   - Can be detected and fixed by the [`vue/no-deprecated-v-on-number-modifiers`](https://eslint.vuejs.org/rules/no-deprecated-v-on-number-modifiers.html) ESLint rule
+  - `config.keyCode` can be supported in the compat build. It is also detectable with the [`vue/no-deprecated-vue-config-keycodes`](https://eslint.vuejs.org/rules/no-deprecated-vue-config-keycodes.html) ESLint rule
 - 🟢 [RFC19: Remove `data` object declaration](https://github.com/vuejs/rfcs/blob/master/active-rfcs/0019-remove-data-object-declaration.md)
   - Can be detected and fixed by the [`vue/no-shared-component-data`](https://eslint.vuejs.org/rules/no-shared-component-data.html) and the [`vue/no-deprecated-data-object-declaration`](https://eslint.vuejs.org/rules/no-deprecated-data-object-declaration.html) ESLint rules
 
@@ -90,8 +91,9 @@ Legend of annotations:
          2. If there's exactly one entry file and one root instance, but several other files are also using `Vue.*`, then transform the entry file to export the root instance, import it in other files and transform them with the imported root instance;
          3. If there are more than one entry file or root instances, then the user needs to manually export the root instances, re-apply this codemod to those non-entry files with an argument designating the root instance.
   - 🔵 Detect and warn on `optionMergeStrategies` behavior change
-- 🔴 [RFC07: Functional and async components API change](https://github.com/vuejs/rfcs/blob/master/active-rfcs/0007-functional-async-api-change.md)
+- 🟠 [RFC07: Functional and async components API change](https://github.com/vuejs/rfcs/blob/master/active-rfcs/0007-functional-async-api-change.md)
   - 🔵 a compatibility mode can be provided for functional components for one-at-a-time migration
+  - 🟢 Can be detected by the [`vue/no-deprecated-functional-template`](https://eslint.vuejs.org/rules/no-deprecated-functional-template.html) ESLint rule
   - 🔴 SFCs using `<template functional>` should be converted to normal SFCs (Can be partially implemented as an ESLint rule, may need further transformation)
 - 🔴 [RFC08: Render function API change](https://github.com/vuejs/rfcs/blob/master/active-rfcs/0008-render-function-api-change.md)
   - 🟢 Template users won't be affected
@@ -143,7 +145,7 @@ Legend of annotations:
 #### Breaking Changes that Can Only Be Manually Migrated
 
 - [RFC17: Changed behavior when using `transition` as root](https://github.com/vuejs/rfcs/blob/master/active-rfcs/0017-transition-as-root.md)
-  - Can be detected by the [`vue/require-v-if-inside-transition`](https://github.com/vuejs/eslint-plugin-vue/pull/1099) ESLint rule
+  - Can be detected by the [`vue/require-toggle-inside-transition`](https://eslint.vuejs.org/rules/require-toggle-inside-transition.html) ESLint rule
 - [RFC22: Merge `meta` fields from parent to child in `RouteLocation`](https://github.com/vuejs/rfcs/blob/master/active-rfcs/0022-router-merge-meta-routelocation.md)
   - Seems no codemod or ESLint rule is applicable to this breaking change
 - [RFC24: Attribute coercion behavior change](https://github.com/vuejs/rfcs/blob/master/active-rfcs/0024-attribute-coercion-behavior.md)
@@ -179,11 +181,12 @@ Some of them can be automatically migrated with the help of codemods.
   - 🔴 A codemod can be implemented to use other libraries like [tiny-emitter](https://github.com/scottcorgan/tiny-emitter) for the events API
 - 🟢 [RFC23-scoped-styles-changes](https://github.com/vuejs/rfcs/blob/master/active-rfcs/0023-scoped-styles-changes.md)
   - The new behavior should be opt-in
-- 🔴 [RFC27: Custom Elements Interop Improvements](https://github.com/vuejs/rfcs/blob/master/active-rfcs/0027-custom-elements-interop.md)
+- 🟠 [RFC27: Custom Elements Interop Improvements](https://github.com/vuejs/rfcs/blob/master/active-rfcs/0027-custom-elements-interop.md)
   - (Covered by the Global API RFCs): `Vue.config.ignoredElements` -> `app.config.isCustomElement`
-  - 🔴 (There'll be an ESLint rule for this) Non `<component>` tags with `is` usage ->
-    - `<component is>` (for SFC templates)
+  - 🔴 Vue 2 non-`<component>` tags with `is` usage ->
+    - `<component is>` (for SFC templates).
     - `v-is` (for in-DOM templates).
+  - 🟢 The [`vue/no-deprecated-html-element-is`](https://eslint.vuejs.org/rules/no-deprecated-html-element-is.html) ESLint rule can be used to detect usage for `is` usage on built-in HTML tags.
 
 ### Generic Transformations
 

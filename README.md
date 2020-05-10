@@ -94,7 +94,7 @@ Legend of annotations:
 - 🟠 [RFC07: Functional and async components API change](https://github.com/vuejs/rfcs/blob/master/active-rfcs/0007-functional-async-api-change.md)
   - 🔵 a compatibility mode can be provided for functional components for one-at-a-time migration
   - 🟢 Can be detected by the [`vue/no-deprecated-functional-template`](https://eslint.vuejs.org/rules/no-deprecated-functional-template.html) ESLint rule
-  - 🔴 SFCs using `<template functional>` should be converted to normal SFCs (Can be partially implemented as an ESLint rule, may need further transformation)
+  - 🔴 SFCs using `<template functional>` should be converted to normal SFCs
 - 🔴 [RFC08: Render function API change](https://github.com/vuejs/rfcs/blob/master/active-rfcs/0008-render-function-api-change.md)
   - 🟢 Template users won't be affected
   - 🔴 JSX plugin will be rewritten to cover most use cases
@@ -115,8 +115,9 @@ Legend of annotations:
 - 🟠 [RFC16: Remove `inline-template`](https://github.com/vuejs/rfcs/blob/master/active-rfcs/0016-remove-inline-templates.md)
   - 🟢 Can be detected by the [`vue/no-deprecated-inline-template`](https://eslint.vuejs.org/rules/no-deprecated-inline-template.html) ESLint rule
   - 🔴 Possible alternatives are addressed [in the RFC](https://github.com/vuejs/rfcs/blob/master/active-rfcs/0016-remove-inline-templates.md#adoption-strategy)
-- 🔴 [RFC25: Built-in `<Teleport>` component](https://github.com/vuejs/rfcs/blob/master/active-rfcs/0025-teleport.md)
-  - Detect all the presence of `<Teleport>` components, renaming them to some other name like `<TeleportComp>`. Should be covered by the [`vue/no-reserved-component-names`](https://eslint.vuejs.org/rules/no-reserved-component-names.html) ESLint rule
+- 🟠 [RFC25: Built-in `<Teleport>` component](https://github.com/vuejs/rfcs/blob/master/active-rfcs/0025-teleport.md)
+  - 🟢 Can be detected by the [`vue/no-reserved-component-names`](https://eslint.vuejs.org/rules/no-reserved-component-names.html) ESLint rule
+  - 🔴 A codemod can be implemented to rename all `<Teleport>` components to some other name like `<TeleportComp>`.
 - 🔴 [RFC26: New async component API](https://github.com/vuejs/rfcs/blob/master/active-rfcs/0026-async-component-api.md)
   - 🔵 In the compat build, it is possible to check the return value of functional components and warn legacy async components usage. This should cover all Promise-based use cases.
   - 🔴 The syntax conversion is mechanical and can be performed via a codemod. The challenge is in determining which plain functions should be considered async components. Some basic heuristics can be used (note this may not cover 100% of the existing usage):

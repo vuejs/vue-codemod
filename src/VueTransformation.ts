@@ -1,3 +1,3 @@
-export default class VueTransformation {
+export default abstract class VueTransformation {
   // TODO:
 }

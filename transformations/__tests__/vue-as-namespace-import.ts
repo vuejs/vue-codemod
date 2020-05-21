@@ -1,5 +1,5 @@
 import { defineInlineTest } from 'jscodeshift/src/testUtils'
-const transform = require('../tree-shakable-vue')
+const transform = require('../vue-as-namespace-import')
 
 defineInlineTest(
   transform,

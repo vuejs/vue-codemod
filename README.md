@@ -95,9 +95,9 @@ Legend of annotations:
   - 🔵 a compatibility mode can be provided for functional components for one-at-a-time migration
   - 🟢 Can be detected by the [`vue/no-deprecated-functional-template`](https://eslint.vuejs.org/rules/no-deprecated-functional-template.html) ESLint rule
   - 🔴 SFCs using `<template functional>` should be converted to normal SFCs
-- 🔴 [RFC08: Render function API change](https://github.com/vuejs/rfcs/blob/master/active-rfcs/0008-render-function-api-change.md)
+- 🟠 [RFC08: Render function API change](https://github.com/vuejs/rfcs/blob/master/active-rfcs/0008-render-function-api-change.md)
   - 🟢 Template users won't be affected
-  - 🔴 JSX plugin will be rewritten to cover most use cases
+  - 🟠 JSX plugin will be rewritten to cover most use cases (work-in-progress, available at https://github.com/vueComponent/jsx/)
   - 🔴 For Users who manually write render functions using `h`
     - 🔵 It's possible to provide a compat plugin that patches render functions and make them expose a 2.x compatible arguments, and can be turned off in each component for a one-at-a-time migration process.
     - 🔴 It's also possible to provide a codemod that auto-converts `h` calls to use the new VNode data format, since the mapping is pretty mechanical.

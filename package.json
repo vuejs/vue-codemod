@@ -5,7 +5,8 @@
   "main": "index.js",
   "bin": "./dist/bin/vue-codemod.js",
   "files": [
-    "dist"
+    "dist",
+    "!dist/**/__tests__/**"
   ],
   "scripts": {
     "build": "tsc",

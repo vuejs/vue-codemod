@@ -1,5 +1,12 @@
+import type { Transform, Parser } from 'jscodeshift'
+
+type JSTransformationModule = {
+  default: Transform
+  parser?: string | Parser
+}
+
 const transformationMap: {
-  [name: string]: Function
+  [name: string]: JSTransformationModule
 } = {
   'new-global-api': require('./new-global-api'),
   'vue-router-v4': require('./vue-router-v4'),

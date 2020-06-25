@@ -3,7 +3,7 @@
     "baseUrl": ".",
     "outDir": "dist",
     "sourceMap": false,
-    "target": "esnext",
+    "target": "ES2019",
     "module": "commonjs",
     "moduleResolution": "node",
     "allowJs": false,
@@ -15,12 +15,8 @@
     "esModuleInterop": true,
     "removeComments": false,
     "jsx": "preserve",
-    "lib": ["esnext"],
-    "types": [
-      "jest",
-      "jscodeshift",
-      "node"
-    ],
-    "rootDir": ".",
+    "lib": ["ES2019"],
+    "types": ["jest", "jscodeshift", "node"],
+    "rootDir": "."
   }
 }

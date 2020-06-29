@@ -1,6 +1,6 @@
 {
   "name": "vue-codemod",
-  "version": "0.0.3",
+  "version": "0.0.4",
   "description": "Vue codemod scripts",
   "main": "dist/index.js",
   "bin": "./dist/bin/vue-codemod.js",

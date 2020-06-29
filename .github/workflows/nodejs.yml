@@ -23,5 +23,7 @@ jobs:
         uses: actions/setup-node@v1
         with:
           node-version: ${{ matrix.node-version }}
-      - run: yarn --frozen-lockfile
+      - run: yarn add -D jest@25 ts-jest@25 @types/jest@25 prettier@1
+        if: ${{ node-version == '8.x' }}
+      - run: yarn --pure-lockfile
       - run: yarn test

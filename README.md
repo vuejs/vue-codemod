@@ -37,7 +37,7 @@ Inspired by [react-codemod](https://github.com/reactjs/react-codemod).
 
 The migration path (to be integrated in a new version of [`vue-migration-helper`](https://github.com/vuejs/vue-migration-helper)):
 
-1. Install eslint-plugin-vue@7, turn on the `vue3-essential` category
+1. Install eslint-plugin-vue@7, turn on the `vue3-essential` category (maybe a few exceptions like `vue/no-deprecated-dollar-scopedslots-api`)
 2. Run `eslint --fix` to fix all auto-fixable issues; if there are any remaining errors, fix them manually
 3. Run the codemods below
 4. Install vue@3, vue-loader@16, etc.

@@ -1,0 +1,7 @@
+{
+  "verbose": true,
+  "autoAttachChildProcesses": true,
+  "exec": "npx ts-node",
+  "watch": "./api",
+  "ext": ".ts"
+}

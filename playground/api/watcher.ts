@@ -12,3 +12,5 @@ wss.on('connection', (ws) => {
   })
   ws.send('something')
 })
+
+server.addListener('close', () => wss.close())

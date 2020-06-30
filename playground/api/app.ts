@@ -10,7 +10,9 @@ const server = http.createServer(app.callback())
 
 app
   .use(error())
-  .use(bodyParser())
+  .use(bodyParser({
+    enableTypes: ['json', 'text']
+  }))
   .use(json())
   .use(router.routes())
   .use(router.allowedMethods())

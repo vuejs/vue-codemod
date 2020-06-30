@@ -32,16 +32,20 @@ router.put('/files/(.*)', async (ctx) => {
   await fs.writeFile(filepath, ctx.request.body, 'utf-8')
 })
 
-router.get('/run/:trans', async (ctx) => {
+router.post('/run/:trans', async (ctx) => {
   const transformationModule = require(`../../transformations/${ctx.params.trans}.ts`)
 
-  ctx.body = runTransformation(
+  console.log(ctx.request.body)
+
+  const result = runTransformation(
     {
       path: 'anonymous.vue',
       source: ctx.request.body || ''
     },
     transformationModule
   )
+
+  ctx.body = result
 })
 
 export { router }

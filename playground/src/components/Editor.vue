@@ -2,7 +2,7 @@
   <div class="grid grid-rows-fix-auto h-auto overflow-hidden">
     <div class="bg-gray-200 p-1 border-grey-700 border-0 border-b">
       <span class="text-gray-600 align-middle font-mono text-xs px-2">{{title || filepath}}</span>
-      <a v-if='href' :href="href">
+      <a v-if="href" :href="href">
         <button
           class="bg-transparent text-xs text-gray-500 hover:text-gray-600 border border-gray-400 hover:border-gray-600 px-2 rounded align-middle"
         >Open in VS Code</button>
@@ -34,10 +34,19 @@ export default defineComponent({
     },
     readonly: {
       type: Boolean,
-    }
+    },
   },
   setup(props) {
     const code = ref(props.value || '')
+
+    watch(
+      () => props.value,
+      () => {
+        if (props.value) {
+          code.value = props.value
+        }
+      }
+    )
 
     watch(
       () => props.filepath,
@@ -69,7 +78,7 @@ export default defineComponent({
       return {
         mode:
           props.mode ||
-          (props.filepath?.endsWith('.vue') ? 'vue' : 'text/typescript'),
+          (props.filepath?.endsWith('.vue') ? 'text/x-vue' : 'text/typescript'),
         lines: true,
         lineNumbers: true,
         tabSize: 2,

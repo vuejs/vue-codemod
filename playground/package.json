@@ -5,7 +5,7 @@
   "scripts": {
     "dev": "concurrently \"npm:api\" \"npm:vite\"",
     "vite": "vite",
-    "api": "nodemon -w ./api --ext .ts --exec \"ts-node ./api\""
+    "api": "nodemon ./api"
   },
   "dependencies": {
     "tailwindcss": "^1.4.6",

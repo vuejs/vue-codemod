@@ -1,4 +1,5 @@
 import { reactive } from 'vue'
+import { VueTemplate } from './templates'
 
 export const store = reactive({
   current: '',

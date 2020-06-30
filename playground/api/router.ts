@@ -1,31 +1,22 @@
 import Router from '@koa/router'
 import path from 'path'
-import fg from 'fast-glob'
 import fs from 'fs-extra'
 import { default as runTransformation } from '../../src/run-transformation'
+import { API_PORT, ROOT_DIR } from './constants'
+import { getTransformations } from './controllers'
 
 const router = new Router()
-const ROOT_DIR = path.resolve(__dirname, '../..')
-const TRANS_DIR = path.resolve(ROOT_DIR, 'transformations')
 
 router.get('/', (ctx) => {
   ctx.body = 'Hello'
 })
 
-router.get('/root', (ctx) => {
-  ctx.body = ROOT_DIR
-})
-
-router.get('/transformations', async (ctx) => {
-  const files = await fg('*.ts', {
-    cwd: TRANS_DIR,
-    onlyFiles: true
-  })
-
-  // remove .ts extension and filter out index.ts
-  ctx.body = files
-    .map(f => f.slice(0, -3))
-    .filter(f => f !== 'index')
+router.get('/meta', async (ctx) => {
+  ctx.body = {
+    apiPort: API_PORT,
+    rootPath: ROOT_DIR,
+    transformations: await getTransformations()
+  }
 })
 
 router.get('/files/(.*)', async (ctx) => {

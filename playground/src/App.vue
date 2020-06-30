@@ -1,6 +1,14 @@
 <template>
   <Navbar/>
-  <Editor v-if='current' :filepath='`/transformations/${current}.ts`' :title='current'/>
+  <TransformView/>
+  <!--<Panels v-if='current'>
+    <template v-slot:left>
+      <Editor :filepath='`/transformations/${current}.ts`' :title='current'/>
+    </template>
+    <template v-slot:right>
+      <Editor :filepath='`/transformations/${current}.ts`' :title='current'/>
+    </template>
+  </Panels>-->
 </template>
 
 <script lang="ts">

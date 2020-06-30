@@ -2,6 +2,7 @@ import { reactive } from 'vue'
 
 export const store = reactive({
   current: '',
+  apiPort: 3002,
   rootPath: '',
   transformations: [],
   config: {
@@ -10,17 +11,11 @@ export const store = reactive({
 })
 
 export function initStore() {
-  fetch('/api/transformations')
+  fetch('/api/meta')
     .then(r => r.json())
     .then(r => {
-      store.transformations = r
+      Object.assign(store, r)
       if (!store.current)
-        store.current = r[0]
-    })
-
-  fetch('/api/root')
-    .then(r => r.text())
-    .then(r => {
-      store.rootPath = r
+        store.current = store.transformations[0]
     })
 }

@@ -1,6 +1,6 @@
 <template>
   <Navbar/>
-  <Editor :filepath='`/transformations/${current}.ts`'/>
+  <Editor v-if='current' :filepath='`/transformations/${current}.ts`' :title='current'/>
 </template>
 
 <script lang="ts">

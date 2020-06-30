@@ -1,14 +1,15 @@
 <template>
-  <TransformationSelect>
+  <Navbar/>
+  <Editor :filepath='`/transformations/${current}.ts`'/>
 </template>
 
-<script>
-import TransformationSelect from './components/TransformationSelect.vue'
+<script lang="ts">
+import { defineComponent } from 'vue'
+import { store } from './store'
 
-export default {
-  name: 'App',
-  components: {
-    TransformationSelect
+export default defineComponent({
+  setup() {
+    return store
   }
-}
+})
 </script>

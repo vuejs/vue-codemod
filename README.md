@@ -29,7 +29,7 @@ Inspired by [react-codemod](https://github.com/reactjs/react-codemod).
 - [ ] Built-in transformations need to support TypeScript
 - [ ] Built-in transformations need to support module systems other than ES module, and those without modules
 - [ ] Define an interface for transformation of template blocks (may use [`vue-eslint-parser`](https://github.com/mysticatea/vue-eslint-parser/) for this)
-- [ ] A playground for writing transformations
+- [x] A playground for writing transformations - `yarn playground` and visit http://localhost:3000
 
 ## Included Transformations
 

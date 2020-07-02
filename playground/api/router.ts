@@ -1,9 +1,10 @@
 import Router from '@koa/router'
 import path from 'path'
 import fs from 'fs-extra'
-import { default as runTransformation } from '../../src/run-transformation'
 import { API_PORT, ROOT_DIR } from './constants'
 import { getTransformations } from './controllers'
+import { spawnSync } from 'child_process'
+import { stdin } from 'process'
 
 const router = new Router()
 
@@ -15,16 +16,14 @@ router.get('/meta', async (ctx) => {
   ctx.body = {
     apiPort: API_PORT,
     rootPath: ROOT_DIR,
-    transformations: await getTransformations()
+    transformations: await getTransformations(),
   }
 })
 
 router.get('/files/(.*)', async (ctx) => {
   const filepath = path.join(ROOT_DIR, ctx.params[0])
-  if (fs.existsSync(filepath))
-    ctx.body = await fs.readFile(filepath, 'utf-8')
-  else
-    ctx.status = 404
+  if (fs.existsSync(filepath)) ctx.body = await fs.readFile(filepath, 'utf-8')
+  else ctx.status = 404
 })
 
 router.put('/files/(.*)', async (ctx) => {
@@ -33,19 +32,22 @@ router.put('/files/(.*)', async (ctx) => {
 })
 
 router.post('/run/:trans', async (ctx) => {
-  const transformationModule = require(`../../transformations/${ctx.params.trans}.ts`)
+  const name = ctx.params.trans
+  const input = ctx.request.body
+  const script = path.resolve(__dirname, 'transfrom.ts')
 
-  console.log(ctx.request.body)
+  const result = spawnSync('ts-node', ['-T', script, name], {
+    input,
+    encoding: 'utf-8',
+  })
 
-  const result = runTransformation(
-    {
-      path: 'anonymous.vue',
-      source: ctx.request.body || ''
-    },
-    transformationModule
-  )
+  const { stderr, stdout } = result
 
-  ctx.body = result
+  if (stderr) {
+    ctx.body = `/* ERROR */\n\n${stderr}\n`
+  } else {
+    ctx.body = stdout
+  }
 })
 
 export { router }

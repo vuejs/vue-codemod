@@ -9,7 +9,9 @@ const app = new Koa()
 const server = http.createServer(app.callback())
 
 app
-  .use(error())
+  .use(error({
+    env: 'development'
+  }))
   .use(bodyParser({
     enableTypes: ['json', 'text']
   }))

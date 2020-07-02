@@ -17,7 +17,7 @@ export default defineComponent({
       type: String
     }
   },
-  setup(){
+  setup() {
     return store
   }
 })

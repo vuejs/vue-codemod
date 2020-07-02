@@ -5,10 +5,11 @@
   "scripts": {
     "dev": "concurrently \"npm:api\" \"npm:vite\"",
     "vite": "vite",
-    "api": "nodemon ./api"
+    "api": "ts-node-dev --respawn --transpileOnly ./api"
   },
   "dependencies": {
     "tailwindcss": "^1.4.6",
+    "ts-node": "^8.10.2",
     "vue": "^3.0.0-beta.15"
   },
   "devDependencies": {
@@ -18,13 +19,13 @@
     "@types/koa__router": "^8.0.2",
     "@types/ws": "^7.2.6",
     "@vue/compiler-sfc": "^3.0.0-beta.15",
+    "chokidar": "^3.4.0",
     "concurrently": "^5.2.0",
     "fast-glob": "^3.2.4",
     "fs-extra": "^9.0.1",
     "koa-error": "^3.2.0",
     "koa-json": "^2.0.2",
-    "nodemon": "^2.0.4",
-    "ts-node": "^8.10.2",
+    "ts-node-dev": "^1.0.0-pre.50",
     "vite": "^1.0.0-beta.3",
     "ws": "^7.3.0"
   }

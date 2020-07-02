@@ -1,5 +1,4 @@
 import { reactive } from 'vue'
-import { VueTemplate } from './templates'
 
 export const store = reactive({
   current: '',
@@ -20,3 +19,4 @@ export function initStore() {
         store.current = store.transformations[0]
     })
 }
+

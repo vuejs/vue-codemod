@@ -1,13 +1,12 @@
 <template>
   <div class="grid grid-rows-fix-auto h-auto overflow-hidden">
-    <div class="bg-gray-200 p-1 border-grey-700 border-0 border-b">
-      <span class="text-gray-600 align-middle font-mono text-xs px-2">{{title || filepath}}</span>
-      <a v-if="href" :href="href">
-        <button
-          class="bg-transparent text-xs text-gray-500 hover:text-gray-600 border border-gray-400 hover:border-gray-600 px-2 rounded align-middle"
-        >Open in VS Code</button>
-      </a>
-      <slot name="actions"></slot>
+    <div class="bg-gray-200 p-1 border-grey-700 border-0 border-b flex">
+      <div class="text-gray-600 font-mono text-xs m-auto px-2">{{title || filepath}}</div>
+      <OpenInEditor :filepath='filepath'/>
+      <div class="flex-auto"/>
+      <div class="mx-1">
+        <slot name="actions"></slot>
+      </div>
     </div>
     <CodeMirror v-model:code="code" :options="cmOptions" class="h-auto overflow-auto" />
   </div>
@@ -66,14 +65,6 @@ export default defineComponent({
       { immediate: true }
     )
 
-    const href = computed(() =>
-      props.filepath
-        ? `${
-            store.config.vscodeInsiders ? 'vscode-insiders' : 'vscode'
-          }://file/${store.rootPath}/${props.filepath}`
-        : ''
-    )
-
     const cmOptions = computed(() => {
       return {
         mode:
@@ -88,7 +79,6 @@ export default defineComponent({
 
     return {
       code,
-      href,
       cmOptions,
     }
   },

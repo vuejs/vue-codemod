@@ -1,0 +1,43 @@
+@import 'tailwindcss/base';
+
+@import 'tailwindcss/components';
+
+@import 'tailwindcss/utilities';
+
+body, html {
+  height: 100vh;
+  padding: 0;
+}
+
+.grid-rows-fix-auto {
+  grid-template-rows: max-content auto;
+}
+
+.CodeMirror-scroll {
+  overflow-y: hidden;
+  overflow-x: auto;
+}
+
+.btn-gray {
+  @apply cursor-pointer bg-transparent text-gray-500 border border-gray-400 rounded align-middle;
+}
+
+.btn-gray:hover {
+  @apply text-gray-600 border-gray-600;
+}
+
+.btn-white {
+  @apply cursor-pointer bg-transparent text-white border border-white rounded align-middle opacity-50;
+}
+
+.btn-white:hover {
+  @apply opacity-100;
+}
+
+.btn-icon {
+  @apply cursor-pointer align-middle opacity-50 p-1;
+}
+
+.btn-icon:hover {
+  @apply opacity-100;
+}

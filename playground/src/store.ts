@@ -5,6 +5,7 @@ export const store = reactive({
   apiPort: 3002,
   rootPath: '',
   transformations: [],
+  fixtures: {},
   config: {
     vscodeInsiders: true
   }

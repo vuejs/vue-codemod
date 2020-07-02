@@ -11,9 +11,12 @@
     </template>
 
     <template v-slot:right>
-      <Editor v-model:value="output" title="Output" readonly mode="text/x-vue" >
+      <Editor v-model:value="output" title="Output" readonly mode="text/x-vue">
         <template v-slot:actions>
-          <span class="text-sm text-gray-500">{{lastUpdate}}</span>
+          <div class="text-sm mr-1 m-auto text-gray-500">{{lastUpdate}}</div>
+          <div class="text-lg p-1 m-auto">
+            <span class="iconify" data-icon="logos:vue" data-inline="false"></span>
+          </div>
         </template>
       </Editor>
     </template>
@@ -21,7 +24,7 @@
 </template>
 
 <script lang="ts">
-import { defineComponent, ref } from 'vue'
+import { defineComponent, ref, watch } from 'vue'
 import { store } from '../store'
 import { VueTemplate } from '../templates'
 import { useFileWatcher } from '../watcher'
@@ -48,6 +51,8 @@ export default defineComponent({
         output.value = e.toString()
       }
     }
+
+    watch(() => store.current, run)
 
     useFileWatcher((e) => {
       console.log(e)

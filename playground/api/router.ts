@@ -1,10 +1,9 @@
 import Router from '@koa/router'
 import path from 'path'
 import fs from 'fs-extra'
-import { API_PORT, ROOT_DIR } from './constants'
-import { getTransformations } from './controllers'
+import { ROOT_DIR } from './constants'
 import { spawnSync } from 'child_process'
-import { stdin } from 'process'
+import { getMeta } from './controllers'
 
 const router = new Router()
 
@@ -13,11 +12,7 @@ router.get('/', (ctx) => {
 })
 
 router.get('/meta', async (ctx) => {
-  ctx.body = {
-    apiPort: API_PORT,
-    rootPath: ROOT_DIR,
-    transformations: await getTransformations(),
-  }
+  ctx.body = await getMeta()
 })
 
 router.get('/files/(.*)', async (ctx) => {

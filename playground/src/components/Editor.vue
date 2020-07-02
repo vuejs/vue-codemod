@@ -1,10 +1,12 @@
 <template>
   <div class="grid grid-rows-fix-auto h-auto overflow-hidden">
     <div class="bg-gray-200 p-1 border-grey-700 border-0 border-b flex">
-      <div class="text-gray-600 font-mono text-xs m-auto px-2">{{title || filepath}}</div>
-      <OpenInEditor :filepath='filepath'/>
-      <div class="flex-auto"/>
-      <div class="mx-1">
+      <slot name="title">
+        <div class="text-gray-600 font-mono text-xs m-auto px-2">{{title || filepath}}</div>
+        <OpenInEditor :filepath="filepath" />
+      </slot>
+      <div class="flex-auto" />
+      <div class="mx-1 flex">
         <slot name="actions"></slot>
       </div>
     </div>

@@ -7,7 +7,7 @@ export const store = reactive({
   transformations: [],
   fixtures: {},
   config: {
-    vscodeInsiders: true
+    vscodeInsiders: false
   }
 })
 

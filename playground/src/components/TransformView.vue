@@ -6,6 +6,7 @@
         v-model:changed="inputChanged"
         @ready="run"
         :filepath="inputPath"
+        :counter="inputCounter"
         title="Input"
         mode="text/x-vue"
       >
@@ -40,8 +41,8 @@
 </template>
 
 <script lang="ts">
-import { defineComponent, ref, watch, computed } from 'vue'
-import { store } from '../store'
+import { defineComponent, ref, watch, onMounted } from 'vue'
+import { store, initStore } from '../store'
 import { VueTemplate } from '../templates'
 import { useFileWatcher } from '../watcher'
 import { getFixturePath } from '../utils'
@@ -51,7 +52,7 @@ export default defineComponent({
     const input = ref(VueTemplate)
     const output = ref('')
     const lastUpdate = ref('')
-    const inputChanged = ref(false)
+    const inputCounter = ref(0)
     const inputFixtureName = ref('')
     const inputPath = ref('')
 
@@ -72,6 +73,17 @@ export default defineComponent({
       }
     }
 
+    const saveFile = async (filepath: string, content: string) => {
+      await fetch(`/api/files/${filepath}`, {
+        method: 'POST',
+        body: content,
+        headers: {
+          'Content-Type': 'text/plain',
+        },
+      })
+      inputCounter.value += 1
+    }
+
     const newInput = async () => {
       const name = prompt('Enter new input fixture name')
       if (!name) return
@@ -79,12 +91,12 @@ export default defineComponent({
       if (!ext) return
       const filename = `${name}.input.${ext}`
       if (!confirm(`Ok with filename "${filename}"`)) return
-      // TODO:
+      await saveFile(getFixturePath(store.current, filename), input.value)
+      await initStore()
+      inputFixtureName.value = filename
     }
 
-    const saveInput = async () => {
-      // TODO
-    }
+    const saveInput = () => saveFile(inputPath.value, input.value)
 
     // on trans changed
     watch(
@@ -122,15 +134,35 @@ export default defineComponent({
       }
     })
 
+    onMounted(() => {
+      // capture ctrl+s and cmd+s
+      document.addEventListener(
+        'keydown',
+        function (e) {
+          if (
+            (window.navigator.platform.match('Mac') ? e.metaKey : e.ctrlKey) &&
+            e.keyCode == 83
+          ) {
+            e.preventDefault()
+            // currently only work for input panel
+            // consider save file base on current focus in the future
+            saveInput()
+          }
+        },
+        false
+      )
+    })
+
     return {
       output,
       input,
       run,
       lastUpdate,
       newInput,
-      inputChanged,
+      inputChanged: false,
       inputPath,
       inputFixtureName,
+      inputCounter,
       saveInput,
     }
   },

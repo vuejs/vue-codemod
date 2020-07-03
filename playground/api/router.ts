@@ -17,13 +17,18 @@ router.get('/meta', async (ctx) => {
 
 router.get('/files/(.*)', async (ctx) => {
   const filepath = path.join(ROOT_DIR, ctx.params[0])
-  if (fs.existsSync(filepath)) ctx.body = await fs.readFile(filepath, 'utf-8')
-  else ctx.status = 404
+  if (fs.existsSync(filepath)) {
+    ctx.body = await fs.readFile(filepath, 'utf-8')
+  } else {
+    ctx.status = 404
+  }
 })
 
-router.put('/files/(.*)', async (ctx) => {
+router.post('/files/(.*)', async (ctx) => {
   const filepath = path.join(ROOT_DIR, ctx.params[0])
+  await fs.ensureDir(path.dirname(filepath))
   await fs.writeFile(filepath, ctx.request.body, 'utf-8')
+  ctx.status = 200
 })
 
 router.post('/run/:trans', async (ctx) => {

@@ -37,6 +37,11 @@ export default defineComponent({
     },
     changed: {
       type: Boolean,
+      default: false,
+    },
+    counter: {
+      type: Number,
+      default: 0,
     },
   },
   emits: ['update:value', 'update:changed', 'ready'],
@@ -45,6 +50,24 @@ export default defineComponent({
     const code = usePropsRef<string>(props, 'value', emit)
     const fileChanged = usePropsRef<boolean>(props, 'changed', emit)
 
+    const loadFile = async () => {
+      if (!props.filepath) {
+        return
+      }
+      fetch(`/api/files/${props.filepath}`)
+        .then((r) => r.text())
+        .then(async (r) => {
+          code.value = r
+          original.value = r
+          await nextTick()
+          emit('ready')
+        })
+        .catch(() => {
+          code.value = ''
+          original.value = ''
+        })
+    }
+
     watch(
       () => [code.value, original.value],
       ([c, o]) => {
@@ -52,27 +75,9 @@ export default defineComponent({
       }
     )
 
-    watch(
-      () => props.filepath,
-      () => {
-        if (!props.filepath) {
-          return
-        }
-        fetch(`/api/files/${props.filepath}`)
-          .then((r) => r.text())
-          .then(async (r) => {
-            code.value = r
-            original.value = r
-            await nextTick()
-            emit('ready')
-          })
-          .catch(() => {
-            code.value = ''
-            original.value = ''
-          })
-      },
-      { immediate: true }
-    )
+    watch(() => props.filepath, loadFile, { immediate: true })
+
+    watch(() => props.counter, loadFile)
 
     const cmOptions = computed(() => {
       return {

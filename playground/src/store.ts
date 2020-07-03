@@ -13,7 +13,7 @@ export const store = reactive({
 })
 
 export function initStore() {
-  fetch('/api/meta')
+  return fetch('/api/meta')
     .then((r) => r.json())
     .then((r) => {
       Object.assign(store, r)

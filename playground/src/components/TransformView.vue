@@ -1,10 +1,26 @@
 <template>
   <Panels>
     <template v-slot:left>
-      <Editor v-model:value="input" title="Input" mode="text/x-vue">
+      <Editor
+        v-model:value="input"
+        v-model:changed="inputChanged"
+        @ready="run"
+        :filepath="inputPath"
+        title="Input"
+        mode="text/x-vue"
+      >
+        <template v-slot:title>
+          <FixtureSelect v-model:value="inputFixtureName" type="input" :changed="inputChanged" />
+          <button @click="newInput" class="btn-icon text-lg">
+            <span class="iconify" data-icon="ri:add-circle-line" data-inline="false"></span>
+          </button>
+          <button @click="saveInput" class="btn-icon text-lg" :class="{disabled: !inputChanged}">
+            <span class="iconify" data-icon="ri:save-line" data-inline="false"></span>
+          </button>
+        </template>
         <template v-slot:actions>
           <button @click="run" class="btn-icon text-lg">
-            <span class="iconify" data-icon="ri:refresh-line" data-inline="false"></span>
+            <span class="iconify" data-icon="ri:play-line" data-inline="false"></span>
           </button>
         </template>
       </Editor>
@@ -24,16 +40,20 @@
 </template>
 
 <script lang="ts">
-import { defineComponent, ref, watch } from 'vue'
+import { defineComponent, ref, watch, computed } from 'vue'
 import { store } from '../store'
 import { VueTemplate } from '../templates'
 import { useFileWatcher } from '../watcher'
+import { getFixturePath } from '../utils'
 
 export default defineComponent({
   setup() {
     const input = ref(VueTemplate)
     const output = ref('')
     const lastUpdate = ref('')
+    const inputChanged = ref(false)
+    const inputFixtureName = ref('')
+    const inputPath = ref('')
 
     const run = async () => {
       try {
@@ -52,8 +72,48 @@ export default defineComponent({
       }
     }
 
-    watch(() => store.current, run)
+    const newInput = async () => {
+      const name = prompt('Enter new input fixture name')
+      if (!name) return
+      const ext = prompt('Enter new input fixture file ext', 'vue')
+      if (!ext) return
+      const filename = `${name}.input.${ext}`
+      if (!confirm(`Ok with filename "${filename}"`)) return
+      // TODO:
+    }
 
+    const saveInput = async () => {
+      // TODO
+    }
+
+    // on trans changed
+    watch(
+      () => store.current,
+      (v) => {
+        input.value = ''
+        output.value = ''
+        inputFixtureName.value = (store.fixtures[v] || [])[0] || ''
+      },
+      { immediate: true }
+    )
+
+    // on fixture changed
+    watch(
+      () => inputFixtureName.value,
+      () => {
+        if (inputFixtureName.value) {
+          inputPath.value = getFixturePath(
+            store.current,
+            inputFixtureName.value
+          )
+        } else {
+          inputPath.value = ''
+        }
+      },
+      { immediate: true }
+    )
+
+    // on local file changed
     useFileWatcher((e) => {
       console.log(e)
       if (store.current && e.path.startsWith(store.current)) {
@@ -67,6 +127,11 @@ export default defineComponent({
       input,
       run,
       lastUpdate,
+      newInput,
+      inputChanged,
+      inputPath,
+      inputFixtureName,
+      saveInput,
     }
   },
 })

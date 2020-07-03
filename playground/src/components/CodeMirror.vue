@@ -58,10 +58,8 @@ export default {
       this.cm.setValue(this.code || this.value || this.content)
       this.cm.on('change', cm => {
         this.content = cm.getValue()
-        if (this.$emit) {
-          this.$emit('input', this.content)
-          this.$emit('update:code', this.content)
-        }
+        this.$emit('input', this.content)
+        this.$emit('update:code', this.content)
       })
       const allEvents = [
         'scroll',

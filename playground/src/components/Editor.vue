@@ -2,7 +2,7 @@
   <div class="grid grid-rows-fix-auto h-auto overflow-hidden">
     <div class="bg-gray-200 p-1 border-grey-700 border-0 border-b flex">
       <slot name="title">
-        <div class="text-gray-600 font-mono text-xs m-auto px-2">{{title || filepath}}</div>
+        <div class="text-gray-600 text-xs m-auto px-2">{{title || filepath}}</div>
         <OpenInEditor :filepath="filepath" />
       </slot>
       <div class="flex-auto" />
@@ -15,9 +15,8 @@
 </template>
 
 <script lang="ts">
-import { defineComponent, ref, computed, watch } from 'vue'
-// @ts-ignore
-import { store } from '../store'
+import { defineComponent, computed, watch, ref, nextTick } from 'vue'
+import { usePropsRef } from '../utils'
 
 export default defineComponent({
   props: {
@@ -36,16 +35,20 @@ export default defineComponent({
     readonly: {
       type: Boolean,
     },
+    changed: {
+      type: Boolean,
+    },
   },
-  setup(props) {
-    const code = ref(props.value || '')
+  emits: ['update:value', 'update:changed', 'ready'],
+  setup(props, { emit }) {
+    const original = ref(props.value || '')
+    const code = usePropsRef<string>(props, 'value', emit)
+    const fileChanged = usePropsRef<boolean>(props, 'changed', emit)
 
     watch(
-      () => props.value,
-      () => {
-        if (props.value) {
-          code.value = props.value
-        }
+      () => [code.value, original.value],
+      ([c, o]) => {
+        fileChanged.value = c !== o
       }
     )
 
@@ -57,11 +60,15 @@ export default defineComponent({
         }
         fetch(`/api/files/${props.filepath}`)
           .then((r) => r.text())
-          .then((r) => {
+          .then(async (r) => {
             code.value = r
+            original.value = r
+            await nextTick()
+            emit('ready')
           })
           .catch(() => {
             code.value = ''
+            original.value = ''
           })
       },
       { immediate: true }
@@ -82,6 +89,7 @@ export default defineComponent({
     return {
       code,
       cmOptions,
+      fileChanged,
     }
   },
 })

@@ -15,7 +15,12 @@
           <button @click="newInput" class="btn-icon text-lg">
             <span class="iconify" data-icon="ri:add-circle-line" data-inline="false"></span>
           </button>
-          <button @click="saveInput" class="btn-icon text-lg" :class="{disabled: !inputChanged}">
+          <button
+            @click="saveInput"
+            v-show="inputFixtureName"
+            class="btn-icon text-lg"
+            :class="{disabled: !inputChanged}"
+          >
             <span class="iconify" data-icon="ri:save-line" data-inline="false"></span>
           </button>
         </template>
@@ -29,6 +34,12 @@
 
     <template v-slot:right>
       <Editor v-model:value="output" title="Output" readonly mode="text/x-vue">
+        <template v-slot:title>
+          <div class="text-gray-600 text-sm m-auto px-2">{{outputFixtureName || 'Output'}}</div>
+          <button @click="saveOutput" v-show="outputFixtureName" class="btn-icon text-lg">
+            <span class="iconify" data-icon="ri:save-line" data-inline="false"></span>
+          </button>
+        </template>
         <template v-slot:actions>
           <div class="text-sm mr-1 m-auto text-gray-500">{{lastUpdate}}</div>
           <div class="text-lg p-1 m-auto">
@@ -41,7 +52,7 @@
 </template>
 
 <script lang="ts">
-import { defineComponent, ref, watch, onMounted } from 'vue'
+import { defineComponent, ref, watch, onMounted, computed } from 'vue'
 import { store, initStore } from '../store'
 import { VueTemplate } from '../templates'
 import { useFileWatcher } from '../watcher'
@@ -81,7 +92,6 @@ export default defineComponent({
           'Content-Type': 'text/plain',
         },
       })
-      inputCounter.value += 1
     }
 
     const newInput = async () => {
@@ -96,7 +106,20 @@ export default defineComponent({
       inputFixtureName.value = filename
     }
 
-    const saveInput = () => saveFile(inputPath.value, input.value)
+    const saveInput = () => {
+      saveFile(inputPath.value, input.value)
+      inputCounter.value += 1
+    }
+    const saveOutput = () => {
+      saveFile(
+        getFixturePath(store.current, outputFixtureName.value),
+        output.value
+      )
+    }
+
+    const outputFixtureName = computed(() =>
+      inputFixtureName.value.replace('.input.', '.output.')
+    )
 
     // on trans changed
     watch(
@@ -164,6 +187,8 @@ export default defineComponent({
       inputFixtureName,
       inputCounter,
       saveInput,
+      saveOutput,
+      outputFixtureName,
     }
   },
 })

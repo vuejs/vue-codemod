@@ -8,6 +8,7 @@ type JSTransformationModule = {
 const transformationMap: {
   [name: string]: JSTransformationModule
 } = {
+  'vue-class-component-v8': require('./vue-class-component-v8'),
   'new-global-api': require('./new-global-api'),
   'vue-router-v4': require('./vue-router-v4'),
   'vuex-v4': require('./vuex-v4'),

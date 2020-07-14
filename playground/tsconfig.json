@@ -1,0 +1,6 @@
+{
+  "extends": "..",
+  "compilerOptions": {
+    "noImplicitAny": false
+  }
+}

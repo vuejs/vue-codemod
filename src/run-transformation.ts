@@ -49,7 +49,7 @@ export default function runTransformation(
 
   if (transformation instanceof VueTransformation) {
     debug('TODO: Running VueTransformation')
-    return
+    return fileInfo.source
   }
 
   debug('Running jscodeshift transform')

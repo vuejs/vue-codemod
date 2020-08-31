@@ -157,7 +157,6 @@ Legend of annotations:
 
 - 🔵 [RFC04: Global API treeshaking](https://github.com/vuejs/rfcs/blob/master/active-rfcs/0004-global-api-treeshaking.md) & [RFC09: Global mounting/configuration API change](https://github.com/vuejs/rfcs/blob/master/active-rfcs/0009-global-api-change.md)
   - `Vue.extend` can be supported in a compat runtime as an alias to `defineComponent`
-  - For the changes in the form of `Vue.*`->`app.*`, it may be not easy to transform all apperances correctly, because there would be many cross references to the root app instance. So in the runtime, we can alias `Vue.*` to `app.*` if there's only one `createApp` call in the whole app lifecycle, and throws if there are more than one root app instance detected. This can greatly ease the migration cost for most single-root apps. The compat layer won't apply to multi-root apps because that would defeat the purpose of the API change.
 - 🔵 [RFC11: Component `v-model` API change](https://github.com/vuejs/rfcs/blob/master/active-rfcs/0011-v-model-api-change.md)
   - I don't have a clear idea on how to progressively migrate the `v-model` API because both the author and consumer of the components need to change their ways to use this API, according to the current RFC. So we might need a compatibility layer in the runtime.
 

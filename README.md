@@ -149,7 +149,12 @@ Legend of annotations:
   - Seems no codemod or ESLint rule is applicable to this breaking change
 - [RFC24: Attribute coercion behavior change](https://github.com/vuejs/rfcs/blob/master/active-rfcs/0024-attribute-coercion-behavior.md)
   - Codemod is not likely to help in this case
+- [RFC31: Attribute Fallthrough + Functional Component Updates](https://github.com/vuejs/rfcs/blob/master/active-rfcs/0031-attr-fallthrough.md)
+  - Warn of every `$listeners` and `.native` usage
 - Subtle differences between `@vue/composition-api` and the Vue 3 implementation are listed in the [`@vue/composition-api` README](https://github.com/vuejs/composition-api#limitations)
+- [The precedence of `v-if` and `v-for` have been flipped when using both on the same element.](https://github.com/vuejs/vue-next/issues/1165)
+- Warn for [mixing `v-for` and `ref`](https://github.com/vuejs/vue-next/issues/1166).
+- Warn about deprecated instance methods and properties: `$destroy`, `$children`
 
 #### RFCs that May Need Amendments to Simplify the Migration
 
@@ -186,6 +191,8 @@ Some of them can be automatically migrated with the help of codemods.
     - `<component is>` (for SFC templates).
     - `v-is` (for in-DOM templates).
   - The [`vue/no-deprecated-html-element-is`](https://eslint.vuejs.org/rules/no-deprecated-html-element-is.html) ESLint rule can be used to detect usage for `is` usage on built-in HTML tags.
+- `set` and `delete` instance or global methods [will be supported only in IE compat builds](https://github.com/vuejs/vue-next/issues/2026).
+  - Import replacement codemod could be provided for `Vue.set` and `Vue.delete`.
 
 ### Generic Transformations
 

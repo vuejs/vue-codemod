@@ -140,8 +140,6 @@ Legend of annotations:
   - `import { Component } from 'vue-class-component'` -> `import { Options as Component } from 'vue-class-component'`
   - 🔴 `import Vue from 'vue'` -> `import { Vue } from 'vue-class-component'` (Need to avoid name collision if there's any reference to `Vue` besides `extends Vue`)
   - 🔴 `Component.registerHooks` -> `Vue.registerHooks`
-- 🔴 [`watch` no longer supports dot delimited paths](https://github.com/vuejs/vue-next/issues/2003)
-  - Path chould be extracted into a computed property and referenced in the watcher.
 
 #### Breaking Changes that Can Only Be Manually Migrated
 

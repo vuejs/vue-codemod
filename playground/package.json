@@ -10,7 +10,7 @@
   "dependencies": {
     "@types/koa-bodyparser": "^4.3.0",
     "tailwindcss": "^1.4.6",
-    "vue": "^3.0.0-beta.15"
+    "vue": "^3.0.4"
   },
   "devDependencies": {
     "@koa/router": "^9.0.1",
@@ -18,7 +18,7 @@
     "@types/koa-json": "^2.0.18",
     "@types/koa__router": "^8.0.2",
     "@types/ws": "^7.2.6",
-    "@vue/compiler-sfc": "^3.0.0-beta.15",
+    "@vue/compiler-sfc": "^3.0.4",
     "chokidar": "^3.4.0",
     "concurrently": "^5.2.0",
     "fast-glob": "^3.2.4",
@@ -28,7 +28,7 @@
     "koa-json": "^2.0.2",
     "ts-node": "^8.10.2",
     "ts-node-dev": "1.0.0-pre.50",
-    "vite": "^1.0.0-beta.3",
+    "vite": "^1.0.0-rc.13",
     "ws": "^7.3.0"
   }
 }

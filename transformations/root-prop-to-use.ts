@@ -42,6 +42,11 @@ export const transformAST: ASTTransformation<Params> = (
       // @ts-ignore
       (p) => p.key && p.key.name === rootPropName
     )
+
+    if (propertyIndex === -1) {
+      return createAppCall
+    }
+
     // @ts-ignore
     const [{ value: pluginInstance }] = rootProps.properties.splice(
       propertyIndex,

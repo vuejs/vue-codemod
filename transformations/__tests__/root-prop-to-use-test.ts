@@ -20,3 +20,12 @@ defineInlineTest(
   `Vue.createApp({}).use(router);`,
   'Can recognize Vue.createApp'
 )
+
+defineInlineTest(
+  transform,
+  {
+    rootPropName: 'router',
+  },
+  `createApp({});`,
+  `createApp({});`
+)

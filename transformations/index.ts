@@ -23,7 +23,7 @@ const transformationMap: {
   'remove-trivial-root': require('./remove-trivial-root'),
   'remove-vue-use': require('./remove-vue-use'),
   'root-prop-to-use': require('./root-prop-to-use'),
-  'tree-shakable-vue': require('./tree-shakable-vue'),
+  'vue-as-namespace-import': require('./vue-as-namespace-import'),
 
   // generic utility tranformations
   'add-import': require('./add-import'),

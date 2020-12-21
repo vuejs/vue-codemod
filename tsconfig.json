@@ -19,5 +19,6 @@
     "lib": ["ES2018", "DOM"],
     "types": ["jest", "jscodeshift", "node"],
     "rootDir": "."
-  }
+  },
+  "exclude": ["dist", "playground"]
 }

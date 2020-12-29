@@ -3,7 +3,7 @@ jest.autoMockOff()
 import * as fs from 'fs'
 import * as path from 'path'
 import { defineInlineTest } from 'jscodeshift/src/testUtils'
-import runTransformation from '../../src/run-transformation'
+import runTransformation from '../../src/runTransformation'
 
 const transform = require('../define-component')
 

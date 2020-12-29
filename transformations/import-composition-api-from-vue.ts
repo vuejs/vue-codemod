@@ -1,6 +1,6 @@
 // this file is served as a boilerplate template for writing more complex transformations
-import wrap from '../src/wrap-ast-transformation'
-import type { ASTTransformation } from '../src/wrap-ast-transformation'
+import wrap from '../src/wrapAstTransformation'
+import type { ASTTransformation } from '../src/wrapAstTransformation'
 
 // TODO: SetupContext.refs does not exist in Vue 3.0
 export const transformAST: ASTTransformation = ({ root, j }) => {

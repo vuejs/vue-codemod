@@ -10,7 +10,7 @@ import * as globby from 'globby'
 import createDebug from 'debug'
 
 import builtInTransformations from '../transformations'
-import runTransformation from '../src/run-transformation'
+import runTransformation from '../src/runTransformation'
 
 const debug = createDebug('vue-codemod')
 const log = console.log.bind(console)

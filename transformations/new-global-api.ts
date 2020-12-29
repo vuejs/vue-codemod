@@ -1,5 +1,5 @@
-import wrap from '../src/wrap-ast-transformation'
-import type { ASTTransformation } from '../src/wrap-ast-transformation'
+import wrap from '../src/wrapAstTransformation'
+import type { ASTTransformation } from '../src/wrapAstTransformation'
 
 import { transformAST as vueAsNamespaceImport } from './vue-as-namespace-import'
 import { transformAST as importCompositionApiFromVue } from './import-composition-api-from-vue'

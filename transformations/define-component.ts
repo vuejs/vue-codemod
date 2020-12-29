@@ -1,5 +1,5 @@
-import wrap from '../src/wrap-ast-transformation'
-import type { ASTTransformation } from '../src/wrap-ast-transformation'
+import wrap from '../src/wrapAstTransformation'
+import type { ASTTransformation } from '../src/wrapAstTransformation'
 
 import { transformAST as addImport } from './add-import'
 import { transformAST as removeExtraneousImport } from './remove-extraneous-import'

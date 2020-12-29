@@ -1,5 +1,5 @@
-import wrap from '../src/wrap-ast-transformation'
-import type { ASTTransformation } from '../src/wrap-ast-transformation'
+import wrap from '../src/wrapAstTransformation'
+import type { ASTTransformation } from '../src/wrapAstTransformation'
 
 export const transformAST: ASTTransformation = ({ root, j }) => {
   const productionTipAssignment = root.find(

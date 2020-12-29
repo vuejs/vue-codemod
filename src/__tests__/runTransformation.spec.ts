@@ -1,7 +1,7 @@
 // @ts-nocheck
 /* eslint-env jest */
 import type { Transform } from 'jscodeshift'
-import runTransformation from '../run-transformation'
+import runTransformation from '../runTransformation'
 
 const unreachableTransform: Transform = () => {
   throw new Error('This transform should never be invoked')

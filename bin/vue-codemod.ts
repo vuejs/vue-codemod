@@ -31,7 +31,7 @@ const { _: files, transformation: transformationName, params } = yargs
 
 // TODO: port the `Runner` interface of jscodeshift
 async function main() {
-  const resolvedPaths = globby.sync(files)
+  const resolvedPaths = globby.sync(files as string[])
   const transformationModule = loadTransformationModule(transformationName)
 
   log(`Processing ${resolvedPaths.length} files…`)

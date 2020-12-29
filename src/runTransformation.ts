@@ -1,9 +1,10 @@
 import jscodeshift, { Transform, Parser } from 'jscodeshift'
 // @ts-ignore
 import getParser from 'jscodeshift/src/getParser'
-import { parse as parseSFC, SFCDescriptor } from '@vue/compiler-sfc'
-import stringifySFCDescriptor from './stringify-sfc-descriptor'
 import createDebug from 'debug'
+
+import { parse as parseSFC, stringify as stringifySFC } from './sfcUtils'
+import type { SFCDescriptor } from './sfcUtils'
 
 import VueTransformation from './VueTransformation'
 
@@ -105,7 +106,7 @@ export default function runTransformation(
     }
 
     descriptor!.script!.content = out
-    return stringifySFCDescriptor(descriptor!)
+    return stringifySFC(descriptor!)
   }
 
   return out

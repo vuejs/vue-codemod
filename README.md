@@ -192,7 +192,7 @@ Some of them can be automatically migrated with the help of codemods.
     - `v-is` (for in-DOM templates).
   - The [`vue/no-deprecated-html-element-is`](https://eslint.vuejs.org/rules/no-deprecated-html-element-is.html) ESLint rule can be used to detect usage for `is` usage on built-in HTML tags.
 - `set` and `delete` instance or global methods [will be supported only in IE compat builds](https://github.com/vuejs/vue-next/issues/2026).
-  - Import replacement codemod could be provided for `Vue.set` and `Vue.delete`.
+  - implemented as `remove-vue-set-and-delete`
 
 ### Generic Transformations
 

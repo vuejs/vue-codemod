@@ -14,7 +14,7 @@ export const transformAST: ASTTransformation = (context) => {
     return j.Identifier.check(node) && node.name === 'Vue'
   }
 
-  const setCalls = root
+  const setOrDeleteCalls = root
     .find(j.CallExpression, (n: N.CallExpression) => {
       if (
         !j.MemberExpression.check(n.callee) ||
@@ -23,11 +23,16 @@ export const transformAST: ASTTransformation = (context) => {
         return false
       }
 
-      if (n.callee.property.name === 'set' && isVue(n.callee.object)) {
+      const propName = n.callee.property.name
+
+      if (
+        (propName === 'set' || propName === 'delete') &&
+        isVue(n.callee.object)
+      ) {
         return true
       }
 
-      if (n.callee.property.name === '$set') {
+      if (propName === '$set' || propName === '$delete') {
         // we need the path & scope to check if the object is `this`
         // so leave it to the filter function
         return true
@@ -36,8 +41,11 @@ export const transformAST: ASTTransformation = (context) => {
       return false
     })
     .filter((path) => {
-      // @ts-ignore
-      if (path.node.callee.property.name !== '$set') {
+      const prop = (path.node.callee as N.MemberExpression)
+        .property as N.Identifier
+
+      // only the object of `.$set` and `.$delete` is pending for check
+      if (prop.name !== '$set' && prop.name !== '$delete') {
         return true
       }
 
@@ -68,22 +76,33 @@ export const transformAST: ASTTransformation = (context) => {
       return false
     })
 
-  setCalls.replaceWith(({ node }) => {
-    if (
-      node.arguments.length !== 3 ||
-      node.arguments.some((arg) => j.SpreadElement.check(arg))
-    ) {
+  setOrDeleteCalls.replaceWith(({ node }) => {
+    if (node.arguments.some((arg) => j.SpreadElement.check(arg))) {
       // TODO: add a comment to inform the user that this kind of usage can't be transformed
       return node
     }
 
-    return j.assignmentExpression(
-      '=',
-      // @ts-ignore
-      j.memberExpression(node.arguments[0], node.arguments[1], true),
-      // @ts-ignore
-      node.arguments[2]
-    )
+    const prop = (node.callee as N.MemberExpression).property as N.Identifier
+    if (prop.name === '$set' || prop.name === 'set') {
+      return j.assignmentExpression(
+        '=',
+        // @ts-ignore
+        j.memberExpression(node.arguments[0], node.arguments[1], true),
+        // @ts-ignore
+        node.arguments[2]
+      )
+    }
+
+    if (prop.name === '$delete' || prop.name === 'delete') {
+      return j.unaryExpression(
+        'delete',
+        // @ts-ignore
+        j.memberExpression(node.arguments[0], node.arguments[1], true)
+      )
+    }
+
+    // unreachable branch
+    return node
   })
 }
 

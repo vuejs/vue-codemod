@@ -1,4 +1,4 @@
-import runTransformation from '../../src/run-transformation'
+import runTransformation from '../../dist/src/runTransformation'
 
 const transfrom = process.argv[2]
 const options = JSON.parse(process.argv[3] || '{}')

@@ -11,7 +11,7 @@
   "scripts": {
     "build": "tsc",
     "prepublishOnly": "tsc",
-    "playground": "npm -C ./playground run dev",
+    "playground": "npm run build && cd ./playground && npm install && npm run dev",
     "test": "jest"
   },
   "repository": {

@@ -20,6 +20,7 @@ const transformationMap: {
   'rename-lifecycle': require('./rename-lifecycle'),
   'add-emit-declaration': require('./add-emit-declaration'),
   'global-filter': require('./global-filter'),
+  'tree-shaking': require('./tree-shaking'),
 
   // atomic ones
   'remove-contextual-h-from-render': require('./remove-contextual-h-from-render'),

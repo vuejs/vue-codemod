@@ -21,6 +21,7 @@ const transformationMap: {
   'add-emit-declaration': require('./add-emit-declaration'),
   'global-filter': require('./global-filter'),
   'tree-shaking': require('./tree-shaking'),
+  'v-model': require('./v-model'),
 
   // atomic ones
   'remove-contextual-h-from-render': require('./remove-contextual-h-from-render'),

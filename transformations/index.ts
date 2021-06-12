@@ -22,6 +22,7 @@ const transformationMap: {
   'global-filter': require('./global-filter'),
   'tree-shaking': require('./tree-shaking'),
   'v-model': require('./v-model'),
+  'render-to-resolveComponent': require('./render-to-resolveComponent'),
 
   // atomic ones
   'remove-contextual-h-from-render': require('./remove-contextual-h-from-render'),

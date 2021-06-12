@@ -17,6 +17,7 @@ const transformationMap: {
   'scoped-slots-to-slots': require('./scoped-slots-to-slots'),
   'new-directive-api': require('./new-directive-api'),
   'remove-vue-set-and-delete': require('./remove-vue-set-and-delete'),
+  'render-to-resolveComponent': require('./render-to-resolveComponent'),
 
   // atomic ones
   'remove-contextual-h-from-render': require('./remove-contextual-h-from-render'),

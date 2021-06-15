@@ -19,6 +19,7 @@ const transformationMap: {
   'remove-vue-set-and-delete': require('./remove-vue-set-and-delete'),
   'rename-lifecycle': require('./rename-lifecycle'),
   'add-emit-declaration': require('./add-emit-declaration'),
+  'global-filter': require('./global-filter'),
 
   // atomic ones
   'remove-contextual-h-from-render': require('./remove-contextual-h-from-render'),

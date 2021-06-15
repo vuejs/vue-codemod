@@ -32,11 +32,15 @@
     "jscodeshift": "^0.11.0",
     "lru-cache": "^6.0.0",
     "source-map": "^0.6.1",
+    "vue-eslint-parser": "^7.6.0",
     "yargs": "^16.2.0"
   },
   "devDependencies": {
     "@types/debug": "^4.1.5",
+    "@types/eslint-scope": "^3.7.0",
+    "@types/eslint-visitor-keys": "^1.0.0",
     "@types/jest": "^26.0.3",
+    "@types/lodash": "^4.14.170",
     "@types/node": "^12.12.47",
     "@types/yargs": "^15.0.4",
     "jest": "^26.1.0",

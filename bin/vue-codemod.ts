@@ -37,11 +37,16 @@ async function main() {
 
   log(`Processing ${resolvedPaths.length} files…`)
 
+  const extensions = ['.js', '.ts', '.vue', '.jsx', '.tsx']
   for (const p of resolvedPaths) {
     debug(`Processing ${p}…`)
     const fileInfo = {
       path: p,
       source: fs.readFileSync(p).toString(),
+    }
+    const extension = (/\.([^.]*)$/.exec(fileInfo.path) || [])[0]
+    if (!extensions.includes(extension)){
+      continue
     }
     try {
       const result = runTransformation(

@@ -10,6 +10,7 @@ import * as globby from 'globby'
 import createDebug from 'debug'
 
 import builtInTransformations from '../transformations'
+import vueTransformations from '../vue-transformations'
 import runTransformation from '../src/runTransformation'
 
 const debug = createDebug('vue-codemod')
@@ -61,9 +62,13 @@ main().catch((err) => {
 })
 
 function loadTransformationModule(nameOrPath: string) {
-  let transformation = builtInTransformations[nameOrPath]
-  if (transformation) {
-    return transformation
+  let jsTransformation = builtInTransformations[nameOrPath]
+  let vueTransformation = vueTransformations[nameOrPath]
+  if (jsTransformation) {
+    return jsTransformation
+  }
+  if (vueTransformations) {
+    return vueTransformation
   }
 
   const customModulePath = path.resolve(process.cwd(), nameOrPath)

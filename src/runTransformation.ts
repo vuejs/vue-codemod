@@ -64,8 +64,18 @@ export default function runTransformation(
     if (!descriptor.template) {
       return source
     }
+    let contentStart: number =
+      descriptor.template.ast.children[0].loc.start.offset
+    let contentEnd: number =
+      descriptor.template.ast.children[
+        descriptor.template.ast.children.length - 1
+      ].loc.end.offset + 1
 
-    fileInfo.source = `<template>${descriptor.template.content}</template>`
+    fileInfo.source =
+      source.slice(0, contentStart) +
+      descriptor.template.content +
+      source.slice(contentEnd, contentEnd + 11)
+
     const out = transformation(fileInfo, params)
 
     if (!out) {
@@ -78,7 +88,10 @@ export default function runTransformation(
         return source // skipped, don't bother re-stringifying
       }
       // remove redundant <template> tag
-      descriptor!.template!.content = out.slice(11, -11)
+      descriptor!.template!.content = out.slice(
+        contentStart,
+        descriptor.template.content.length - contentEnd
+      )
       return stringifySFC(descriptor!)
     }
 

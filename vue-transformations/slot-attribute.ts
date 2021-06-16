@@ -6,7 +6,7 @@ import * as parser from 'vue-eslint-parser'
 import wrap from '../src/wrapVueTransformation'
 
 export const transformAST: VueASTTransformation = (context) => {
-  var fixOperations: Operation[] = []
+  let fixOperations: Operation[] = []
   const toFixNodes: Node[] = findNodes(context)
   toFixNodes.forEach((node) => {
     fixOperations = fixOperations.concat(fix(node))
@@ -19,7 +19,6 @@ export default wrap(transformAST)
  * search slot attribute nodes
  *
  * @param context
- * @param templateBody
  * @returns slot attribute nodes
  */
 function findNodes(context: any): Node[] {
@@ -27,8 +26,8 @@ function findNodes(context: any): Node[] {
   const source = file.source
   const options = { sourceType: 'module' }
   const ast = parser.parse(source, options)
-  var toFixNodes: Node[] = []
-  var root: Node = <Node>ast.templateBody
+  let toFixNodes: Node[] = []
+  let root: Node = <Node>ast.templateBody
   parser.AST.traverseNodes(root, {
     enterNode(node: Node) {
       if (node.type === 'VAttribute' && node.key.name === 'slot') {
@@ -41,11 +40,10 @@ function findNodes(context: any): Node[] {
 }
 /**
  * fix logic
- * @param fixer
- * @param slotAttr
+ * @param node
  */
 function fix(node: Node): Operation[] {
-  var fixOperations: Operation[] = []
+  let fixOperations: Operation[] = []
 
   const target: any = node!.parent!.parent
   // @ts-ignore

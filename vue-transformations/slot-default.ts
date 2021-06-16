@@ -6,7 +6,7 @@ import * as parser from 'vue-eslint-parser'
 import wrap from '../src/wrapVueTransformation'
 
 export const transformAST: VueASTTransformation = (context) => {
-  var fixOperations: Operation[] = []
+  let fixOperations: Operation[] = []
   const toFixNodes: Node[] = findNodes(context)
   toFixNodes.forEach((node) => {
     fixOperations = fixOperations.concat(fix(node))
@@ -21,8 +21,8 @@ function findNodes(context: any): Node[] {
   const source = file.source
   const options = { sourceType: 'module' }
   const ast = parser.parse(source, options)
-  var toFixNodes: Node[] = []
-  var root: Node = <Node>ast.templateBody
+  let toFixNodes: Node[] = []
+  let root: Node = <Node>ast.templateBody
   parser.AST.traverseNodes(root, {
     enterNode(node: Node) {
       if (
@@ -43,7 +43,7 @@ function findNodes(context: any): Node[] {
 }
 
 function fix(node: Node): Operation[] {
-  var fixOperations: Operation[] = []
+  let fixOperations: Operation[] = []
 
   const target: any = node!.parent!.parent
   const targetParent: any = target.parent

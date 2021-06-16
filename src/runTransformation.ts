@@ -50,19 +50,42 @@ export default function runTransformation(
     transformation = transformationModule
   }
 
-  if (transformation.type === 'vueTransformation') {
-    debug('TODO: Running VueTransformation')
+  const { path, source } = fileInfo
+  const extension = (/\.([^.]*)$/.exec(path) || [])[0]
+  let lang = extension.slice(1)
+  let descriptor: SFCDescriptor
 
+  if (transformation.type === 'vueTransformation' && extension === '.vue') {
+    debug('Running VueTransformation')
+
+    descriptor = parseSFC(source, { filename: path }).descriptor
+
+    // skip .vue files without template block
+    if (!descriptor.template) {
+      return source
+    }
+
+    fileInfo.source = `<template>${descriptor.template.content}</template>`
     const out = transformation(fileInfo, params)
+
+    if (!out) {
+      return source
+    }
+
+    // need to reconstruct the .vue file from descriptor blocks
+    if (extension === '.vue') {
+      if (out === descriptor!.template!.content) {
+        return source // skipped, don't bother re-stringifying
+      }
+      // remove redundant <template> tag
+      descriptor!.template!.content = out.slice(11, -11)
+      return stringifySFC(descriptor!)
+    }
+
     return out
   } else {
     debug('Running jscodeshift transform')
 
-    const { path, source } = fileInfo
-    const extension = (/\.([^.]*)$/.exec(path) || [])[0]
-    let lang = extension.slice(1)
-
-    let descriptor: SFCDescriptor
     if (extension === '.vue') {
       descriptor = parseSFC(source, { filename: path }).descriptor
 

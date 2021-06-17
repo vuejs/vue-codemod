@@ -38,7 +38,6 @@ const {
   .option('runAllTransformation', {
     alias: 'a',
     type: 'boolean',
-    default: true,
     conflicts: 'transformation',
     describe: 'run all transformation module',
   })

@@ -33,7 +33,9 @@ type VueTransformationModule =
       default: VueTransformation,
     }
 
-type TransformationModule = JSTransformationModule | VueTransformationModule
+export type TransformationModule =
+  | JSTransformationModule
+  | VueTransformationModule
 
 export default function runTransformation(
   fileInfo: FileInfo,
@@ -74,7 +76,7 @@ export default function runTransformation(
     fileInfo.source =
       source.slice(0, contentStart) +
       descriptor.template.content +
-      source.slice(contentEnd)
+      source.slice(contentEnd, contentEnd + 11)
 
     const out = transformation(fileInfo, params)
 

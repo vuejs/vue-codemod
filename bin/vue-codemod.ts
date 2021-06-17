@@ -13,29 +13,79 @@ import builtInTransformations from '../transformations'
 import vueTransformations from '../vue-transformations'
 import runTransformation from '../src/runTransformation'
 
+import type { TransformationModule } from '../src/runTransformation'
+
 const debug = createDebug('vue-codemod')
 const log = console.log.bind(console)
 
-const { _: files, transformation: transformationName, params } = yargs
+const {
+  _: files,
+  transformation: transformationName,
+  runAllTransformation: runAllTransformation,
+  params,
+} = yargs
   .usage('Usage: $0 [file pattern]')
   .option('transformation', {
     alias: 't',
     type: 'string',
+    conflicts: 'runAllTransformation',
     describe: 'Name or path of the transformation module',
   })
   .option('params', {
     alias: 'p',
     describe: 'Custom params to the transformation',
   })
-  .demandOption('transformation')
+  .option('runAllTransformation', {
+    alias: 'a',
+    type: 'boolean',
+    default: true,
+    conflicts: 'transformation',
+    describe: 'run all transformation module',
+  })
+  // example(command: string, description: string): Argv<T>;
+  .example([
+    [
+      'npx vue-codemod ./src -a',
+      'Run all rules to convert all relevant files in the ./src folder',
+    ],
+    [
+      'npx vue-codemod ./src/components/HelloWorld.vue -t slot-attribute',
+      'Run slot-attribute rule to convert HelloWorld.vue',
+    ],
+  ])
   .help().argv
 
 // TODO: port the `Runner` interface of jscodeshift
 async function main() {
   const resolvedPaths = globby.sync(files as string[])
-  const transformationModule = loadTransformationModule(transformationName)
+  if (transformationName != undefined) {
+    const transformationModule = loadTransformationModule(transformationName)
+    processTransformation(
+      resolvedPaths,
+      transformationName,
+      transformationModule
+    )
+  }
 
-  log(`Processing ${resolvedPaths.length} files…`)
+  if (runAllTransformation) {
+    for (let key in builtInTransformations) {
+      processTransformation(resolvedPaths, key, builtInTransformations[key])
+    }
+
+    for (let key in vueTransformations) {
+      processTransformation(resolvedPaths, key, vueTransformations[key])
+    }
+  }
+}
+
+function processTransformation(
+  resolvedPaths: string[],
+  transformationName: string,
+  transformationModule: TransformationModule
+) {
+  log(
+    `Processing ${resolvedPaths.length} files… use ${transformationName} transformation`
+  )
 
   const extensions = ['.js', '.ts', '.vue', '.jsx', '.tsx']
   for (const p of resolvedPaths) {
@@ -45,7 +95,7 @@ async function main() {
       source: fs.readFileSync(p).toString(),
     }
     const extension = (/\.([^.]*)$/.exec(fileInfo.path) || [])[0]
-    if (!extensions.includes(extension)){
+    if (!extensions.includes(extension)) {
       continue
     }
     try {
@@ -65,7 +115,11 @@ main().catch((err) => {
   console.error(err)
   process.exit(1)
 })
-
+/**
+ * load Transformation Module
+ * @param nameOrPath
+ * @returns
+ */
 function loadTransformationModule(nameOrPath: string) {
   let jsTransformation = builtInTransformations[nameOrPath]
   let vueTransformation = vueTransformations[nameOrPath]

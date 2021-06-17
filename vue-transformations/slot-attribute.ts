@@ -44,19 +44,28 @@ function findNodes(context: any): Node[] {
  */
 function fix(node: Node): Operation[] {
   let fixOperations: Operation[] = []
-
-  const target: any = node!.parent!.parent
+  const element: any = node!.parent!.parent
   // @ts-ignore
   const slotValue: string = node!.value!.value
 
-  // remove v-slot:${slotValue}
-  fixOperations.push(OperationUtils.remove(node))
-  // add <template v-slot:${slotValue}>
-  fixOperations.push(
-    OperationUtils.insertTextBefore(target, `<template v-slot:${slotValue}>`)
-  )
-  // add </template>
-  fixOperations.push(OperationUtils.insertTextAfter(target, `</template>`))
+  if (
+    element != null &&
+    element != undefined &&
+    element.type == 'VElement' &&
+    element.name == 'template'
+  ) {
+    // template element replace slot="xxx" to v-slot:xxx
+    fixOperations.push(OperationUtils.replaceText(node, `v-slot:${slotValue}`))
+  } else {
+    // remove v-slot:${slotValue}
+    fixOperations.push(OperationUtils.remove(node))
+    // add <template v-slot:${slotValue}>
+    fixOperations.push(
+      OperationUtils.insertTextBefore(element, `<template v-slot:${slotValue}>`)
+    )
+    // add </template>
+    fixOperations.push(OperationUtils.insertTextAfter(element, `</template>`))
+  }
 
   return fixOperations
 }

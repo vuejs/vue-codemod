@@ -55,10 +55,15 @@ export default function runTransformation(
   let lang = extension.slice(1)
   let descriptor: SFCDescriptor
 
-  if (transformation.type === 'vueTransformation' && extension === '.vue') {
+  if (transformation.type === 'vueTransformation') {
     debug('Running VueTransformation')
 
-    descriptor = parseSFC(source, { filename: path }).descriptor
+    if (extension === '.vue') {
+      descriptor = parseSFC(source, { filename: path }).descriptor
+    } else {
+      // skip non .vue files
+      return source
+    }
 
     // skip .vue files without template block
     if (!descriptor.template) {

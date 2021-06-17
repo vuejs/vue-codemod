@@ -126,7 +126,7 @@ function loadTransformationModule(nameOrPath: string) {
   if (jsTransformation) {
     return jsTransformation
   }
-  if (vueTransformations) {
+  if (vueTransformation) {
     return vueTransformation
   }
 

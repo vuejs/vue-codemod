@@ -11,7 +11,7 @@ export const transformAST: ASTTransformation = (context) => {
       && node.params.length === 1
   })
     .filter(nodePath => nodePath.parent.parent.node.type === 'ExportDefaultDeclaration')
-  if (!renderCollections) return
+  if (!renderCollections.length) return
 
   // add import
   addImport(context, {

@@ -39,7 +39,7 @@ export const transformAST: ASTTransformation = ({ root, j }) => {
 
     if(!hasEmitsProperty){
     //  no emits property then create emits:[...]  AST
-      defaultExportBody.get(0).node.declaration.properties.unshift(j.objectProperty(j.identifier('emits'),j.arrayExpression(elements)));
+      defaultExportBody.get(0).node.declaration.properties?.unshift(j.objectProperty(j.identifier('emits'),j.arrayExpression(elements)));
     }
   }
 }

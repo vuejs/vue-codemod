@@ -42,7 +42,6 @@ const {
     conflicts: 'transformation',
     describe: 'run all transformation module',
   })
-  // example(command: string, description: string): Argv<T>;
   .example([
     [
       'npx vue-codemod ./src -a',
@@ -77,7 +76,12 @@ async function main() {
     }
   }
 }
-
+/**
+ * process files by Transformation
+ * @param resolvedPaths resolved file path
+ * @param transformationName transformation name
+ * @param transformationModule transformation module
+ */
 function processTransformation(
   resolvedPaths: string[],
   transformationName: string,

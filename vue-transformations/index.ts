@@ -12,6 +12,7 @@ const transformationMap: {
   'v-for-template-key': require('./v-for-template-key'),
   'v-else-if-key': require('./v-else-if-key'),
   'transition-group-root': require('./transition-group-root'),
+  'v-bind-order-sensitive': require('./v-bind-order-sensitive.spec')
 }
 
 export default transformationMap

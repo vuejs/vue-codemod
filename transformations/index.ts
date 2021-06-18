@@ -37,4 +37,17 @@ const transformationMap: {
   'remove-extraneous-import': require('./remove-extraneous-import'),
 }
 
+export const excludedTransformations = [
+  'define-component',
+  'new-vue-to-create-app',
+  'remove-contextual-h-from-render',
+  'remove-production-tip',
+  'remove-trivial-root',
+  'remove-vue-use',
+  'root-prop-to-use',
+  'vue-as-namespace-import',
+  'add-import',
+  'remove-extraneous-import'
+]
+
 export default transformationMap

@@ -10,7 +10,7 @@ import * as globby from 'globby'
 import createDebug from 'debug'
 
 import builtInTransformations from '../transformations'
-import { excludedTransformations } from "../transformations"
+import { excludedTransformations } from '../transformations'
 import vueTransformations from '../vue-transformations'
 import runTransformation from '../src/runTransformation'
 
@@ -52,7 +52,8 @@ const {
       'Run slot-attribute rule to convert HelloWorld.vue',
     ],
   ])
-  .help().argv
+  .help()
+  .alias('h', 'help').argv
 
 // TODO: port the `Runner` interface of jscodeshift
 async function main() {
@@ -105,6 +106,7 @@ function processTransformation(
       continue
     }
     try {
+      debug(`Processing file: ${fileInfo.path}`)
       const result = runTransformation(
         fileInfo,
         transformationModule,

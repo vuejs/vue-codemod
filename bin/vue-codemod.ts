@@ -10,6 +10,7 @@ import * as globby from 'globby'
 import createDebug from 'debug'
 
 import builtInTransformations from '../transformations'
+import { excludedTransformations } from "../transformations"
 import vueTransformations from '../vue-transformations'
 import runTransformation from '../src/runTransformation'
 
@@ -67,7 +68,9 @@ async function main() {
 
   if (runAllTransformation) {
     for (let key in builtInTransformations) {
-      processTransformation(resolvedPaths, key, builtInTransformations[key])
+      if (!excludedTransformations.includes(key)) {
+        processTransformation(resolvedPaths, key, builtInTransformations[key])
+      }
     }
 
     for (let key in vueTransformations) {

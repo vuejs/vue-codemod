@@ -7,3 +7,10 @@ runTest(
   'vue',
   'vue'
 )
+runTest(
+  ':key is not the attribute of v-for template child',
+  'v-for-template-key',
+  'without-v-for-template',
+  'vue',
+  'vue'
+)

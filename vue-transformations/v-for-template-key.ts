@@ -66,7 +66,7 @@ function fix(node: any): Operation[] {
   const target: any = node!.parent!.parent
 
   // The current node has no attribute that is v-for
-  let havaForBrother: boolean = false
+  let hasForAttr: boolean = false
   target.startTag.attributes
     .filter(
       (attr: any) =>
@@ -74,39 +74,24 @@ function fix(node: any): Operation[] {
         attr.key.type === 'VDirectiveKey' &&
         attr.key.name.name === 'for'
     )
-    .forEach((element: any) => {
-      havaForBrother = true
+    .forEach(() => {
+      hasForAttr = true
     })
-  if (havaForBrother) {
+  if (hasForAttr) {
     return fixOperations
   }
 
   let elder: any = null
-  let elderHasKey: any = false
-  let tmp: any = target.parent
+  let elderHasKey: boolean = false
+  let elderHasFor: boolean = false
+  let tmp: any = target
   // find template parent
   while (elder == null && tmp != null) {
     elderHasKey = false
-    if (tmp.type != 'VElement' || tmp.name != 'template') {
-      tmp = tmp.parent
+    elderHasFor = false
+    tmp = tmp.parent
+    if (tmp == null || tmp.type != 'VElement' || tmp.name != 'template') {
       continue
-    }
-
-    tmp.startTag.attributes
-      .filter(
-        (attr: any) =>
-          attr.type === 'VAttribute' &&
-          attr.key.type === 'VDirectiveKey' &&
-          attr.key.name.name === 'bind' &&
-          attr.key.argument?.type === 'VIdentifier' &&
-          attr.key.argument?.name === 'key'
-      )
-      .forEach((element: any) => {
-        elderHasKey = true
-      })
-
-    if (elderHasKey) {
-      break
     }
 
     tmp.startTag.attributes
@@ -117,16 +102,39 @@ function fix(node: any): Operation[] {
           attr.key.name.name === 'for'
       )
       .forEach((element: any) => {
+        elderHasFor = true
         elder = element
       })
+
+    tmp.startTag.attributes
+      .filter(
+        (attr: any) =>
+          attr.type === 'VAttribute' &&
+          attr.key.type === 'VDirectiveKey' &&
+          attr.key.name.name === 'bind' &&
+          attr.key.argument?.type === 'VIdentifier' &&
+          attr.key.argument?.name === 'key'
+      )
+      .forEach(() => {
+        elderHasKey = true
+      })
+
+    if (elderHasFor) {
+      break
+    }
+  }
+
+  if (!elderHasFor) {
+    return fixOperations
   }
 
   let expression: string = getExpression(node.value)
 
   fixOperations.push(OperationUtils.remove(node))
   if (
+    !elderHasKey &&
     util.inspect(operatingParentElements).indexOf(util.inspect(elder.range)) ==
-    -1
+      -1
   ) {
     operatingParentElements.push(elder.range)
     fixOperations.push(

@@ -61,7 +61,7 @@ function fix(node: any): Operation[] {
   const target: any = node!.parent!.parent
 
   // The current node has no attribute that is v-for
-  let havaBrotherAttr: boolean = false
+  let hasTargetAttr: boolean = false
   target.startTag.attributes
     .filter(
       (attr: any) =>
@@ -72,9 +72,9 @@ function fix(node: any): Operation[] {
           attr.key.name.name === 'else')
     )
     .forEach((element: any) => {
-      havaBrotherAttr = true
+      hasTargetAttr = true
     })
-  if (!havaBrotherAttr) {
+  if (!hasTargetAttr) {
     return fixOperations
   }
 

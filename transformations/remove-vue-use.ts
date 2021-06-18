@@ -36,7 +36,7 @@ export const transformAST: ASTTransformation<Params> = (
   const removableUseCalls = vueUseCalls.filter(({ node }) => {
     if (j.Identifier.check(node.arguments[0])) {
       const plugin = node.arguments[0].name
-      if (removablePlugins.includes(plugin)) {
+      if (removablePlugins?.includes(plugin)) {
         removedPlugins.push(plugin)
         return true
       }

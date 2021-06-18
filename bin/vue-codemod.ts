@@ -66,8 +66,23 @@ async function main() {
   }
 
   if (runAllTransformation) {
+    const excludedTransformations = [
+      'define-component',
+      'new-vue-to-create-app',
+      'remove-contextual-h-from-render',
+      'remove-production-tip',
+      'remove-trivial-root',
+      'remove-vue-use',
+      'root-prop-to-use',
+      'vue-as-namespace-import',
+      'add-import',
+      'remove-extraneous-import'
+    ]
+    
     for (let key in builtInTransformations) {
-      processTransformation(resolvedPaths, key, builtInTransformations[key])
+      if (!excludedTransformations.includes(key)) {
+        processTransformation(resolvedPaths, key, builtInTransformations[key])
+      }
     }
 
     for (let key in vueTransformations) {

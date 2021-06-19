@@ -12,6 +12,14 @@ defineInlineTest(
 defineInlineTest(
   transform,
   {},
+  `new Vue()`,
+  `Vue.createApp()`,
+  'transform `new Vue()` to createApp() with no arguments'
+)
+
+defineInlineTest(
+  transform,
+  {},
   `new Vue({ render: h => h(App) }).$mount("#app")`,
   `Vue.createApp({ render: h => h(App) }).mount("#app")`,
   'transform `new Vue().$mount` with options to createApp().mount'

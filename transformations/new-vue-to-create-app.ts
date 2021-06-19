@@ -31,10 +31,10 @@ export const transformAST: ASTTransformation<Params | void> = (
 
   // new Vue() -> Vue.createApp()
   newVue.replaceWith(({ node }) => {
-    const rootProps = node.arguments[0]
+    const rootProps = node.arguments
     return j.callExpression(
       j.memberExpression(j.identifier('Vue'), j.identifier('createApp')),
-      [rootProps]
+      rootProps
     )
   })
 

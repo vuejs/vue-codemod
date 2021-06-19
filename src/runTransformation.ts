@@ -91,7 +91,7 @@ export default function runTransformation(
 
     // need to reconstruct the .vue file from descriptor blocks
     if (extension === '.vue') {
-      if (out === descriptor!.template!.content) {
+      if (out === fileInfo.source) {
         return source // skipped, don't bother re-stringifying
       }
       // remove redundant <template> tag

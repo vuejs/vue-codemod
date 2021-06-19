@@ -2,18 +2,20 @@
 
 **Current status: experimental**
 
-This repository contains a collection of codemod scripts for use with [JSCodeshift](https://github.com/facebook/jscodeshift) that help update Vue.js APIs.
+This repository contains a collection of codemod scripts for use with [JSCodeshift](https://github.com/facebook/jscodeshift) and [vue-eslint-parser](https://github.com/mysticatea/vue-eslint-parser) that help update Vue.js APIs.
 
 Inspired by [react-codemod](https://github.com/reactjs/react-codemod).
 
 ## Command Line Usage
+- run a single transformation:
+  `npx vue-codemod <path> -t <transformation> --params [transformation params] [...additional options]`
 
-`npx vue-codemod <path> -t <transformation> --params [transformation params] [...additional options]`
-
-- `transformation` (required) - name of transformation, see available transformations below; or you can provide a path to a custom transformation module.
-- `path` (required) - files or directory to transform.
-- `--params` (optional) - additional transformation specific args.
+  - `transformation` (required) - name of transformation, see available transformations below; or you can provide a path to a custom transformation module.
+  - `path` (required) - files or directory to transform.
+  - `--params` (optional) - additional transformation specific args.
 <!-- - use the `--dry` options for a dry-run. -->
+- run all transformations:
+  `npx vue-codemod <path> -a`
 
 ## Programmatic API
 
@@ -28,10 +30,45 @@ Inspired by [react-codemod](https://github.com/reactjs/react-codemod).
 - [ ] (WIP) Implement the transformations described below for migration usage
 - [ ] Built-in transformations need to support TypeScript
 - [ ] Built-in transformations need to support module systems other than ES module, and those without modules
-- [ ] Define an interface for transformation of template blocks (may use [`vue-eslint-parser`](https://github.com/mysticatea/vue-eslint-parser/) for this)
+- [x] Define an interface for transformation of template blocks (use [`vue-eslint-parser`](https://github.com/mysticatea/vue-eslint-parser/) for this)
 - [x] A playground for writing transformations - `yarn playground` and visit http://localhost:3000
 
 ## Included Transformations
+
+### Transformation List
+
+- `vue-class-component-v8`
+- `new-global-api`
+- `vue-router-v4`
+- `vuex-v4`
+- `define-component`
+- `new-vue-to-create-app`
+- `scoped-slots-to-slots`
+- `new-directive-api`
+- `remove-vue-set-and-delete`
+- `rename-lifecycle`
+- `add-emit-declaration`
+- `global-filter`
+- `tree-shaking`
+- `v-model`
+- `render-to-resolveComponent`
+- `remove-contextual-h-from-render`
+- `remove-production-tip`
+- `remove-trivial-root`
+- `remove-vue-use`
+- `root-prop-to-use`
+- `vue-as-namespace-import`
+- `add-import`
+- `remove-extraneous-import`
+- `slot-attribute`
+- `slot-default`
+- `slot-scope-attribute`
+- `v-for-template-key`
+- `v-else-if-key`
+- `transition-group-root`
+- `v-bind-order-sensitive`
+- `v-for-v-if-precedence-changed`
+- `remove-listeners`
 
 ### Migrating from Vue 2 to Vue 3
 
@@ -39,7 +76,7 @@ The migration path (to be integrated in a new version of [`vue-migration-helper`
 
 1. Install eslint-plugin-vue@7, turn on the `vue3-essential` category (maybe a few exceptions like `vue/no-deprecated-dollar-scopedslots-api`)
 2. Run `eslint --fix` to fix all auto-fixable issues; if there are any remaining errors, fix them manually
-3. Run the codemods below
+3. Run the `-a` command: `npx vue-codemod <path> -a`
 4. Install vue@3, vue-loader@16, etc.
 5. Make sure to use the compat build of vue@3
 6. Serve the app in development mode, fix the runtime deprecation warnings
@@ -122,7 +159,8 @@ Legend of annotations:
     - Arrow functions that returns dynamic `import` call to `.vue` files
     - Arrow functions that returns an object with the `component` property being a dynamic `import` call.
   - The only case that cannot be easily detected is 2.x async components using manual `resolve/reject` instead of returning promises. Manual upgrade will be required for such cases but they should be relatively rare.
-- 🔴 [RFC30: Add `emits` component option](https://github.com/vuejs/rfcs/blob/master/active-rfcs/0030-emits-option.md)
+- [RFC30: Add `emits` component option](https://github.com/vuejs/rfcs/blob/master/active-rfcs/0030-emits-option.md)
+  - **implemented as `add-emit-declaration`**
   - There could be potential naming conflicts with existing component-level `emits` options, so we need to scan and warn on such usages
   - To better utilize the new `emits` option, we can provide a codemod that automatically scans all instances of `$emit` calls in a component and generate the `emits` option
 - [Vuex 3.x to 4](https://github.com/vuejs/vuex/tree/4.0)
@@ -140,6 +178,8 @@ Legend of annotations:
   - `import { Component } from 'vue-class-component'` -> `import { Options as Component } from 'vue-class-component'`
   - 🔴 `import Vue from 'vue'` -> `import { Vue } from 'vue-class-component'` (Need to avoid name collision if there's any reference to `Vue` besides `extends Vue`)
   - 🔴 `Component.registerHooks` -> `Vue.registerHooks`
+- [The precedence of `v-if` and `v-for` have been flipped when using both on the same element.](https://github.com/vuejs/vue-next/issues/1165)
+  - **implemented as `v-for-v-if-precedence-changed`**
 
 #### Breaking Changes that Can Only Be Manually Migrated
 
@@ -152,7 +192,6 @@ Legend of annotations:
 - [RFC31: Attribute Fallthrough + Functional Component Updates](https://github.com/vuejs/rfcs/blob/master/active-rfcs/0031-attr-fallthrough.md)
   - Warn of every `$listeners` and `.native` usage
 - Subtle differences between `@vue/composition-api` and the Vue 3 implementation are listed in the [`@vue/composition-api` README](https://github.com/vuejs/composition-api#limitations)
-- [The precedence of `v-if` and `v-for` have been flipped when using both on the same element.](https://github.com/vuejs/vue-next/issues/1165)
 - Warn for [mixing `v-for` and `ref`](https://github.com/vuejs/vue-next/issues/1166).
 - Warn about deprecated instance methods and properties: `$destroy`, `$children`
 

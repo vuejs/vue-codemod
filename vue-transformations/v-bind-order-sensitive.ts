@@ -44,7 +44,11 @@ function fix(node: Node, source: string): Operation[] {
   // get parent node
   const target: any = node!.parent;
   // get the value of v-bind according to the range
-  const bindValue:string = source.slice(node.range[0], node.range[1]) + ' ';
+  let bindValue:string = source.slice(node.range[0], node.range[1]);
+
+  if (target.attributes[target.attributes.length -1] === node) {
+    bindValue += ' ';
+  }
   // remove node
   fixOperations.push(OperationUtils.remove(node));
   // add node to the first

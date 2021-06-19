@@ -44,13 +44,14 @@ function fix(node: Node, source: string): Operation[] {
   // get parent node
   const target: any = node!.parent;
   // get the value of v-bind according to the range
-  let bindValue:string = source.slice(node.range[0], node.range[1]);
-
-  if (target.attributes[target.attributes.length -1] === node) {
-    bindValue += ' ';
-  }
+  const bindValue:string = source.slice(node.range[0], node.range[1]) + ' ';
   // remove node
-  fixOperations.push(OperationUtils.remove(node));
+  if (target.attributes[target.attributes.length -1] === node) {
+    fixOperations.push(OperationUtils.remove(node));
+  }
+  else {
+    fixOperations.push(OperationUtils.removeRange([node.range[0], node.range[1] + 1]));
+  }
   // add node to the first
   fixOperations.push(OperationUtils.insertTextBefore(target.attributes[0],bindValue));
   return fixOperations

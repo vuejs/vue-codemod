@@ -14,7 +14,8 @@ const transformationMap: {
   'v-else-if-key': require('./v-else-if-key'),
   'transition-group-root': require('./transition-group-root'),
   'v-bind-order-sensitive': require('./v-bind-order-sensitive'),
-  'v-for-v-if-precedence-changed': require('./v-for-v-if-precedence-changed')
+  'v-for-v-if-precedence-changed': require('./v-for-v-if-precedence-changed'),
+  'remove-listeners': require('./remove-listeners')
 }
 
 export default transformationMap

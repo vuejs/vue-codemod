@@ -77,11 +77,10 @@ export default function runTransformation(
       descriptor.template.ast.children[
         descriptor.template.ast.children.length - 1
       ].loc.end.offset + 1
+    let astStart = descriptor.template.ast.loc.start.offset
+    let astEnd = descriptor.template.ast.loc.end.offset + 1
 
-    fileInfo.source =
-      source.slice(0, contentStart) +
-      descriptor.template.content +
-      source.slice(contentEnd, contentEnd + 11)
+    fileInfo.source = descriptor.template.ast.loc.source
 
     const out = transformation(fileInfo, params)
 
@@ -91,13 +90,13 @@ export default function runTransformation(
 
     // need to reconstruct the .vue file from descriptor blocks
     if (extension === '.vue') {
-      if (out === fileInfo.source) {
+      if (out === descriptor!.template!.content) {
         return source // skipped, don't bother re-stringifying
       }
       // remove redundant <template> tag
       descriptor!.template!.content = out.slice(
-        contentStart,
-        descriptor.template.content.length - contentEnd
+        contentStart - astStart,
+        contentEnd - astEnd
       )
       return stringifySFC(descriptor!)
     }

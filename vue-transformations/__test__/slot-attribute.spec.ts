@@ -7,10 +7,19 @@ runTest(
   'vue',
   'vue'
 )
+
 runTest(
   'template element replace slot="xxx" to v-slot:xxx',
   'slot-attribute',
   'template-slot-attribute',
+  'vue',
+  'vue'
+)
+
+runTest(
+  'Template is between style and script',
+  'slot-attribute',
+  'template-tag-slice',
   'vue',
   'vue'
 )

@@ -31,10 +31,10 @@ export const transformAST: ASTTransformation = context => {
     })
 
     if (!callExpressionCollection.length) return
-    //  find the component name
+    // find the component name
     const componentName =
       callExpressionCollection.get(0).node.arguments[0].value
-    //  remove non-letter for complying variable name rules
+    // remove non-letter for complying variable name rules
     const componentVariableName = removeNonLetter(componentName)
     callExpressionCollection
       .get(0)
@@ -45,7 +45,7 @@ export const transformAST: ASTTransformation = context => {
           .find(j.VariableDeclaration)
           .get().node
       )
-    //  replace h('xxx') with resolveComponent('xxx')
+    // replace h('xxx') with resolveComponent('xxx')
     callExpressionCollection.replaceWith(
       // @ts-ignore
       nodePath => (nodePath.node.callee.name = componentVariableName)
@@ -69,7 +69,7 @@ function removeNonLetter(str: string): string | undefined {
       ) {
         returnValue += str[i]
       } else {
-        //  non-letter , remove and uppercase the first letter after non-letter
+        // non-letter , remove and uppercase the first letter after non-letter
         i++
         if (str[i] >= 'a' && str[i] <= 'z') {
           returnValue += String.fromCharCode(str[i].charCodeAt(0) - 32)

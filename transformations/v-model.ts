@@ -67,7 +67,7 @@ export const transformAST: ASTTransformation = ({ j, root }) => {
     .get(0).node
 
   if (!methodsCollections.length) {
-    //  method option dont exists ,push a method option
+    // method option dont exists ,push a method option
     propsCollections
       .get(0)
       .parent.value.properties.push(

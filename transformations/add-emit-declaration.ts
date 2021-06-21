@@ -2,10 +2,10 @@ import wrap from '../src/wrapAstTransformation'
 import type { ASTTransformation } from '../src/wrapAstTransformation'
 
 export const transformAST: ASTTransformation = ({ root, j }) => {
-  //  find the export default
+  // find the export default
   const defaultExportBody = root.find(j.ExportDefaultDeclaration)
 
-  //  find the CallExpression
+  // find the CallExpression
   const emitCalls = defaultExportBody.find(j.CallExpression, node => {
     return (
       node.callee.object?.type === 'ThisExpression' &&
@@ -14,7 +14,7 @@ export const transformAST: ASTTransformation = ({ root, j }) => {
   })
 
   if (emitCalls.length) {
-    //  find the $emit argument
+    // find the $emit argument
     const eventNames: string[] = []
     emitCalls.forEach(({ node }) => {
       if (node.arguments[0]?.type === 'StringLiteral') {
@@ -22,7 +22,7 @@ export const transformAST: ASTTransformation = ({ root, j }) => {
       }
     })
 
-    //  find the emit property
+    // find the emit property
     const emitsProperty = defaultExportBody.find(j.ObjectProperty, node => {
       return node.key.name === 'emits' && node.value.type === 'ArrayExpression'
     })
@@ -41,7 +41,7 @@ export const transformAST: ASTTransformation = ({ root, j }) => {
     })
 
     if (!hasEmitsProperty) {
-      //  no emits property then create emits:[...]  AST
+      // no emits property then create emits:[...]  AST
       defaultExportBody
         .get(0)
         .node.declaration.properties?.unshift(

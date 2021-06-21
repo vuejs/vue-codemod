@@ -10,7 +10,7 @@ export const transformAST: ASTTransformation = context => {
   observable(context)
   version(context)
 
-  //  remove import 'Vue' from 'vue' if not used
+  // remove import 'Vue' from 'vue' if not used
   removeImport(context, { localBinding: 'Vue' })
 }
 

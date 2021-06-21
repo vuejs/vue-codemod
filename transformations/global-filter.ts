@@ -2,7 +2,7 @@ import wrap from '../src/wrapAstTransformation'
 import type { ASTTransformation } from '../src/wrapAstTransformation'
 
 export const transformAST: ASTTransformation = ({ root, j }) => {
-  //  find the createApp()
+  // find the createApp()
   const appDeclare = root.find(j.VariableDeclarator, {
     id: { type: 'Identifier' },
     init: {

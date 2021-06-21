@@ -1,6 +1,6 @@
 {
-  "name": "vue-codemod",
-  "version": "0.0.5",
+  "name": "@originjs/vue-codemod",
+  "version": "1.0.0",
   "description": "Vue codemod scripts",
   "main": "dist/index.js",
   "bin": "./dist/bin/vue-codemod.js",
@@ -16,9 +16,9 @@
   },
   "repository": {
     "type": "git",
-    "url": "https://github.com/vuejs/vue-codemod.git"
+    "url": "https://github.com/originjs/vue-codemod.git"
   },
-  "author": "Haoqun Jiang",
+  "author": "ygj6",
   "license": "MIT",
   "dependencies": {
     "@babel/core": "^7.10.3",

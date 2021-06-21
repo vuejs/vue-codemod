@@ -16,7 +16,7 @@ type Params = {
 export const transformAST: ASTTransformation<Params | void> = (
   context,
   params: Params = {
-    includeMaybeComponents: true,
+    includeMaybeComponents: true
   }
 ) => {
   const { j, root } = context
@@ -25,8 +25,8 @@ export const transformAST: ASTTransformation<Params | void> = (
   const newVue = root.find(j.NewExpression, {
     callee: {
       type: 'Identifier',
-      name: 'Vue',
-    },
+      name: 'Vue'
+    }
   })
 
   // new Vue() -> Vue.createApp()
@@ -40,7 +40,7 @@ export const transformAST: ASTTransformation<Params | void> = (
 
   const vueCreateApp = newVue
   // Vue.createApp().$mount() -> Vue.createApp().mount()
-  vueCreateApp.forEach((path) => {
+  vueCreateApp.forEach(path => {
     const parentNode = path.parent.node
     if (
       j.MemberExpression.check(parentNode) &&
@@ -63,7 +63,7 @@ export const transformAST: ASTTransformation<Params | void> = (
 
     const rootProps = node.arguments[0]
     const elIndex = rootProps.properties.findIndex(
-      (p) =>
+      p =>
         j.ObjectProperty.check(p) &&
         j.Identifier.check(p.key) &&
         p.key.name === 'el'
@@ -108,7 +108,7 @@ export const transformAST: ASTTransformation<Params | void> = (
             j.memberExpression(j.identifier('Vue'), j.identifier('createApp')),
             [
               ctor,
-              ...instance.arguments, // additional props
+              ...instance.arguments // additional props
             ]
           ),
           j.identifier('mount')
@@ -123,10 +123,10 @@ export const transformAST: ASTTransformation<Params | void> = (
         type: 'MemberExpression',
         property: {
           type: 'Identifier',
-          name: '$mount',
-        },
+          name: '$mount'
+        }
       },
-      arguments: (args: Array<any>) => args.length === 1,
+      arguments: (args: Array<any>) => args.length === 1
     })
     $mount.forEach(({ node }) => {
       // @ts-ignore
@@ -139,7 +139,7 @@ export const transformAST: ASTTransformation<Params | void> = (
         n.arguments.length === 1 &&
         j.ObjectExpression.check(n.arguments[0]) &&
         n.arguments[0].properties.some(
-          (prop) =>
+          prop =>
             j.ObjectProperty.check(prop) &&
             j.Identifier.check(prop.key) &&
             prop.key.name === 'el'
@@ -150,7 +150,7 @@ export const transformAST: ASTTransformation<Params | void> = (
     newWithEl.replaceWith(({ node }) => {
       const rootProps = node.arguments[0] as N.ObjectExpression
       const elIndex = rootProps.properties.findIndex(
-        (p) =>
+        p =>
           j.ObjectProperty.check(p) &&
           j.Identifier.check(p.key) &&
           p.key.name === 'el'
@@ -169,7 +169,7 @@ export const transformAST: ASTTransformation<Params | void> = (
             [
               ctor,
               // additional props, and skip empty objects
-              ...(rootProps.properties.length > 0 ? [rootProps] : []),
+              ...(rootProps.properties.length > 0 ? [rootProps] : [])
             ]
           ),
           j.identifier('mount')

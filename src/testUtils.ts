@@ -32,7 +32,7 @@ export const runTest = (
 
     const fileInfo = {
       path: inputPath,
-      source: fs.readFileSync(inputPath).toString(),
+      source: fs.readFileSync(inputPath).toString()
     }
     const transformation = require((transformationType == 'vue'
       ? '../vue-transformations'

@@ -2,7 +2,7 @@ import wrap from '../src/wrapAstTransformation'
 import type { ASTTransformation } from '../src/wrapAstTransformation'
 
 export const transformAST: ASTTransformation = ({ root, j }) => {
-//  find the createApp()
+  //  find the createApp()
   const appDeclare = root.find(j.VariableDeclarator, {
     id: { type: 'Identifier' },
     init: {
@@ -29,7 +29,9 @@ export const transformAST: ASTTransformation = ({ root, j }) => {
 
     // need to transform global-filter first
     if (newVue.length) {
-      console.warn('please transform new-global-api before transform global-filter!')
+      console.warn(
+        'please transform new-global-api before transform global-filter!'
+      )
     }
     return
   }

@@ -7,7 +7,7 @@ import wrap from '../src/wrapAstTransformation'
 import type { ASTTransformation } from '../src/wrapAstTransformation'
 import type * as N from 'jscodeshift'
 
-export const transformAST: ASTTransformation = (context) => {
+export const transformAST: ASTTransformation = context => {
   const { root, j } = context
 
   const isVue = (node: N.ASTNode) => {
@@ -40,7 +40,7 @@ export const transformAST: ASTTransformation = (context) => {
 
       return false
     })
-    .filter((path) => {
+    .filter(path => {
       const prop = (path.node.callee as N.MemberExpression)
         .property as N.Identifier
 
@@ -59,7 +59,7 @@ export const transformAST: ASTTransformation = (context) => {
         return false
       }
 
-      const decls = j(path).getVariableDeclarators((p) => obj.name)
+      const decls = j(path).getVariableDeclarators(p => obj.name)
       if (decls && decls.length === 1) {
         const declPath = decls.paths()[0]
         const declNode = declPath.node
@@ -77,7 +77,7 @@ export const transformAST: ASTTransformation = (context) => {
     })
 
   setOrDeleteCalls.replaceWith(({ node }) => {
-    if (node.arguments.some((arg) => j.SpreadElement.check(arg))) {
+    if (node.arguments.some(arg => j.SpreadElement.check(arg))) {
       // TODO: add a comment to inform the user that this kind of usage can't be transformed
       return node
     }

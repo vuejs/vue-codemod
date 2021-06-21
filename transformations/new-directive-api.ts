@@ -5,7 +5,7 @@ const hookNameMap: { [key: string]: string } = {
   bind: 'beforeMount',
   inserted: 'mounted',
   componentUpdated: 'updated',
-  unbind: 'unmounted',
+  unbind: 'unmounted'
 }
 
 export const transformAST: ASTTransformation = ({ root, j }) => {
@@ -13,12 +13,12 @@ export const transformAST: ASTTransformation = ({ root, j }) => {
     callee: {
       type: 'MemberExpression',
       object: {
-        name: 'Vue',
+        name: 'Vue'
       },
       property: {
-        name: 'directive',
-      },
-    },
+        name: 'directive'
+      }
+    }
   })
 
   directiveRegistration.forEach(({ node }) => {

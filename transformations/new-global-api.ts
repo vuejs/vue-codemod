@@ -12,7 +12,7 @@ import { transformAST as removeContextualHFromRender } from './remove-contextual
 
 import { transformAST as removeExtraneousImport } from './remove-extraneous-import'
 
-export const transformAST: ASTTransformation = (context) => {
+export const transformAST: ASTTransformation = context => {
   vueAsNamespaceImport(context)
   importCompositionApiFromVue(context)
   newVueTocreateApp(context)

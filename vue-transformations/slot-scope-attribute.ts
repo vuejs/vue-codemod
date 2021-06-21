@@ -5,12 +5,12 @@ import type { VueASTTransformation } from '../src/wrapVueTransformation'
 import * as parser from 'vue-eslint-parser'
 import wrap from '../src/wrapVueTransformation'
 
-export const transformAST: VueASTTransformation = (context) => {
+export const transformAST: VueASTTransformation = context => {
   let fixOperations: Operation[] = []
   const toFixNodes: Node[] = findNodes(context)
   const { file } = context
   const source = file.source
-  toFixNodes.forEach((node) => {
+  toFixNodes.forEach(node => {
     fixOperations = fixOperations.concat(fix(node, source))
   })
   return fixOperations
@@ -32,13 +32,15 @@ function findNodes(context: any): Node[] {
   let root: Node = <Node>ast.templateBody
   parser.AST.traverseNodes(root, {
     enterNode(node: Node) {
-      if (node.type === 'VAttribute' &&
+      if (
+        node.type === 'VAttribute' &&
         node.directive &&
-        node.key.name.name === 'slot-scope') {
+        node.key.name.name === 'slot-scope'
+      ) {
         toFixNodes.push(node)
       }
     },
-    leaveNode(node: Node) { },
+    leaveNode(node: Node) {}
   })
   return toFixNodes
 }
@@ -49,8 +51,12 @@ function findNodes(context: any): Node[] {
 function fix(node: Node, source: string): Operation[] {
   let fixOperations: Operation[] = []
   const element: any = node!.parent!.parent
-  // @ts-ignore
-  const scopeValue: string = source.slice(node.value.range[0], node.value.range[1])
+  const scopeValue: string = source.slice(
+    // @ts-ignore
+    node.value.range[0],
+    // @ts-ignore
+    node.value.range[1]
+  )
 
   if (!!element && element.type == 'VElement' && element.name == 'template') {
     // template element replace slot-scope="xxx" to v-slot="xxx"

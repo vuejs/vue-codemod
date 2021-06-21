@@ -30,7 +30,7 @@ type JSTransformationModule =
 type VueTransformationModule =
   | VueTransformation
   | {
-      default: VueTransformation,
+      default: VueTransformation
     }
 
 export type TransformationModule =
@@ -138,7 +138,7 @@ export default function runTransformation(
       j,
       jscodeshift: j,
       stats: () => {},
-      report: () => {},
+      report: () => {}
     }
 
     const out = transformation(fileInfo, api, params)

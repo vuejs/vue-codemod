@@ -2,7 +2,7 @@
 import wrap from '../src/wrapAstTransformation'
 import type { ASTTransformation } from '../src/wrapAstTransformation'
 
-export const transformAST: ASTTransformation = (context) => {}
+export const transformAST: ASTTransformation = context => {}
 
 export default wrap(transformAST)
 export const parser = 'babylon'

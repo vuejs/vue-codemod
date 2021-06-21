@@ -5,8 +5,8 @@ import type { ASTTransformation } from '../src/wrapAstTransformation'
 export const transformAST: ASTTransformation = ({ j, root }) => {
   const importDecl = root.find(j.ImportDeclaration, {
     source: {
-      value: 'vue',
-    },
+      value: 'vue'
+    }
   })
 
   importDecl.find(j.ImportDefaultSpecifier).replaceWith(({ node }) => {

@@ -5,12 +5,12 @@ import type { VueASTTransformation } from '../src/wrapVueTransformation'
 import * as parser from 'vue-eslint-parser'
 import wrap from '../src/wrapVueTransformation'
 
-export const transformAST: VueASTTransformation = (context) => {
+export const transformAST: VueASTTransformation = context => {
   let fixOperations: Operation[] = []
   const { file } = context
   const source = file.source
   const toFixNodes: Node[] = findNodes(source)
-  toFixNodes.forEach((node) => {
+  toFixNodes.forEach(node => {
     fixOperations = fixOperations.concat(fix(node, source))
   })
   return fixOperations
@@ -34,7 +34,7 @@ function findNodes(source: string): Node[] {
         toFixNodes.push(node)
       }
     },
-    leaveNode(node: Node) {},
+    leaveNode(node: Node) {}
   })
   return toFixNodes
 }
@@ -42,17 +42,20 @@ function findNodes(source: string): Node[] {
 function fix(node: Node, source: string): Operation[] {
   let fixOperations: Operation[] = []
   // get parent node
-  const target: any = node!.parent;
+  const target: any = node!.parent
   // get the value of v-bind according to the range
-  const bindValue:string = source.slice(node.range[0], node.range[1]) + ' ';
+  const bindValue: string = source.slice(node.range[0], node.range[1]) + ' '
   // remove node
-  if (target.attributes[target.attributes.length -1] === node) {
-    fixOperations.push(OperationUtils.remove(node));
-  }
-  else {
-    fixOperations.push(OperationUtils.removeRange([node.range[0], node.range[1] + 1]));
+  if (target.attributes[target.attributes.length - 1] === node) {
+    fixOperations.push(OperationUtils.remove(node))
+  } else {
+    fixOperations.push(
+      OperationUtils.removeRange([node.range[0], node.range[1] + 1])
+    )
   }
   // add node to the first
-  fixOperations.push(OperationUtils.insertTextBefore(target.attributes[0],bindValue));
+  fixOperations.push(
+    OperationUtils.insertTextBefore(target.attributes[0], bindValue)
+  )
   return fixOperations
 }

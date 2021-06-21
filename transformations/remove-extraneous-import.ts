@@ -3,7 +3,7 @@ import type { ASTTransformation } from '../src/wrapAstTransformation'
 import type {
   ImportSpecifier,
   ImportDefaultSpecifier,
-  ImportNamespaceSpecifier,
+  ImportNamespaceSpecifier
 } from 'jscodeshift'
 import type { Collection } from 'jscodeshift/src/Collection'
 
@@ -25,7 +25,7 @@ export const transformAST: ASTTransformation<Params> = (
 ) => {
   const usages = root
     .find(j.Identifier, { name: localBinding })
-    .filter((identifierPath) => {
+    .filter(identifierPath => {
       const parent = identifierPath.parent.node
 
       // Ignore the import specifier
@@ -62,23 +62,23 @@ export const transformAST: ASTTransformation<Params> = (
       ImportSpecifier | ImportDefaultSpecifier | ImportNamespaceSpecifier
     > = root.find(j.ImportSpecifier, {
       local: {
-        name: localBinding,
-      },
+        name: localBinding
+      }
     })
 
     if (!specifier.length) {
       specifier = root.find(j.ImportDefaultSpecifier, {
         local: {
-          name: localBinding,
-        },
+          name: localBinding
+        }
       })
     }
 
     if (!specifier.length) {
       specifier = root.find(j.ImportNamespaceSpecifier, {
         local: {
-          name: localBinding,
-        },
+          name: localBinding
+        }
       })
     }
 
@@ -96,7 +96,7 @@ export const transformAST: ASTTransformation<Params> = (
       'vue',
       'vue-router',
       'vuex',
-      '@vue/composition-api',
+      '@vue/composition-api'
     ]
     if (
       peerSpecifiers.length === 1 &&

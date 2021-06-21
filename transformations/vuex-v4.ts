@@ -5,20 +5,20 @@ import { transformAST as addImport } from './add-import'
 import { transformAST as removeExtraneousImport } from './remove-extraneous-import'
 
 // new Store() -> createStore()
-export const transformAST: ASTTransformation = (context) => {
+export const transformAST: ASTTransformation = context => {
   const { j, root } = context
 
   const vuexImportDecls = root.find(j.ImportDeclaration, {
     source: {
-      value: 'vuex',
-    },
+      value: 'vuex'
+    }
   })
 
   const importedVuex = vuexImportDecls.find(j.ImportDefaultSpecifier)
   const importedStore = vuexImportDecls.find(j.ImportSpecifier, {
     imported: {
-      name: 'Store',
-    },
+      name: 'Store'
+    }
   })
 
   if (importedVuex.length) {
@@ -28,12 +28,12 @@ export const transformAST: ASTTransformation = (context) => {
         type: 'MemberExpression',
         object: {
           type: 'Identifier',
-          name: localVuex,
+          name: localVuex
         },
         property: {
-          name: 'Store',
-        },
-      },
+          name: 'Store'
+        }
+      }
     })
 
     newVuexDotStore.replaceWith(({ node }) => {
@@ -52,16 +52,16 @@ export const transformAST: ASTTransformation = (context) => {
     const newStore = root.find(j.NewExpression, {
       callee: {
         type: 'Identifier',
-        name: localStore,
-      },
+        name: localStore
+      }
     })
 
     addImport(context, {
       specifier: {
         type: 'named',
-        imported: 'createStore',
+        imported: 'createStore'
       },
-      source: 'vuex',
+      source: 'vuex'
     })
     newStore.replaceWith(({ node }) => {
       return j.callExpression(j.identifier('createStore'), node.arguments)

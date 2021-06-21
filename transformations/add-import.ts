@@ -3,7 +3,7 @@ import type { ASTTransformation } from '../src/wrapAstTransformation'
 import type {
   ImportSpecifier,
   ImportDefaultSpecifier,
-  ImportNamespaceSpecifier,
+  ImportNamespaceSpecifier
 } from 'jscodeshift'
 
 type DefaultSpecifierParam = {
@@ -46,10 +46,10 @@ export const transformAST: ASTTransformation<Params> = (
       >
     ) =>
       // @ts-ignore there's a bug in ast-types definition, the `local` should be non-nullable
-      arr.some((s) => s.local.name === localBinding),
+      arr.some(s => s.local.name === localBinding),
     source: {
-      value: source,
-    },
+      value: source
+    }
   })
   if (duplicate.length) {
     return
@@ -70,8 +70,8 @@ export const transformAST: ASTTransformation<Params> = (
 
   const matchedDecl = root.find(j.ImportDeclaration, {
     source: {
-      value: source,
-    },
+      value: source
+    }
   })
   if (
     matchedDecl.length &&

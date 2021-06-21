@@ -1,5 +1,5 @@
 .github
-bin
+bin/__tests__
 playground
 src/__tests__
 transformations/__testfixtures__

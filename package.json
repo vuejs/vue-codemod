@@ -12,7 +12,12 @@
     "build": "tsc",
     "prepublishOnly": "tsc",
     "playground": "npm run build && cd ./playground && npm install && npm run dev",
-    "test": "jest"
+    "test": "jest",
+    "fix": "npm-run-all --parallel lint:fix format:fix",
+    "lint:codes": "eslint . --ext .ts",
+    "lint:fix": "npm run lint:codes --fix",
+    "format:prettier": "prettier --config .prettierrc .",
+    "format:fix": "prettier --write --config .prettierrc ."
   },
   "repository": {
     "type": "git",
@@ -43,8 +48,11 @@
     "@types/lodash": "^4.14.170",
     "@types/node": "^12.12.47",
     "@types/yargs": "^15.0.4",
+    "@typescript-eslint/parser": "^4.27.0",
+    "eslint": "^7.29.0",
     "jest": "^26.1.0",
-    "prettier": "^2.0.4",
+    "npm-run-all": "^4.1.5",
+    "prettier": "^2.3.1",
     "ts-jest": "^26.1.1",
     "typescript": "^4.1.3"
   },
@@ -55,10 +63,6 @@
       "<rootDir>/dist/",
       "<rootDir>/node_modules/"
     ]
-  },
-  "prettier": {
-    "semi": false,
-    "singleQuote": true
   },
   "engines": {
     "node": ">= 10.0"

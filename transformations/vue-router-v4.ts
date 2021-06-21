@@ -7,12 +7,12 @@ import { transformAST as removeExtraneousImport } from './remove-extraneous-impo
 import type { ObjectExpression } from 'jscodeshift'
 
 // new Router() -> createRouter()
-export const transformAST: ASTTransformation = (context) => {
+export const transformAST: ASTTransformation = context => {
   const { root, j } = context
   const routerImportDecls = root.find(j.ImportDeclaration, {
     source: {
-      value: 'vue-router',
-    },
+      value: 'vue-router'
+    }
   })
 
   const importedVueRouter = routerImportDecls.find(j.ImportDefaultSpecifier)
@@ -22,13 +22,13 @@ export const transformAST: ASTTransformation = (context) => {
     const newVueRouter = root.find(j.NewExpression, {
       callee: {
         type: 'Identifier',
-        name: localVueRouter,
-      },
+        name: localVueRouter
+      }
     })
 
     addImport(context, {
       specifier: { type: 'named', imported: 'createRouter' },
-      source: 'vue-router',
+      source: 'vue-router'
     })
     newVueRouter.replaceWith(({ node }) => {
       // mode: 'history' -> history: createWebHistory(), etc
@@ -42,7 +42,7 @@ export const transformAST: ASTTransformation = (context) => {
       }
 
       const routerConfig: ObjectExpression = node.arguments[0]
-      routerConfig.properties = routerConfig.properties.filter((p) => {
+      routerConfig.properties = routerConfig.properties.filter(p => {
         if (!j.ObjectProperty.check(p) && !j.Property.check(p)) {
           return true
         }
@@ -72,10 +72,10 @@ export const transformAST: ASTTransformation = (context) => {
       // add the default mode with a hash history
       addImport(context, {
         specifier: { type: 'named', imported: historyMode },
-        source: 'vue-router',
+        source: 'vue-router'
       })
       node.arguments[0].properties = node.arguments[0].properties.filter(
-        (p) => !!p
+        p => !!p
       )
       node.arguments[0].properties.unshift(
         j.objectProperty(
@@ -90,7 +90,7 @@ export const transformAST: ASTTransformation = (context) => {
       return j.callExpression(j.identifier('createRouter'), node.arguments)
     })
     removeExtraneousImport(context, {
-      localBinding: localVueRouter,
+      localBinding: localVueRouter
     })
   }
 }

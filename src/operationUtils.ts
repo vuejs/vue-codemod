@@ -17,7 +17,7 @@ export type Operation = {
 export function insertTextAt(index: number, text: string): Operation {
   return {
     range: [index, index],
-    text,
+    text
   }
 }
 
@@ -101,7 +101,7 @@ export function replaceText(
 export function replaceTextRange(range: number[], text: string): Operation {
   return {
     range,
-    text,
+    text
   }
 }
 
@@ -125,6 +125,6 @@ export function remove(nodeOrToken: Node | Token): Operation {
 export function removeRange(range: number[]): Operation {
   return {
     range,
-    text: '',
+    text: ''
   }
 }

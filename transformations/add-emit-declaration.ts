@@ -2,13 +2,15 @@ import wrap from '../src/wrapAstTransformation'
 import type { ASTTransformation } from '../src/wrapAstTransformation'
 
 export const transformAST: ASTTransformation = ({ root, j }) => {
-//  find the export default
+  //  find the export default
   const defaultExportBody = root.find(j.ExportDefaultDeclaration)
 
-//  find the CallExpression
+  //  find the CallExpression
   const emitCalls = defaultExportBody.find(j.CallExpression, node => {
-    return node.callee.object?.type === 'ThisExpression'
-      && node.callee.property?.name === '$emit'
+    return (
+      node.callee.object?.type === 'ThisExpression' &&
+      node.callee.property?.name === '$emit'
+    )
   })
 
   if (emitCalls.length) {
@@ -22,11 +24,12 @@ export const transformAST: ASTTransformation = ({ root, j }) => {
 
     //  find the emit property
     const emitsProperty = defaultExportBody.find(j.ObjectProperty, node => {
-      return node.key.name === 'emits'
-        && node.value.type === 'ArrayExpression'
+      return node.key.name === 'emits' && node.value.type === 'ArrayExpression'
     })
 
-    const elements = emitsProperty.length ? emitsProperty.get(0).node.value.elements : []
+    const elements = emitsProperty.length
+      ? emitsProperty.get(0).node.value.elements
+      : []
     const emits = elements.map((r: { value: string }) => r.value)
     const hasEmitsProperty = emitsProperty.length
 
@@ -37,9 +40,13 @@ export const transformAST: ASTTransformation = ({ root, j }) => {
       }
     })
 
-    if(!hasEmitsProperty){
-    //  no emits property then create emits:[...]  AST
-      defaultExportBody.get(0).node.declaration.properties?.unshift(j.objectProperty(j.identifier('emits'),j.arrayExpression(elements)));
+    if (!hasEmitsProperty) {
+      //  no emits property then create emits:[...]  AST
+      defaultExportBody
+        .get(0)
+        .node.declaration.properties?.unshift(
+          j.objectProperty(j.identifier('emits'), j.arrayExpression(elements))
+        )
     }
   }
 }

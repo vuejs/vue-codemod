@@ -40,7 +40,7 @@ export const transformAST: ASTTransformation<Params> = (
     const rootProps = createAppCall.arguments[0] as N.ObjectExpression
     const propertyIndex = rootProps.properties.findIndex(
       // @ts-ignore
-      (p) => p.key && p.key.name === rootPropName
+      p => p.key && p.key.name === rootPropName
     )
 
     if (propertyIndex === -1) {

@@ -5,12 +5,12 @@ import { transformAST as observable } from './observable'
 import { transformAST as version } from './version'
 import { transformAST as removeImport } from './remove-extraneous-import'
 
-export const transformAST: ASTTransformation = (context) => {
+export const transformAST: ASTTransformation = context => {
   nextTick(context)
   observable(context)
   version(context)
 
-//  remove import 'Vue' from 'vue' if not used
+  //  remove import 'Vue' from 'vue' if not used
   removeImport(context, { localBinding: 'Vue' })
 }
 

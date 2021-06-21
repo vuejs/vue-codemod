@@ -14,13 +14,16 @@ export const transformAST: ASTTransformation = ({ root, j }) => {
   if (observableCalls.length) {
     // add import reactive
     const addImport = require('./add-import')
-    addImport.transformAST({ root, j }, {
-      specifier: {
-        type: 'named',
-        imported: 'reactive'
-      },
-      source: 'vue'
-    })
+    addImport.transformAST(
+      { root, j },
+      {
+        specifier: {
+          type: 'named',
+          imported: 'reactive'
+        },
+        source: 'vue'
+      }
+    )
 
     observableCalls.replaceWith(({ node }) => {
       const el = node.arguments[0]

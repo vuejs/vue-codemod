@@ -13,10 +13,10 @@ import wrap from '../src/wrapVueTransformation'
  * @param context
  */
 
-export const transformAST: VueASTTransformation = (context) => {
+export const transformAST: VueASTTransformation = context => {
   let fixOperations: Operation[] = []
   const toFixNodes: Node[] = findNodes(context)
-  toFixNodes.forEach((node) => {
+  toFixNodes.forEach(node => {
     // fix(node) 返回的为 Operation 数组，因此用 concat 合并多个数组
     fixOperations = fixOperations.concat(fix(node))
   })
@@ -48,7 +48,7 @@ function findNodes(context: any): Node[] {
         toFixNodes.push(node)
       }
     },
-    leaveNode(node: Node) {},
+    leaveNode(node: Node) {}
   })
   return toFixNodes
 }

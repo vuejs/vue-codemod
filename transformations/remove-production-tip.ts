@@ -4,7 +4,7 @@ import type { ASTTransformation } from '../src/wrapAstTransformation'
 export const transformAST: ASTTransformation = ({ root, j }) => {
   const productionTipAssignment = root.find(
     j.AssignmentExpression,
-    (n) =>
+    n =>
       j.MemberExpression.check(n.left) &&
       n.left.property.name === 'productionTip' &&
       n.left.object.property.name === 'config' &&

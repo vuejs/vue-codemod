@@ -6,8 +6,8 @@ import type { ASTTransformation } from '../src/wrapAstTransformation'
 export const transformAST: ASTTransformation = ({ root, j }) => {
   const importDecl = root.find(j.ImportDeclaration, {
     source: {
-      value: '@vue/composition-api',
-    },
+      value: '@vue/composition-api'
+    }
   })
 
   const specifiers = importDecl.find(j.ImportSpecifier)
@@ -32,9 +32,9 @@ export const transformAST: ASTTransformation = ({ root, j }) => {
     )
   }
 
-  importDecl.forEach((path) => {
+  importDecl.forEach(path => {
     // the default import should be left untouched to be taken care of by `remove-vue-use`
-    path.node.specifiers = path.node.specifiers.filter((s) =>
+    path.node.specifiers = path.node.specifiers.filter(s =>
       j.ImportDefaultSpecifier.check(s)
     )
 

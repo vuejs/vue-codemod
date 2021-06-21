@@ -14,13 +14,16 @@ export const transformAST: ASTTransformation = ({ root, j }) => {
   if (nextTickCalls.length) {
     // add import nextTick
     const addImport = require('./add-import')
-    addImport.transformAST({ root, j }, {
-      specifier: {
-        type: 'named',
-        imported: 'nextTick'
-      },
-      source: 'vue'
-    })
+    addImport.transformAST(
+      { root, j },
+      {
+        specifier: {
+          type: 'named',
+          imported: 'nextTick'
+        },
+        source: 'vue'
+      }
+    )
 
     nextTickCalls.replaceWith(({ node }) => {
       const el = node.arguments[0]

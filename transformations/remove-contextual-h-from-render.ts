@@ -5,29 +5,29 @@ import type { ASTTransformation } from '../src/wrapAstTransformation'
 
 import { transformAST as addImport } from './add-import'
 
-export const transformAST: ASTTransformation = (context) => {
+export const transformAST: ASTTransformation = context => {
   const { root, j } = context
   const renderFns = root.find(j.ObjectProperty, {
     key: {
-      name: 'render',
+      name: 'render'
     },
     value: {
-      type: 'ArrowFunctionExpression',
-    },
+      type: 'ArrowFunctionExpression'
+    }
   })
 
   const renderMethods = root.find(j.ObjectMethod, {
     key: {
-      name: 'render',
+      name: 'render'
     },
     params: (params: Array<any>) =>
-      j.Identifier.check(params[0]) && params[0].name === 'h',
+      j.Identifier.check(params[0]) && params[0].name === 'h'
   })
 
   if (renderFns.length || renderMethods.length) {
     addImport(context, {
       specifier: { type: 'named', imported: 'h' },
-      source: 'vue',
+      source: 'vue'
     })
 
     renderFns.forEach(({ node }) => {

@@ -5,10 +5,10 @@ import type { VueASTTransformation } from '../src/wrapVueTransformation'
 import * as parser from 'vue-eslint-parser'
 import wrap from '../src/wrapVueTransformation'
 
-export const transformAST: VueASTTransformation = (context) => {
+export const transformAST: VueASTTransformation = context => {
   let fixOperations: Operation[] = []
   const toFixNodes: Node[] = findNodes(context)
-  toFixNodes.forEach((node) => {
+  toFixNodes.forEach(node => {
     fixOperations = fixOperations.concat(fix(node))
   })
   return fixOperations
@@ -37,7 +37,7 @@ function findNodes(context: any): Node[] {
         toFixNodes.push(node)
       }
     },
-    leaveNode(node: Node) {},
+    leaveNode(node: Node) {}
   })
   return toFixNodes
 }

@@ -8,7 +8,7 @@ import {
   SourceLocation,
   CompilerError,
   TextModes,
-  BindingMetadata,
+  BindingMetadata
 } from '@vue/compiler-core'
 import * as CompilerDom from '@vue/compiler-dom'
 import { RawSourceMap, SourceMapGenerator } from 'source-map'
@@ -44,13 +44,15 @@ export function stringify(sfcDescriptor: SFCDescriptor) {
   const { template, script, styles, customBlocks } = sfcDescriptor
 
   return (
-    ([template, script, ...styles, ...customBlocks]
-      // discard blocks that don't exist
-      .filter((block) => block != null) as Array<NonNullable<SFCBlock>>)
+    (
+      [template, script, ...styles, ...customBlocks]
+        // discard blocks that don't exist
+        .filter(block => block != null) as Array<NonNullable<SFCBlock>>
+    )
       // sort blocks by source position
       .sort((a, b) => a.loc.start.offset - b.loc.start.offset)
       // figure out exact source positions of blocks
-      .map((block) => {
+      .map(block => {
         const openTag = makeOpenTag(block)
         const closeTag = makeCloseTag(block)
 
@@ -62,7 +64,7 @@ export function stringify(sfcDescriptor: SFCDescriptor) {
           endOfOpenTag: block.loc.start.offset,
 
           startOfCloseTag: block.loc.end.offset,
-          endOfCloseTag: block.loc.end.offset + closeTag.length,
+          endOfCloseTag: block.loc.end.offset + closeTag.length
         })
       })
       // generate sfc source
@@ -94,7 +96,7 @@ function makeOpenTag(block: SFCBlock) {
 
   source += Object.keys(block.attrs)
     .sort()
-    .map((name) => {
+    .map(name => {
       const value = block.attrs[name]
 
       if (value === true) {
@@ -103,7 +105,7 @@ function makeOpenTag(block: SFCBlock) {
         return `${name}="${value}"`
       }
     })
-    .map((attr) => ' ' + attr)
+    .map(attr => ' ' + attr)
     .join('')
 
   return source + '>'
@@ -187,7 +189,7 @@ export function parse(
     filename = 'anonymous.vue',
     sourceRoot = '',
     pad = false,
-    compiler = CompilerDom,
+    compiler = CompilerDom
   }: SFCParseOptions = {}
 ): SFCParseResult {
   const sourceKey =
@@ -204,7 +206,7 @@ export function parse(
     script: null,
     scriptSetup: null,
     styles: [],
-    customBlocks: [],
+    customBlocks: []
   }
 
   const errors: (CompilerError | SyntaxError)[] = []
@@ -221,7 +223,7 @@ export function parse(
         // <template lang="xxx"> should also be treated as raw text
         (tag === 'template' &&
           props.some(
-            (p) =>
+            p =>
               p.type === NodeTypes.ATTRIBUTE &&
               p.name === 'lang' &&
               p.value &&
@@ -233,12 +235,12 @@ export function parse(
         return TextModes.DATA
       }
     },
-    onError: (e) => {
+    onError: e => {
       errors.push(e)
-    },
+    }
   })
 
-  ast.children.forEach((node) => {
+  ast.children.forEach(node => {
     if (node.type !== NodeTypes.ELEMENT) {
       return
     }
@@ -330,7 +332,7 @@ export function parse(
 
   const result = {
     descriptor,
-    errors,
+    errors
   }
   sourceToSFC.set(sourceKey, result)
   return result
@@ -365,19 +367,19 @@ function createBlock(
   const loc = {
     source: content,
     start,
-    end,
+    end
   }
   const attrs: Record<string, string | true> = {}
   const block: SFCBlock = {
     type,
     content,
     loc,
-    attrs,
+    attrs
   }
   if (pad) {
     block.content = padContent(source, block, pad) + block.content
   }
-  node.props.forEach((p) => {
+  node.props.forEach(p => {
     if (p.type === NodeTypes.ATTRIBUTE) {
       attrs[p.name] = p.value ? p.value.content || true : true
       if (p.name === 'lang') {
@@ -411,7 +413,7 @@ function generateSourceMap(
 ): RawSourceMap {
   const map = new SourceMapGenerator({
     file: filename.replace(/\\/g, '/'),
-    sourceRoot: sourceRoot.replace(/\\/g, '/'),
+    sourceRoot: sourceRoot.replace(/\\/g, '/')
   })
   map.setSourceContent(filename, source)
   generated.split(splitRE).forEach((line, index) => {
@@ -424,12 +426,12 @@ function generateSourceMap(
             source: filename,
             original: {
               line: originalLine,
-              column: i,
+              column: i
             },
             generated: {
               line: generatedLine,
-              column: i,
-            },
+              column: i
+            }
           })
         }
       }
@@ -454,7 +456,7 @@ function padContent(
 }
 
 function hasSrc(node: ElementNode) {
-  return node.props.some((p) => {
+  return node.props.some(p => {
     if (p.type !== NodeTypes.ATTRIBUTE) {
       return false
     }

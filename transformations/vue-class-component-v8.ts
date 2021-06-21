@@ -3,21 +3,21 @@ import type { ASTTransformation } from '../src/wrapAstTransformation'
 
 // import { Component } from 'vue-class-component' ->
 // import { Options as Component } from 'vue-class-component'
-export const transformAST: ASTTransformation = (context) => {
+export const transformAST: ASTTransformation = context => {
   const { j, root } = context
 
   const vueClassComponentImportDecls = root.find(j.ImportDeclaration, {
     source: {
-      value: 'vue-class-component',
-    },
+      value: 'vue-class-component'
+    }
   })
 
   const ComponentImportSpec = vueClassComponentImportDecls.find(
     j.ImportSpecifier,
     {
       imported: {
-        name: 'Component',
-      },
+        name: 'Component'
+      }
     }
   )
 

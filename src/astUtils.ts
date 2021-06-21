@@ -9,7 +9,7 @@ import type {
   Expression,
   ObjectExpression,
   FunctionExpression,
-  ArrowFunctionExpression,
+  ArrowFunctionExpression
 } from 'jscodeshift'
 import type { Context } from './wrapAstTransformation'
 
@@ -42,8 +42,9 @@ export function getVueOptions(context: Context): Collection<VueOptionsType> {
       return null
     }
 
-    const declarationKind = declarator.closest(j.VariableDeclaration).nodes()[0]
-      .kind
+    const declarationKind = declarator
+      .closest(j.VariableDeclaration)
+      .nodes()[0].kind
 
     if (declarationKind !== 'const') {
       // TODO: check reassignments (=, for in)
@@ -54,7 +55,7 @@ export function getVueOptions(context: Context): Collection<VueOptionsType> {
   }
 
   function hasRenderOrTemplateProps(obj: ObjectExpression) {
-    return obj.properties.some((prop) => {
+    return obj.properties.some(prop => {
       // skip spread properties
       if (j.SpreadElement.check(prop) || j.SpreadProperty.check(prop)) {
         return false
@@ -124,7 +125,7 @@ export function getVueOptions(context: Context): Collection<VueOptionsType> {
 
     return (
       returnStatements.length > 0 &&
-      returnStatements.every((path) =>
+      returnStatements.every(path =>
         !!path.node.argument ? isPromiseExpression(path.node.argument) : true
       )
     )
@@ -146,7 +147,7 @@ export function getVueOptions(context: Context): Collection<VueOptionsType> {
     comp: ASTNode | null,
     {
       mayBeAsyncComponent = false,
-      shouldCheckProps = false,
+      shouldCheckProps = false
     }: {
       mayBeAsyncComponent?: boolean
       shouldCheckProps?: boolean
@@ -172,13 +173,13 @@ export function getVueOptions(context: Context): Collection<VueOptionsType> {
   // export default {}
   const defaultObjectExport = root
     .find(j.ExportDefaultDeclaration)
-    .map((path) => {
+    .map(path => {
       const decl = path.node.declaration
 
       if (
         isLikelyVueOptions(decl, {
           shouldCheckProps: !isInSFC,
-          mayBeAsyncComponent: !isInSFC,
+          mayBeAsyncComponent: !isInSFC
         })
       ) {
         return wrapOptionsInPaths(decl)
@@ -188,7 +189,7 @@ export function getVueOptions(context: Context): Collection<VueOptionsType> {
         const init = getConstDeclarationInit(decl)
         return isLikelyVueOptions(init, {
           shouldCheckProps: !isInSFC,
-          mayBeAsyncComponent: !isInSFC,
+          mayBeAsyncComponent: !isInSFC
         })
           ? wrapOptionsInPaths(init)
           : null
@@ -220,7 +221,7 @@ export function getVueOptions(context: Context): Collection<VueOptionsType> {
 
       return false
     })
-    .map((path) => {
+    .map(path => {
       const arg = path.node.arguments[0]
       if (isLikelyVueOptions(arg)) {
         return wrapOptionsInPaths(arg)
@@ -242,10 +243,10 @@ export function getVueOptions(context: Context): Collection<VueOptionsType> {
     .find(j.NewExpression, {
       callee: {
         type: 'Identifier',
-        name: 'Vue',
-      },
+        name: 'Vue'
+      }
     })
-    .map((path) => {
+    .map(path => {
       const arg = path.node.arguments[0]
       if (isLikelyVueOptions(arg)) {
         return wrapOptionsInPaths(arg)
@@ -275,7 +276,7 @@ export function getVueOptions(context: Context): Collection<VueOptionsType> {
         node.callee.property.name === 'component'
       )
     })
-    .map((path) => {
+    .map(path => {
       if (path.node.arguments.length !== 2) {
         return null
       }
@@ -311,7 +312,7 @@ export function getVueOptions(context: Context): Collection<VueOptionsType> {
     }
 
     const componentsProp = node.properties.find(
-      (prop) =>
+      prop =>
         j.ObjectProperty.check(prop) &&
         ((j.Identifier.check(prop.key) && prop.key.name === 'components') ||
           (j.StringLiteral.check(prop.key) && prop.key.value === 'components'))
@@ -338,7 +339,7 @@ export function getVueOptions(context: Context): Collection<VueOptionsType> {
     }
 
     const subComponentDefinitions = componentsObject.properties
-      .map((prop) => {
+      .map(prop => {
         if (j.ObjectProperty.check(prop)) {
           if (isLikelyVueOptions(prop.value, { mayBeAsyncComponent: true })) {
             return prop.value

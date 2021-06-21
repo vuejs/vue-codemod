@@ -11,7 +11,7 @@ type Params = {
 export const transformAST: ASTTransformation<Params | undefined> = (
   context,
   { useCompositionApi }: Params = {
-    useCompositionApi: false,
+    useCompositionApi: false
   }
 ) => {
   const { root, j, filename } = context
@@ -19,21 +19,21 @@ export const transformAST: ASTTransformation<Params | undefined> = (
     addImport(context, {
       specifier: {
         type: 'named',
-        imported: 'defineComponent',
+        imported: 'defineComponent'
       },
-      source: useCompositionApi ? '@vue/composition-api' : 'vue',
+      source: useCompositionApi ? '@vue/composition-api' : 'vue'
     })
 
   const vueExtend = root.find(j.CallExpression, {
     callee: {
       type: 'MemberExpression',
       object: {
-        name: 'Vue',
+        name: 'Vue'
       },
       property: {
-        name: 'extend',
-      },
-    },
+        name: 'extend'
+      }
+    }
   })
   if (vueExtend.length) {
     importDefineComponent()

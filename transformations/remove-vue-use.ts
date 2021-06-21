@@ -24,12 +24,12 @@ export const transformAST: ASTTransformation<Params> = (
     callee: {
       type: 'MemberExpression',
       object: {
-        name: 'Vue',
+        name: 'Vue'
       },
       property: {
-        name: 'use',
-      },
-    },
+        name: 'use'
+      }
+    }
   })
 
   const removedPlugins: string[] = []
@@ -47,9 +47,9 @@ export const transformAST: ASTTransformation<Params> = (
 
   removableUseCalls.remove()
 
-  removedPlugins.forEach((name) =>
+  removedPlugins.forEach(name =>
     removeExtraneousImport(context, {
-      localBinding: name,
+      localBinding: name
     })
   )
 }

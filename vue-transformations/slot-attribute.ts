@@ -60,11 +60,44 @@ function fix(node: Node): Operation[] {
     // remove v-slot:${slotValue}
     fixOperations.push(OperationUtils.remove(node))
     // add <template v-slot:${slotValue}>
-    fixOperations.push(
-      OperationUtils.insertTextBefore(element, `<template v-slot:${slotValue}>`)
-    )
-    // add </template>
-    fixOperations.push(OperationUtils.insertTextAfter(element, `</template>`))
+
+    let elder: any = null
+    let hasSlotAttr: boolean = false
+    let tmp: any = element
+    // find template parent
+    while (elder == null && tmp != null) {
+      hasSlotAttr = false
+      tmp = tmp.parent
+      if (tmp == null || tmp.type != 'VElement' || tmp.name != 'template') {
+        continue
+      }
+
+      elder = element
+      tmp.startTag.attributes
+        .filter(
+          (attr: any) =>
+            attr.type === 'VAttribute' &&
+            attr.key.type === 'VIdentifier' &&
+            attr.key.name === 'slot'
+        )
+        .forEach((element: any) => {
+          hasSlotAttr = true
+        })
+      if (hasSlotAttr) {
+        break
+      }
+    }
+
+    if (!hasSlotAttr) {
+      fixOperations.push(
+        OperationUtils.insertTextBefore(
+          element,
+          `<template v-slot:${slotValue}>`
+        )
+      )
+      // add </template>
+      fixOperations.push(OperationUtils.insertTextAfter(element, `</template>`))
+    }
   }
 
   return fixOperations

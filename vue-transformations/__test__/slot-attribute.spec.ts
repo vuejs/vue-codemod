@@ -23,3 +23,11 @@ runTest(
   'vue',
   'vue'
 )
+
+runTest(
+  'The v-slot attribute already exists in the upper template',
+  'slot-attribute',
+  'template-with-slot',
+  'vue',
+  'vue'
+)

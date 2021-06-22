@@ -8,6 +8,7 @@ import * as yargs from 'yargs'
 import * as globby from 'globby'
 
 import createDebug from 'debug'
+import { question } from 'readline-sync'
 
 import builtInTransformations from '../transformations'
 import { excludedTransformations } from '../transformations'
@@ -59,6 +60,15 @@ const {
 
 // TODO: port the `Runner` interface of jscodeshift
 async function main() {
+  // Remind user to back up files
+  const answer = question('Warning!!\n ' +
+    'This tool may overwrite files.\n' +
+    'Enter yes to continue:'
+  )
+  if (answer.trim() !== 'yes') {
+    return
+  }
+
   const resolvedPaths = globby.sync(files as string[])
   if (transformationName != undefined) {
     const transformationModule = loadTransformationModule(transformationName)

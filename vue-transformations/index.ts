@@ -18,8 +18,6 @@ const transformationMap: {
   'remove-listeners': require('./remove-listeners')
 }
 
-export const excludedVueTransformations = [
-  'v-bind-order-sensitive'
-]
+export const excludedVueTransformations = ['v-bind-order-sensitive']
 
 export default transformationMap

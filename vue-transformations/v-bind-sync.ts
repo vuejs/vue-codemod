@@ -7,9 +7,9 @@ import wrap from '../src/wrapVueTransformation'
 
 export const transformAST: VueASTTransformation = context => {
   let fixOperations: Operation[] = []
-  const toFixNodes: Node[] = findNodes(context)
   const { file } = context
   const source = file.source
+  const toFixNodes: Node[] = findNodes(context)
   toFixNodes.forEach(node => {
     fixOperations = fixOperations.concat(fix(node, source))
   })
@@ -35,7 +35,7 @@ function findNodes(context: any): Node[] {
       if (
         node.type === 'VAttribute' &&
         node.directive &&
-        node.key.name.name === 'slot-scope'
+        node.key.name.name === 'bind'
       ) {
         toFixNodes.push(node)
       }
@@ -50,13 +50,21 @@ function findNodes(context: any): Node[] {
  */
 function fix(node: Node, source: string): Operation[] {
   let fixOperations: Operation[] = []
-  const element: any = node!.parent!.parent
   // @ts-ignore
-  const scopeValue: string = OperationUtils.getText(node.value, source)
+  const keyNode = node.key
+  const argument = keyNode.argument
+  const modifiers = keyNode.modifiers
+  const bindArgument = OperationUtils.getText(argument, source)
 
-  if (!!element && element.type == 'VElement' && element.name == 'template') {
-    // template element replace slot-scope="xxx" to v-slot="xxx"
-    fixOperations.push(OperationUtils.replaceText(node, `v-slot=${scopeValue}`))
+  if (
+    argument !== null &&
+    modifiers.length === 1 &&
+    modifiers[0].name === 'sync'
+  ) {
+    // .sync modifiers in v-bind should be replaced with v-model
+    fixOperations.push(
+      OperationUtils.replaceText(keyNode, `v-model:${bindArgument}`)
+    )
   }
 
   return fixOperations

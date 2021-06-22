@@ -128,3 +128,15 @@ export function removeRange(range: number[]): Operation {
     text: ''
   }
 }
+
+/**
+ * Get text of Node
+ * @param {Node} node The node to get text
+ * @param {string} source The full text of the source code
+ * @returns {string} The text of the node
+ */
+export function getText(node: Node, source: string): string {
+  const start = node.range[0]
+  const end = node.range[1]
+  return source.slice(start, end)
+}

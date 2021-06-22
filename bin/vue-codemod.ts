@@ -13,6 +13,7 @@ import builtInTransformations from '../transformations'
 import { excludedTransformations } from '../transformations'
 import vueTransformations from '../vue-transformations'
 import runTransformation from '../src/runTransformation'
+import { transform as packageTransform } from '../src/packageTransformation'
 
 import type { TransformationModule } from '../src/runTransformation'
 
@@ -65,6 +66,7 @@ async function main() {
       transformationName,
       transformationModule
     )
+    packageTransform()
   }
 
   if (runAllTransformation) {
@@ -77,6 +79,7 @@ async function main() {
     for (let key in vueTransformations) {
       processTransformation(resolvedPaths, key, vueTransformations[key])
     }
+    packageTransform()
   }
 }
 /**

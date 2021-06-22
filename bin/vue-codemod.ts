@@ -12,6 +12,7 @@ import createDebug from 'debug'
 import builtInTransformations from '../transformations'
 import { excludedTransformations } from '../transformations'
 import vueTransformations from '../vue-transformations'
+import { excludedVueTransformations } from '../vue-transformations'
 import runTransformation from '../src/runTransformation'
 import { transform as packageTransform } from '../src/packageTransformation'
 
@@ -77,7 +78,9 @@ async function main() {
     }
 
     for (let key in vueTransformations) {
-      processTransformation(resolvedPaths, key, vueTransformations[key])
+      if (!excludedVueTransformations.includes(key)) {
+        processTransformation(resolvedPaths, key, vueTransformations[key])
+      }
     }
     packageTransform()
   }

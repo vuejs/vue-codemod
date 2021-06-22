@@ -1,5 +1,7 @@
 .github
 bin/__tests__
+dist
+node_modules
 playground
 src/__tests__
 transformations/__testfixtures__

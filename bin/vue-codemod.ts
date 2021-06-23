@@ -64,11 +64,11 @@ const {
 async function main() {
   // Remind user to back up files
   const answer = question(
-    'Warning!!\n ' +
+    'Warning!!\n' +
       'This tool may overwrite files.\n' +
-      'Enter yes to continue:'
+      'press enter or enter yes or enter Y to continue:'
   )
-  if (answer.trim() !== 'yes') {
+  if (!['', 'yes', 'Y'].includes(answer.trim())) {
     return
   }
 

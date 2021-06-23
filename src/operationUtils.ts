@@ -136,7 +136,7 @@ export function removeRange(range: number[]): Operation {
  * @returns {string} The text of the node
  */
 export function getText(node: Node, source: string): string {
-  const start = node.range[0]
-  const end = node.range[1]
+  const start = node?.range[0]
+  const end = node?.range[1]
   return source.slice(start, end)
 }

@@ -18,10 +18,10 @@ export const transformAST: VueASTTransformation = context => {
 
 export default wrap(transformAST)
 /**
- * search slot attribute nodes
+ * search v-bind attribute nodes
  *
  * @param context
- * @returns slot attribute nodes
+ * @returns v-bind attribute nodes
  */
 function findNodes(context: any): Node[] {
   const { file } = context

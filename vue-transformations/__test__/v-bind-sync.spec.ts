@@ -1,7 +1,7 @@
 import { runTest } from '../../src/testUtils'
 
 runTest(
-  'Convert usage of slot-scope before vue 2.6',
+  'Replace .sync modifiers in v-bind with v-model',
   'v-bind-sync',
   'v-bind-sync',
   'vue',

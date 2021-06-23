@@ -19,30 +19,44 @@ export function transform(): void {
     fs.readFileSync(resolvedPaths[0]).toString()
   )
 
-  if (packageObject!.dependencies!.vue != undefined) {
-    packageObject.dependencies.vue = '^3.1.1'
-  }
-  if (packageObject!.dependencies!.vuex != undefined) {
-    packageObject.dependencies!.vuex = '^4.0.1'
-  }
-  if (packageObject!.dependencies['vue-router'] != undefined) {
-    packageObject.dependencies['vue-router'] = '^4.0.8'
-  }
-  if (packageObject!.dependencies['vue-i18n'] != undefined) {
-    packageObject.dependencies['vue-i18n'] = '^9.1.6'
+  if (packageObject?.dependencies != undefined) {
+    process(packageObject.dependencies)
   }
 
-  if ((packageObject!.devDependencies['vue-template-compiler'] = undefined)) {
-    delete packageObject.devDependencies['vue-template-compiler']
+  if (packageObject?.peerDependencies != undefined) {
+    process(packageObject.peerDependencies)
   }
 
-  packageObject.devDependencies['@vue/compiler-sfc'] = '^3.1.1'
-  packageObject.devDependencies['eslint'] = '^7.20.0'
-  packageObject.devDependencies['eslint-plugin-vue'] = '^7.11.1'
+  if (packageObject?.devDependencies != undefined) {
+    if (packageObject?.devDependencies['vue-template-compiler'] != undefined) {
+      delete packageObject.devDependencies['vue-template-compiler']
+    }
+    packageObject.devDependencies['@vue/compiler-sfc'] = '^3.1.1'
+    packageObject.devDependencies['eslint'] = '^7.20.0'
+    packageObject.devDependencies['eslint-plugin-vue'] = '^7.11.1'
+  }
 
   let formatted = prettier.format(
     JSON.stringify(packageObject),
     Object.assign({ parser: 'json' }, packageObject.prettier)
   )
   fs.writeFileSync(resolvedPaths[0], formatted)
+}
+/**
+ * Modify the configuration of dependencies
+ * @param dependencies
+ */
+function process(dependencies: any) {
+  if (dependencies['vue'] != undefined) {
+    dependencies.vue = '^3.1.1'
+  }
+  if (dependencies['vuex'] != undefined) {
+    dependencies['vuex'] = '^4.0.1'
+  }
+  if (dependencies['vue-router'] != undefined) {
+    dependencies['vue-router'] = '^4.0.8'
+  }
+  if (dependencies['vue-i18n'] != undefined) {
+    dependencies['vue-i18n'] = '^9.1.6'
+  }
 }

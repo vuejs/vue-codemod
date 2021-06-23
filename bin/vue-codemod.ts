@@ -96,6 +96,7 @@ async function main() {
       }
     }
     packageTransform()
+    processFilePath.push('package.json')
   }
   const processFilePathList = processFilePath.join('\n')
   console.log(`--------------------------------------------------`)
@@ -133,9 +134,12 @@ function processTransformation(
         transformationModule,
         params as object
       )
-      fs.writeFileSync(p, result)
-      if (util.inspect(processFilePath).indexOf(util.inspect(p)) == -1) {
-        processFilePath.push(p)
+
+      if (fs.readFileSync(p).toString() != result) {
+        fs.writeFileSync(p, result)
+        if (util.inspect(processFilePath).indexOf(util.inspect(p)) == -1) {
+          processFilePath.push(p)
+        }
       }
     } catch (e) {
       console.error(e)

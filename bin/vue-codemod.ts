@@ -58,7 +58,8 @@ const {
     ]
   ])
   .help()
-  .alias('h', 'help').argv
+  .alias('h', 'help')
+  .alias('v', 'version').argv
 
 // TODO: port the `Runner` interface of jscodeshift
 async function main() {
@@ -69,6 +70,7 @@ async function main() {
       'press enter or enter yes or enter Y to continue:'
   )
   if (!['', 'yes', 'Y'].includes(answer.trim())) {
+    console.log('Abort!!!')
     return
   }
 
@@ -81,8 +83,9 @@ async function main() {
       transformationName,
       transformationModule
     )
-    packageTransform()
-    processFilePath.push('package.json')
+    if (packageTransform()) {
+      processFilePath.push('package.json')
+    }
   }
 
   if (runAllTransformation) {
@@ -106,8 +109,9 @@ async function main() {
         )
       }
     }
-    packageTransform()
-    processFilePath.push('package.json')
+    if (packageTransform()) {
+      processFilePath.push('package.json')
+    }
   }
   const processFilePathList = processFilePath.join('\n')
   console.log(`--------------------------------------------------`)

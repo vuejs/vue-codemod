@@ -12,11 +12,12 @@ const debug = createDebug('vue-codemod:rule')
  * @returns {Object} The fix command.
  * @private
  */
-export function transform(): void {
+export function transform(): boolean {
+  debug('Find package.json.')
   const resolvedPaths = globby.sync('package.json' as string)
   if (resolvedPaths.length <= 0) {
-    debug('package.json is not exists.')
-    return
+    console.warn('package.json is not exists.')
+    return false
   }
 
   let packageObject: any = JSON.parse(
@@ -24,17 +25,21 @@ export function transform(): void {
   )
 
   if (packageObject?.dependencies != undefined) {
+    debug('Process dependencies')
     process(packageObject.dependencies)
   }
 
   if (packageObject?.peerDependencies != undefined) {
+    debug('Process peerDependencies')
     process(packageObject.peerDependencies)
   }
 
   if (packageObject?.devDependencies != undefined) {
-    if (packageObject?.devDependencies['vue-template-compiler'] != undefined) {
-      delete packageObject.devDependencies['vue-template-compiler']
-    }
+    debug('Process devDependencies')
+    process(packageObject.devDependencies)
+  }
+
+  if (packageObject?.devDependencies != undefined) {
     packageObject.devDependencies['@vue/compiler-sfc'] = '^3.1.1'
     packageObject.devDependencies['eslint'] = '^7.20.0'
     packageObject.devDependencies['eslint-plugin-vue'] = '^7.11.1'
@@ -45,6 +50,7 @@ export function transform(): void {
     Object.assign({ parser: 'json' }, packageObject.prettier)
   )
   fs.writeFileSync(resolvedPaths[0], formatted)
+  return true
 }
 /**
  * Modify the configuration of dependencies
@@ -62,5 +68,11 @@ function process(dependencies: any) {
   }
   if (dependencies['vue-i18n'] != undefined) {
     dependencies['vue-i18n'] = '^9.1.6'
+  }
+  if (dependencies['vue-template-compiler'] != undefined) {
+    delete dependencies['vue-template-compiler']
+  }
+  if (dependencies['@vue/composition-api'] != undefined) {
+    delete dependencies['@vue/composition-api']
   }
 }

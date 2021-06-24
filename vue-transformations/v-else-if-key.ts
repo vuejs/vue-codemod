@@ -4,6 +4,9 @@ import type { Node } from 'vue-eslint-parser/ast/nodes'
 import type { Operation } from '../src/operationUtils'
 import type { VueASTTransformation } from '../src/wrapVueTransformation'
 import wrap from '../src/wrapVueTransformation'
+import createDebug from 'debug'
+
+const debug = createDebug('vue-codemod:rule')
 
 /**
  * 每一个实际的规则，需要做以下几件事：
@@ -71,10 +74,11 @@ function fix(node: any): Operation[] {
           attr.key.name.name === 'else-if' ||
           attr.key.name.name === 'else')
     )
-    .forEach((element: any) => {
+    .forEach(() => {
       hasTargetAttr = true
     })
   if (!hasTargetAttr) {
+    debug('No operator, target element is not if/else-if/else.')
     return fixOperations
   }
 

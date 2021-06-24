@@ -8,7 +8,7 @@ import type { SFCDescriptor } from './sfcUtils'
 
 import VueTransformation from './VueTransformation'
 
-const debug = createDebug('vue-codemod')
+const debug = createDebug('vue-codemod:run')
 
 type FileInfo = {
   path: string
@@ -58,8 +58,6 @@ export default function runTransformation(
   let descriptor: SFCDescriptor
 
   if (transformation.type === 'vueTransformation') {
-    debug('Running VueTransformation')
-
     if (extension === '.vue') {
       descriptor = parseSFC(source, { filename: path }).descriptor
     } else {
@@ -69,6 +67,7 @@ export default function runTransformation(
 
     // skip .vue files without template block
     if (!descriptor.template) {
+      debug('skip .vue files without template block.')
       return source
     }
     let contentStart: number =
@@ -110,6 +109,7 @@ export default function runTransformation(
 
       // skip .vue files without script block
       if (!descriptor.script) {
+        debug('skip .vue files without script block.')
         return source
       }
 

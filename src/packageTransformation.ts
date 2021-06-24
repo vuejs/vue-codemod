@@ -1,6 +1,9 @@
 import * as fs from 'fs'
 import * as globby from 'globby'
 import * as prettier from 'prettier'
+import createDebug from 'debug'
+
+const debug = createDebug('vue-codemod:rule')
 
 /**
  * Creates a fix command that inserts text at the specified index in the source text.
@@ -12,6 +15,7 @@ import * as prettier from 'prettier'
 export function transform(): void {
   const resolvedPaths = globby.sync('package.json' as string)
   if (resolvedPaths.length <= 0) {
+    debug('package.json is not exists.')
     return
   }
 

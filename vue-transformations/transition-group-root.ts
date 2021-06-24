@@ -4,6 +4,9 @@ import type { Node } from 'vue-eslint-parser/ast/nodes'
 import type { Operation } from '../src/operationUtils'
 import type { VueASTTransformation } from '../src/wrapVueTransformation'
 import wrap from '../src/wrapVueTransformation'
+import createDebug from 'debug'
+
+const debug = createDebug('vue-codemod:rule')
 
 /**
  * 每一个实际的规则，需要做以下几件事：
@@ -68,6 +71,7 @@ function fix(node: any): Operation[] {
       hasTagAttr = true
     })
   if (hasTagAttr) {
+    debug('No operator, transition-group element has tag attribute.')
     return fixOperations
   }
 

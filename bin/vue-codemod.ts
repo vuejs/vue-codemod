@@ -20,7 +20,7 @@ import { transform as packageTransform } from '../src/packageTransformation'
 
 import type { TransformationModule } from '../src/runTransformation'
 
-const debug = createDebug('vue-codemod')
+const debug = createDebug('vue-codemod:cli')
 const log = console.log.bind(console)
 let processFilePath: string[] = []
 
@@ -74,6 +74,7 @@ async function main() {
 
   const resolvedPaths = globby.sync(files as string[])
   if (transformationName != undefined) {
+    debug(`run ${transformationName} transformation`)
     const transformationModule = loadTransformationModule(transformationName)
     processTransformation(
       resolvedPaths,
@@ -81,18 +82,28 @@ async function main() {
       transformationModule
     )
     packageTransform()
+    processFilePath.push('package.json')
   }
 
   if (runAllTransformation) {
+    debug(`run all transformation`)
     for (let key in builtInTransformations) {
       if (!excludedTransformations.includes(key)) {
         processTransformation(resolvedPaths, key, builtInTransformations[key])
+      } else {
+        debug(
+          `skip ${key} transformation, Because it will run in other transformation`
+        )
       }
     }
 
     for (let key in vueTransformations) {
       if (!excludedVueTransformations.includes(key)) {
         processTransformation(resolvedPaths, key, vueTransformations[key])
+      } else {
+        debug(
+          `skip ${key} transformation, Because it will run in other transformation`
+        )
       }
     }
     packageTransform()
@@ -125,6 +136,7 @@ function processTransformation(
     }
     const extension = (/\.([^.]*)$/.exec(fileInfo.path) || [])[0]
     if (!extensions.includes(extension)) {
+      debug(`skip ${fileInfo.path} file because not end with ${extensions}.`)
       continue
     }
     try {

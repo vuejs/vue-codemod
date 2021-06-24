@@ -5,6 +5,9 @@ import type { Node } from 'vue-eslint-parser/ast/nodes'
 import type { Operation } from '../src/operationUtils'
 import type { VueASTTransformation } from '../src/wrapVueTransformation'
 import wrap from '../src/wrapVueTransformation'
+import createDebug from 'debug'
+
+const debug = createDebug('vue-codemod:rule')
 
 let operatingParentElements: any = []
 
@@ -78,6 +81,7 @@ function fix(node: any): Operation[] {
       hasForAttr = true
     })
   if (hasForAttr) {
+    debug('No operator, target element has for attribute.')
     return fixOperations
   }
 
@@ -125,6 +129,7 @@ function fix(node: any): Operation[] {
   }
 
   if (!elderHasFor) {
+    debug('No operator, elder element no for attribute.')
     return fixOperations
   }
 

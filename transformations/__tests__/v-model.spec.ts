@@ -7,6 +7,7 @@ defineInlineTest(
   {},
   `export default {
   props: {
+    title: String,
     value: String
   },
   model: {
@@ -22,7 +23,8 @@ defineInlineTest(
 }`,
   `export default {
   props: {
-    modelValue: String
+    modelValue: String,
+    value: String
   },
 
   emits: ['update:modelValue'],
@@ -46,7 +48,8 @@ defineInlineTest(
   {},
   `export default {
   props: {
-    value: String
+    value: String,
+    title: String
   },
   model: {
     prop: 'title',
@@ -56,6 +59,7 @@ defineInlineTest(
 }`,
   `export default {
   props: {
+    value: String,
     modelValue: String
   },
   emits: ['update:modelValue'],
@@ -73,7 +77,7 @@ defineInlineTest(
   {},
   `export default {
   props: {
-    value: String
+    title: String
   },
   model: {
     prop: 'title',

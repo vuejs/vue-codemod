@@ -35,17 +35,18 @@ export const transformAST: ASTTransformation = ({ j, root }) => {
   if (!propsCollections.length) return
 
   // find the value which is in props
-  const valueNode: ObjectProperty = propsCollections
-    .find(j.ObjectProperty, node => node.key.name === 'value')
+  const valueNodePath = propsCollections
+    .find(j.ObjectProperty, node => node.key.name === propName)
     .filter(path => path.parent.parent.node.key.name === 'props')
-    .get(0).node
-
-  // replace the value with modelValue
-  // @ts-ignore
-  valueNode?.key.name = 'modelValue'
 
   // remove model option
   modelCollection.remove()
+
+  if(!valueNodePath.length) return
+
+  // replace the value with modelValue
+  // @ts-ignore
+  valueNodePath.get(0).node.key.name = 'modelValue'
 
   // find the methods option
   const methodsCollections = root

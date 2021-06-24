@@ -72,3 +72,14 @@ defineInlineTest(
   `Vue.createApp(MyComponent).mount("#app")`,
   'transform `new MyComponent` with `el` prop'
 )
+
+
+
+defineInlineTest(
+  transform,
+  {},
+  `const container = new LazyContainer({ el, binding, vnode, lazy: this.lazy })`,
+  `const container = new LazyContainer({ el, binding, vnode, lazy: this.lazy })`,
+  'transform `new MyComponent` with `el` prop'
+)
+

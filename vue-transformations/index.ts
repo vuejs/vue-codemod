@@ -16,7 +16,8 @@ const transformationMap: {
   'v-bind-order-sensitive': require('./v-bind-order-sensitive'),
   'v-for-v-if-precedence-changed': require('./v-for-v-if-precedence-changed'),
   'remove-listeners': require('./remove-listeners'),
-  'v-bind-sync': require('./v-bind-sync')
+  'v-bind-sync': require('./v-bind-sync'),
+  'remove-v-on-native': require('./remove-v-on-native')
 }
 
 export const excludedVueTransformations = ['v-bind-order-sensitive']

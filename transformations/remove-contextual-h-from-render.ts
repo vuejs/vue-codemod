@@ -7,13 +7,12 @@ import { transformAST as addImport } from './add-import'
 
 export const transformAST: ASTTransformation = context => {
   const { root, j } = context
-  const renderFns = root.find(j.ObjectProperty, {
-    key: {
-      name: 'render'
-    },
-    value: {
-      type: 'ArrowFunctionExpression'
-    }
+  const renderFns = root.find(j.ObjectProperty, n => {
+    return (
+      n.key.name === 'render' &&
+      (n.value.type === 'ArrowFunctionExpression' ||
+        n.value.type === 'FunctionExpression')
+    )
   })
 
   const renderMethods = root.find(j.ObjectMethod, {

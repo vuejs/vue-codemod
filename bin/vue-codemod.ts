@@ -136,7 +136,7 @@ function processTransformation(
     debug(`Processing ${p}…`)
     const fileInfo = {
       path: p,
-      source: fs.readFileSync(p).toString()
+      source: fs.readFileSync(p).toString().split('\r\n').join('\n'),
     }
     const extension = (/\.([^.]*)$/.exec(fileInfo.path) || [])[0]
     if (!extensions.includes(extension)) {
@@ -151,7 +151,7 @@ function processTransformation(
         params as object
       )
 
-      if (fs.readFileSync(p).toString() != result) {
+      if (fileInfo.source != result) {
         fs.writeFileSync(p, result)
         if (util.inspect(processFilePath).indexOf(util.inspect(p)) == -1) {
           processFilePath.push(p)

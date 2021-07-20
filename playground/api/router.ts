@@ -1,11 +1,13 @@
 import Router from '@koa/router'
 import path from 'path'
 import fs from 'fs-extra'
+import os from 'os'
 import { ROOT_DIR } from './constants'
 import { spawnSync } from 'child_process'
 import { getMeta } from './controllers'
 
 const router = new Router()
+const cmdSuffix = os.platform() === 'win32' ? '.cmd' : ''
 
 router.get('/', (ctx) => {
   ctx.body = 'Hello'
@@ -36,7 +38,7 @@ router.post('/run/:trans', async (ctx) => {
   const input = ctx.request.body
   const script = path.resolve(__dirname, 'transfrom.ts')
 
-  const result = spawnSync('ts-node', ['-T', script, name], {
+  const result = spawnSync(`ts-node${cmdSuffix}`, ['-T', script, name], {
     input,
     encoding: 'utf-8',
   })

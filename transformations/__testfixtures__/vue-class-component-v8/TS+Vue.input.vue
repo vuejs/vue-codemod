@@ -61,6 +61,32 @@ const uploadResultsModule = namespace('uploadResultsModule');
   },
 })
 export default class ActionableNotification extends Vue {
+  @Watch('$route')
+  onRouteChanged(route) {
+    if (isLoginFlow(route.name))
+      this.$refs.ignToastr.$refs.toastr.clearAll();
+  }
+  
+  created() {
+    var something: boolean;
+    eventBus.$on('on-warning-modal-click', this.onWarningModalClick);
+    configurePermissionRules();
+    configureFeatureRules();
+  }
+  
+  updated() {
+    eventBus.$on('on-warning-modal-click', this.onWarningModalClick);
+    configurePermissionRules();
+    configureFeatureRules();
+  }
+  
+  $refs: any;
+  
+  @State('loading') loading: boolean;
+  @State('forceLoading') forceLoading: boolean;
+  @State('message') message: unknown;
+  @State('success') success: unknown;
+  
   @Action('setMessage') setMessage: any;
   @Action('clearMessage') clearMessage: any;
   @Action('navigateTo') navigateTo: ({ name: string }) => void;
@@ -94,7 +120,6 @@ export default class ActionableNotification extends Vue {
   @uploadResultSummaryModule.Action('updateData') updateData: () => void;
   @patientDetailsModule.Action('clearMutationInfoResult')
   clearMutationInfoResult: any;
-  @Action('setMessage') setMessage: any;
   
   @Prop() message?: string;
   @Prop({ default: () => NotificationType.INFO }) notificationType: NotificationType;
@@ -103,7 +128,7 @@ export default class ActionableNotification extends Vue {
   @Prop() actionTooltip: string;
   
   get someProp() {
-    var something: any[] = [1];
+    var something;
     // const vm: Vue | null = null;
     return { ...NotifictionProps[this.notificationType], ...ActionProps[this.notificationType] };
   }

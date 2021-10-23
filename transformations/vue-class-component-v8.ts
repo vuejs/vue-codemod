@@ -12,10 +12,10 @@ import {
   Identifier,
   identifier,
   ImportDeclaration,
-  literal,
+  literal, memberExpression,
   ObjectExpression,
-  objectExpression,
-  objectMethod,
+  objectExpression, ObjectMethod,
+  objectMethod, ObjectProperty,
   objectProperty,
   Property,
   property,
@@ -65,11 +65,11 @@ function removeImports(context: Context) {
 
   removeExtraneousImport(context, {
     localBinding: 'Vue',
-    ignoreExtend: true
   })
 }
 
 const vueHooks = [
+  // Vue
   'beforeCreate',
   'created',
   'beforeMount',
@@ -78,6 +78,10 @@ const vueHooks = [
   'updated',
   'beforeDestroy',
   'destroyed',
+  // Vue-router
+  'beforeRouteEnter',
+  'beforeRouteUpdate',
+  'beforeRouteLeave',
 ]
 
 function classToOptions(context: Context) {
@@ -88,8 +92,9 @@ function classToOptions(context: Context) {
   const prevClassComputed = prevDefaultExportDeclaration.find(ClassMethod, {
     kind: 'get'
   })
-  const prevClassMethods = prevDefaultExportDeclaration.find(ClassMethod, dec => dec.kind === 'method' && !vueHooks.includes(dec.key.name))
+  const prevClassMethods = prevDefaultExportDeclaration.find(ClassMethod, dec => dec.kind === 'method' && !vueHooks.includes(dec.key.name) && dec.decorators?.[0]?.expression?.callee?.name !== 'Watch')
   const prevClassHooks = prevDefaultExportDeclaration.find(ClassMethod, dec => dec.kind === 'method' && vueHooks.includes(dec.key.name))
+  const prevClassWatches = prevDefaultExportDeclaration.find(ClassMethod, dec => dec.decorators?.[0]?.expression?.callee?.name === 'Watch')
   const componentDecorator = prevClass.get(0).node.decorators.find(d => d.expression.callee?.name === 'Component' || d.expression.name === 'Component')
   const newClassProperties = componentDecorator.expression?.arguments?.[0]?.properties || []
   const variableDeclarations = context.root.find(VariableDeclaration)
@@ -211,8 +216,8 @@ function classToOptions(context: Context) {
   // Props
   newClassProperties.push(
     property('init', identifier('name'), stringLiteral(prevClass.get(0).node.id.name)),
-    property('init', identifier('props'), objectExpression(props)),
-    property('init', identifier('data'), arrowFunctionExpression([], objectExpression(data)))
+    ...(props.length ? [property('init', identifier('props'), objectExpression(props))] : []),
+    ...(data.length ? [property('init', identifier('data'), arrowFunctionExpression([], objectExpression(data)))] : []),
   )
 
   const computed: any[] = [];
@@ -300,23 +305,61 @@ function classToOptions(context: Context) {
 
   // Computed
   prevClassComputed.forEach(c => {
-    // console.log(objectMethod('method', c.node.key, [], c.node.body))
     computed.push(objectMethod('method', c.node.key, [], c.node.body))
   })
   newClassProperties.push(property('init', identifier('computed'), objectExpression(computed)));
 
-  // Methods
-  prevClassMethods.forEach(m => {
-    methods.push(objectMethod('method', m.node.key, [], m.node.body))
+  // Watch
+  const watches: (ObjectProperty | ObjectMethod)[] = [];
+  prevClassWatches.map(c => {
+    const watchName = c.node.decorators[0].expression.arguments[0].value;
+    const watchOptions = c.node.decorators[0].expression.arguments[1]?.properties || [];
+    const key = watchName.includes('.') ? stringLiteral(watchName) : identifier(watchName);
+    let watch;
+
+    // We need a object-style watcher
+    if (watchOptions.length) {
+      watch = objectProperty(
+        key,
+        objectExpression([
+          ...watchOptions,
+          objectMethod('method', identifier('handler'), c.node.params, c.node.body),
+        ])
+      )
+    } else {
+      watch = objectMethod('method', key, c.node.params, c.node.body);
+    }
+
+    watches.push(watch);
   })
-  newClassProperties.push(property('init', identifier('methods'), objectExpression(methods)))
+
+  if (watches.length) {
+    newClassProperties.push(property('init', identifier('watch'), objectExpression(watches)));
+  }
 
   // Hooks
   prevClassHooks.forEach(m => {
     newClassProperties.push(objectMethod('method', m.value.key, [], m.value.body));
   })
 
-  newDefaultExportDeclaration.declaration = objectExpression(newClassProperties)
+  // Methods
+  prevClassMethods.forEach(m => {
+    methods.push(objectMethod('method', m.node.key, [], m.node.body))
+  })
+
+  if (methods.length) {
+    newClassProperties.push(property('init', identifier('methods'), objectExpression(methods)))
+  }
+
+  newDefaultExportDeclaration.declaration = expressionStatement(callExpression(
+    memberExpression(
+      identifier('Vue'),
+      identifier('extend')
+    ),
+    [
+      objectExpression(newClassProperties)
+    ]
+  ));
   prevDefaultExportDeclaration.replaceWith(newDefaultExportDeclaration)
 }
 

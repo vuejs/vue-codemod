@@ -102,7 +102,8 @@ export const transformAST: ASTTransformation<Params> = (
       'vue-router',
       'vuex',
       '@vue/composition-api',
-    ]
+    ];
+
     if (
       peerSpecifiers.length === 1 &&
       safelyRemovableModules.includes(source)

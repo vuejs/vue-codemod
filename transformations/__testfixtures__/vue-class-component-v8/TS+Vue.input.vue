@@ -31,35 +31,43 @@
 </template>
 
 <script lang="ts">
-import {
-  ActionProps,
-  ActionType,
-  NotificationType,
-  NotifictionProps,
-} from '@/components/actionableNotification/consts';
-  import * as something from '@/consts';
+import { BatchFile } from '@/utils/classes/UploadResults';
+import { BUTTONS_ACTIONS, WARNING_MODALS, ROUTES } from '@/utils/consts';
+import { eventBus } from '@/utils/eventBus';
+import { Subscription } from 'rxjs';
 import Vue from 'vue';
 import Component from 'vue-class-component';
-import { Prop } from 'vue-property-decorator';
-import VClamp from 'vue-clamp';
-import { namespace } from 'vuex-class';
-  
-  const a = {
-   ...mapActions('addSampleModule', ['realSaveSample']),
-  //b: 1,
-}
-  
-//var abc = 1;
-//const addSampleModule1 = namespace('addSampleModule');
-//let removeSampleModule2 = namespace('removeSampleModule');
+import { Watch } from 'vue-property-decorator';
+import { Action, namespace } from 'vuex-class';
+import { BATCH_PROCESSING_STATUSES, BatchStatus, SAMPLE_STATUSES } from '../consts/consts';
+import { Filters } from '../models/UploadResultsSummaryState';
+import { VIEWS_TABS_VALUES } from '../services/utils';
+
+const uploadResultSummaryModule = namespace('uploadResultSummaryModule');
+const plateRawDataModule = namespace('plateRawDataModule');
+const patientDetailsModule = namespace('patientDetailsModule');
+const reportsModule = namespace('reportsModule');
+const uploadResultsModule = namespace('uploadResultsModule');
   
 
-  
-@Component
+@Component({
+  components: {
+    IgcTitleLine: () => import('igentify-ui-core/lib/shared/components/IgcTitleLine/IgcTitleLine.vue'),
+    rbTitle: () => import('@/components/rbTitle.vue'),
+    IgnTitle: () => import('@/components/IgnTitle.vue'),
+    SearchInput: () => import('@/components/SearchInput.vue'),
+    ViewsTabs: () => import('@/components/ViewsTabs.vue'),
+    MutationInfo: () => import('@/components/mutation-info/MutationInfo.vue'),
+  },
+})
 export default class ActionableNotification extends Vue {
-  @addSampleModule.Action('realSaveSample') saveSample: (slimSample: SlimSample) => Promise<void>;
-  @addSampleModule.Action('doSomething') doSomething: (slimSample: SlimSample) => Promise<void>;
-  @addPatientModule.Action('addPatient') addPatient: (slimSample: SlimSample) => Promise<void>;
+  @Action('setMessage') setMessage: any;
+  @Action('clearMessage') clearMessage: any;
+  @Action('navigateTo') navigateTo: ({ name: string }) => void;
+  
+  @uploadResultSummaryModule.Action('realSaveSample') saveSample: (slimSample: SlimSample) => Promise<void>;
+  @uploadResultSummaryModule.Action('doSomething') doSomething: (slimSample: SlimSample) => Promise<void>;
+  @plateRawDataModule.Action('addPatient') addPatient: (slimSample: SlimSample) => Promise<void>;
  
   @uploadResultSummaryModule.State('data') currentData: any;
   @uploadResultSummaryModule.State('incomingSampleStatuses') incomingSampleStatuses: any;
@@ -86,6 +94,7 @@ export default class ActionableNotification extends Vue {
   @uploadResultSummaryModule.Action('updateData') updateData: () => void;
   @patientDetailsModule.Action('clearMutationInfoResult')
   clearMutationInfoResult: any;
+  @Action('setMessage') setMessage: any;
   
   @Prop() message?: string;
   @Prop({ default: () => NotificationType.INFO }) notificationType: NotificationType;

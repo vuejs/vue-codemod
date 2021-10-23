@@ -1,6 +1,6 @@
 import {
   arrayExpression,
-  arrowFunctionExpression,
+  arrowFunctionExpression, blockStatement,
   booleanLiteral, callExpression,
   CallExpression,
   ClassDeclaration,
@@ -8,19 +8,20 @@ import {
   ClassProperty,
   Decorator,
   exportDefaultDeclaration,
-  ExportDefaultDeclaration,
+  ExportDefaultDeclaration, expressionStatement,
   Identifier,
   identifier,
   ImportDeclaration,
   literal,
   ObjectExpression,
-  objectExpression, ObjectMethod,
-  objectMethod, objectProperty,
+  objectExpression,
+  objectMethod,
+  objectProperty,
   Property,
   property,
   spreadElement,
-  stringLiteral,
-  VariableDeclaration
+  stringLiteral, variableDeclaration,
+  VariableDeclaration, variableDeclarator
 } from 'jscodeshift'
 import type { ASTTransformation, Context } from '../src/wrapAstTransformation'
 import wrap from '../src/wrapAstTransformation'
@@ -68,8 +69,18 @@ function removeImports(context: Context) {
   })
 }
 
+const vueHooks = [
+  'beforeCreate',
+  'created',
+  'beforeMount',
+  'mounted',
+  'beforeUpdate',
+  'updated',
+  'beforeDestroy',
+  'destroyed',
+]
+
 function classToOptions(context: Context) {
-  console.log('------')
   const prevDefaultExportDeclaration = context.root.find(ExportDefaultDeclaration)
   const newDefaultExportDeclaration = exportDefaultDeclaration(identifier('default'))
   const prevClass = prevDefaultExportDeclaration.find(ClassDeclaration)
@@ -77,9 +88,8 @@ function classToOptions(context: Context) {
   const prevClassComputed = prevDefaultExportDeclaration.find(ClassMethod, {
     kind: 'get'
   })
-  const prevClassMethods = prevDefaultExportDeclaration.find(ClassMethod, {
-    kind: 'method'
-  })
+  const prevClassMethods = prevDefaultExportDeclaration.find(ClassMethod, dec => dec.kind === 'method' && !vueHooks.includes(dec.key.name))
+  const prevClassHooks = prevDefaultExportDeclaration.find(ClassMethod, dec => dec.kind === 'method' && vueHooks.includes(dec.key.name))
   const componentDecorator = prevClass.get(0).node.decorators.find(d => d.expression.callee?.name === 'Component' || d.expression.name === 'Component')
   const newClassProperties = componentDecorator.expression?.arguments?.[0]?.properties || []
   const variableDeclarations = context.root.find(VariableDeclaration)
@@ -95,11 +105,10 @@ function classToOptions(context: Context) {
     Getter: new Map<string, VuexMappingItem>(),
     GetterAlias: new Map<string, VuexMappingItem>(),
   }
+  // We need this object as a reference for vuex accessors (actions/getters/etc) class members decorators
+  const vuexNamespaceMap: Record<string, string> = {}
 
   if (variableDeclarations.length) {
-    // We need this object as a reference for vuex accessors (actions/getters/etc) class members decorators
-    const vuexNamespaceMap: Record<string, string> = {}
-
     context
       .root
       .get(0)
@@ -111,16 +120,15 @@ function classToOptions(context: Context) {
         // We assume there are no multiple declarations like "const a = 1, b = 2" __for vuex namespaces__
         const [declaration] = vd.declarations;
 
-        // console.log(declaration.init.properties?.[0]?.argument?.arguments[1])
-        if (declaration.init.properties?.[0]) {
-          // console.log(spreadElement(callExpression(identifier('mapActions'), [
-          //   stringLiteral('addSampleModule')
-          // ])))
-        }
+        // We're interested in namespace('...') call expressions __only with arguments__
+        if (
+          declaration.init.type !== 'CallExpression'
+          || !declaration.init.arguments?.[0]?.value
+          || declaration.init.callee.name !== 'namespace'
+        ) return;
 
-        // We're interested in namespace('...') call expressions only with arguments
-        if (declaration.init.type !== 'CallExpression' && !declaration.init.arguments?.[0]?.value) return;
         vuexNamespaceMap[declaration.id.name] = declaration.init.arguments[0].value;
+        context.root.find(VariableDeclaration, (value => value.declarations?.[0].init?.callee?.name === 'namespace')).remove();
       })
   }
 
@@ -134,8 +142,10 @@ function classToOptions(context: Context) {
       const type = prop.typeAnnotation?.typeAnnotation?.type.replace(/^TS(.*)Keyword$/, '$1') || 'Object'
 
       if (prop.decorators[0].expression.arguments?.[0]?.type as string === 'StringLiteral') {
-        const accessorType = prop.decorators[0].expression.callee.property.name;
-        const decoratorName = prop.decorators[0].expression.callee.object.name;
+        const accessorType = prop.decorators[0].expression.callee.property
+          ? prop.decorators[0].expression.callee.property?.name
+          : prop.decorators[0].expression.callee.name;
+        const decoratorName = prop.decorators[0].expression.callee.object?.name || 'global';
         const localName = prop.key.name;
         const argumentValue = prop.decorators[0].expression.arguments[0].value;
         const isAliased = localName !== argumentValue;
@@ -205,25 +215,33 @@ function classToOptions(context: Context) {
     property('init', identifier('data'), arrowFunctionExpression([], objectExpression(data)))
   )
 
-  // Computed
-  const computed: any[] = []
-
-  // Methods
-  const methods: any[] = []
+  const computed: any[] = [];
+  const methods: any[] = [];
 
   vuex.Action.forEach((actionArguments, actionName: string) => {
+    if (!vuexNamespaceMap[actionName] && actionName !== 'global') {
+      throw new Error(`Unknown decorator @${actionName}. Make sure you have "const ${actionName} = namespace('${actionName}'); specified`)
+    }
     methods.push(
       spreadElement(callExpression(identifier('mapActions'), [
-        stringLiteral(actionName),
+        ...(actionName === 'global' ? [] : [
+          stringLiteral(vuexNamespaceMap[actionName])
+        ]),
         arrayExpression(actionArguments.map(a => stringLiteral(a.remoteName))),
       ]))
     )
   })
 
   vuex.ActionAlias.forEach((actionArguments, actionName: string) => {
+    if (!vuexNamespaceMap[actionName] && actionName !== 'global') {
+      throw new Error(`Unknown decorator @${actionName}. Make sure you have "const ${actionName} = namespace('${actionName}'); specified`)
+    }
+
     methods.push(
       spreadElement(callExpression(identifier('mapActions'), [
-        stringLiteral(actionName),
+        ...(actionName === 'global' ? [] : [
+          stringLiteral(vuexNamespaceMap[actionName])
+        ]),
         objectExpression([
           ...actionArguments.map(arg => objectProperty(identifier(arg.localName), stringLiteral(arg.remoteName)))
         ])
@@ -235,7 +253,9 @@ function classToOptions(context: Context) {
   vuex.State.forEach((actionArguments, actionName: string) => {
     computed.push(
       spreadElement(callExpression(identifier('mapState'), [
-        stringLiteral(actionName),
+        ...(actionName === 'global' ? [] : [
+          stringLiteral(actionName)
+        ]),
         arrayExpression(actionArguments.map(a => stringLiteral(a.remoteName))),
       ]))
     )
@@ -244,7 +264,9 @@ function classToOptions(context: Context) {
   vuex.StateAlias.forEach((actionArguments, actionName: string) => {
     computed.push(
       spreadElement(callExpression(identifier('mapState'), [
-        stringLiteral(actionName),
+        ...(actionName === 'global' ? [] : [
+          stringLiteral(actionName)
+        ]),
         objectExpression([
           ...actionArguments.map(arg => objectProperty(identifier(arg.localName), stringLiteral(arg.remoteName)))
         ])
@@ -255,7 +277,9 @@ function classToOptions(context: Context) {
   vuex.Getter.forEach((actionArguments, actionName: string) => {
     computed.push(
       spreadElement(callExpression(identifier('mapGetters'), [
-        stringLiteral(actionName),
+        ...(actionName === 'global' ? [] : [
+          stringLiteral(actionName)
+        ]),
         arrayExpression(actionArguments.map(a => stringLiteral(a.remoteName))),
       ]))
     )
@@ -264,7 +288,9 @@ function classToOptions(context: Context) {
   vuex.GetterAlias.forEach((actionArguments, actionName: string) => {
     computed.push(
       spreadElement(callExpression(identifier('mapGetters'), [
-        stringLiteral(actionName),
+        ...(actionName === 'global' ? [] : [
+          stringLiteral(actionName)
+        ]),
         objectExpression([
           ...actionArguments.map(arg => objectProperty(identifier(arg.localName), stringLiteral(arg.remoteName)))
         ])
@@ -272,19 +298,23 @@ function classToOptions(context: Context) {
     )
   })
 
+  // Computed
   prevClassComputed.forEach(c => {
-    computed.push(objectMethod('method', identifier(c.node.key.name), [], c.node.body))
+    // console.log(objectMethod('method', c.node.key, [], c.node.body))
+    computed.push(objectMethod('method', c.node.key, [], c.node.body))
   })
-  newClassProperties.push(
-    property('init', identifier('computed'), objectExpression(computed))
-  )
+  newClassProperties.push(property('init', identifier('computed'), objectExpression(computed)));
 
+  // Methods
   prevClassMethods.forEach(m => {
-    methods.push(objectMethod('method', identifier(m.node.key.name), [], m.node.body))
+    methods.push(objectMethod('method', m.node.key, [], m.node.body))
   })
-  newClassProperties.push(
-    property('init', identifier('methods'), objectExpression(methods))
-  )
+  newClassProperties.push(property('init', identifier('methods'), objectExpression(methods)))
+
+  // Hooks
+  prevClassHooks.forEach(m => {
+    newClassProperties.push(objectMethod('method', m.value.key, [], m.value.body));
+  })
 
   newDefaultExportDeclaration.declaration = objectExpression(newClassProperties)
   prevDefaultExportDeclaration.replaceWith(newDefaultExportDeclaration)

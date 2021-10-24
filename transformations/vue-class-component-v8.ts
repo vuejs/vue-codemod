@@ -53,7 +53,8 @@ function removeImports(context: Context) {
   const removableModules = [
     'vue-class-component',
     'vue-property-decorator',
-    'vuex-class'
+    'vue-mixin-decorator',
+    'vuex-class',
   ]
 
   context
@@ -95,12 +96,13 @@ function classToOptions(context: Context) {
   const prevClassMethods = prevDefaultExportDeclaration.find(ClassMethod, dec => dec.kind === 'method' && !vueHooks.includes(dec.key.name) && dec.decorators?.[0]?.expression?.callee?.name !== 'Watch')
   const prevClassHooks = prevDefaultExportDeclaration.find(ClassMethod, dec => dec.kind === 'method' && vueHooks.includes(dec.key.name))
   const prevClassWatches = prevDefaultExportDeclaration.find(ClassMethod, dec => dec.decorators?.[0]?.expression?.callee?.name === 'Watch')
-  const componentDecorator = prevClass.get(0).node.decorators.find(d => d.expression.callee?.name === 'Component' || d.expression.name === 'Component')
-  const newClassProperties = componentDecorator.expression?.arguments?.[0]?.properties || []
+  const componentDecorator = prevClass.get(0).node.decorators?.find(d => d.expression.callee?.name === 'Component' || d.expression.name === 'Component')
+  const newClassProperties = componentDecorator?.expression?.arguments?.[0]?.properties || []
   const variableDeclarations = context.root.find(VariableDeclaration)
 
   const props: Property[] = []
   const data: Property[] = []
+  const mixins: string[] = []
 
   const vuex = {
     Action: new Map<string, VuexMappingItem>(),
@@ -112,6 +114,13 @@ function classToOptions(context: Context) {
   }
   // We need this object as a reference for vuex accessors (actions/getters/etc) class members decorators
   const vuexNamespaceMap: Record<string, string> = {}
+
+  context.root.find(ClassDeclaration, dec => {
+    if (dec.superClass?.callee?.name === 'Mixins') {
+      mixins.push(dec.superClass.arguments[0].name)
+    }
+  });
+
 
   if (variableDeclarations.length) {
     context
@@ -144,7 +153,11 @@ function classToOptions(context: Context) {
 
     if (prop.decorators) {
       const propDecorator = prop.decorators.find(d => d.expression.callee.name === 'Prop')
-      const type = prop.typeAnnotation?.typeAnnotation?.type.replace(/^TS(.*)Keyword$/, '$1') || 'Object'
+      let type = prop.typeAnnotation?.typeAnnotation?.type.replace(/^TS(.*)Keyword$/, '$1') || 'Object'
+
+      if (type === 'Any') {
+        type = 'Object';
+      }
 
       if (prop.decorators[0].expression.arguments?.[0]?.type as string === 'StringLiteral') {
         const accessorType = prop.decorators[0].expression.callee.property
@@ -178,8 +191,8 @@ function classToOptions(context: Context) {
       ]
 
       if (propDecorator && propDecorator.expression.arguments.length) {
-        const theDefault = propDecorator.expression.arguments[0].properties.find(p => p.key.name === 'default')
-        const theValidator = propDecorator.expression.arguments[0].properties.find(p => p.key.name === 'validator')
+        const theDefault = propDecorator.expression.arguments[0].properties?.find(p => p.key.name === 'default')
+        const theValidator = propDecorator.expression.arguments[0].properties?.find(p => p.key.name === 'validator')
 
         if (theDefault) {
           const theDefaultValue = theDefault?.value.type === 'ArrowFunctionExpression' ? theDefault?.value?.body?.value : theDefault?.value.value
@@ -213,6 +226,15 @@ function classToOptions(context: Context) {
     }
   })
 
+  // Mixins
+  if (mixins.length) {
+    newClassProperties.push(
+      property('init', identifier('mixins'),
+        arrayExpression(mixins.map(mixin => identifier(mixin)))
+      )
+    );
+  }
+
   // Props
   newClassProperties.push(
     property('init', identifier('name'), stringLiteral(prevClass.get(0).node.id.name)),
@@ -223,6 +245,7 @@ function classToOptions(context: Context) {
   const computed: any[] = [];
   const methods: any[] = [];
 
+  // Computed
   vuex.Action.forEach((actionArguments, actionName: string) => {
     if (!vuexNamespaceMap[actionName] && actionName !== 'global') {
       throw new Error(`Unknown decorator @${actionName}. Make sure you have "const ${actionName} = namespace('${actionName}'); specified`)
@@ -303,11 +326,13 @@ function classToOptions(context: Context) {
     )
   })
 
-  // Computed
   prevClassComputed.forEach(c => {
     computed.push(objectMethod('method', c.node.key, [], c.node.body))
   })
-  newClassProperties.push(property('init', identifier('computed'), objectExpression(computed)));
+
+  if (computed.length) {
+    newClassProperties.push(property('init', identifier('computed'), objectExpression(computed)));
+  }
 
   // Watch
   const watches: (ObjectProperty | ObjectMethod)[] = [];
@@ -319,15 +344,19 @@ function classToOptions(context: Context) {
 
     // We need a object-style watcher
     if (watchOptions.length) {
+      const method = objectMethod('method', identifier('handler'), c.node.params, c.node.body);
+
+      method.async = c.node.async;
       watch = objectProperty(
         key,
         objectExpression([
           ...watchOptions,
-          objectMethod('method', identifier('handler'), c.node.params, c.node.body),
+          method,
         ])
       )
     } else {
       watch = objectMethod('method', key, c.node.params, c.node.body);
+      watch.async = c.node.async;
     }
 
     watches.push(watch);
@@ -342,9 +371,23 @@ function classToOptions(context: Context) {
     newClassProperties.push(objectMethod('method', m.value.key, [], m.value.body));
   })
 
+  // console.log(
+  //   context
+  //     .root
+  //     .get(0)
+  //     .node
+  //     .program
+  //     .body[0]
+  //   .body
+  //   .body[0]
+  // )
+
   // Methods
   prevClassMethods.forEach(m => {
-    methods.push(objectMethod('method', m.node.key, [], m.node.body))
+    const method = objectMethod('method', m.node.key, [], m.node.body);
+
+    method.async = m.node.async;
+    methods.push(method)
   })
 
   if (methods.length) {

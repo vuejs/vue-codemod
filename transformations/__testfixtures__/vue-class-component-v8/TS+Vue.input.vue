@@ -47,4 +47,3 @@ export default class TestComponent extends Vue {
   }
 }
 </script>
-

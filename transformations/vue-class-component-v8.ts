@@ -31,7 +31,6 @@ import {
   stringLiteral,
   thisExpression,
   tsAsExpression,
-  tsTypeAnnotation,
   tsTypeParameterInstantiation,
   tsTypeReference,
   VariableDeclaration
@@ -509,30 +508,64 @@ function classToOptions(context: Context) {
     computed.push(method)
   })
 
+//   console.log(
+//     context
+//       .root
+//       .get(0)
+//       .node
+//       .program
+//       .body[0]
+//     .declarations[0]
+//     .init
+//     .properties[0]
+//     .body
+//     .body[0]
+//     .argument
+// .typeAnnotation
+//   )
   refs.forEach((ref) => {
-    const method = objectMethod(
+    let statement: any = memberExpression(
+      memberExpression(
+        thisExpression(),
+        identifier('$refs')
+      ),
+      ref.decorators[0].expression.arguments?.[0]?.value
+        ? identifier(ref.decorators[0].expression.arguments?.[0]?.value)
+        : ref.key
+    );
+
+    if (ref.typeAnnotation) {
+      statement = tsAsExpression(
+        statement,
+        tsTypeReference(
+          identifier('PropType'),
+        )
+      )
+    }
+    const getter = objectMethod(
       'method',
-      ref.key,
+      identifier('get'),
       [],
       blockStatement([
         returnStatement(
-          memberExpression(
-            memberExpression(
-              thisExpression(),
-              identifier('$refs')
-            ),
-            ref.decorators[0].expression.arguments?.[0]?.value
-              ? identifier(ref.decorators[0].expression.arguments?.[0]?.value)
-              : ref.key
-          )
+          statement
         )
       ])
     )
 
-    method.returnType = tsTypeAnnotation(
-      tsTypeReference(identifier(ref.typeAnnotation.typeAnnotation.typeName.name))
+    const refExpression = property(
+      'init',
+      ref.key,
+      objectExpression([
+        property('init', identifier('cache'), booleanLiteral(false)),
+        getter
+      ])
     )
-    computed.push(method)
+
+    // method.returnType = tsTypeAnnotation(
+    //   tsTypeReference(identifier(ref.typeAnnotation.typeAnnotation.typeName.name))
+    // )
+    computed.push(refExpression)
   })
 
   if (computed.length) {

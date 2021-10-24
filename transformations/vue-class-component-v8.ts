@@ -68,7 +68,8 @@ function removeImports(context: Context) {
     'vue-mixin-decorator',
     'vuex-class',
     'vue',
-    'vuex'
+    'vuex',
+    'vue-q',
   ]
 
   context
@@ -182,8 +183,6 @@ function classToOptions(context: Context) {
 
   prevClassProperties.forEach((p) => {
     const prop = p.node as VueClassProperty
-    const isRequired = !prop.optional
-    const propName = prop.key.name
 
     if (prop.decorators) {
       const accessorType = prop.decorators[0].expression.callee.property
@@ -244,10 +243,12 @@ function classToOptions(context: Context) {
       if (!propDecorator) return
 
       const decoratorPropArgument = propDecorator.expression?.arguments?.[0]!
-      let rawType: string
+      let rawType: any
 
       if (decoratorPropArgument?.type === 'Identifier') {
-        rawType = decoratorPropArgument.name
+        rawType = decoratorPropArgument.name;
+      } else if (decoratorPropArgument?.type === 'ArrayExpression') {
+        rawType = propDecorator.expression.arguments?.[0]
       } else {
         const typeKind = propDecorator.expression.arguments[0]?.properties?.find(p => p.key.name === 'type')
         if (typeKind) {
@@ -257,10 +258,13 @@ function classToOptions(context: Context) {
         }
       }
 
-      let type: Node = identifier(rawType)
-      const keywordMatch = rawType.match(/^TS(.*)Keyword$/)
+      let type: any;
 
-      if (keywordMatch) {
+      if (rawType.type === 'ArrayExpression') {
+        type = rawType;
+      } else if (rawType.match(/^TS(.*)Keyword$/)) {
+        const keywordMatch = rawType.match(/^TS(.*)Keyword$/);
+
         type = identifier(keywordMatch[1])
       } else if (rawType === 'TSUnionType') {
         const rawUnionTypes = prop.typeAnnotation?.typeAnnotation?.types || []
@@ -282,6 +286,8 @@ function classToOptions(context: Context) {
         type = identifier(prop.typeAnnotation?.typeAnnotation?.typeName?.name || 'Object')
       } else if (rawType.match(/^TS/)) {
         type = identifier('Object')
+      } else {
+        type = identifier(rawType);
       }
 
       const typedProp = tsAsExpression(
@@ -293,6 +299,8 @@ function classToOptions(context: Context) {
           ])
         )
       )
+
+      const isRequired = !prop.optional
 
       const propProperties: Property[] = [
         property('init', identifier('type'), typedProp),
@@ -329,9 +337,9 @@ function classToOptions(context: Context) {
         }
       }
 
-      props.push(property('init', identifier(propName), objectExpression(propProperties)))
+      props.push(property('init', prop.key, objectExpression(propProperties)))
     } else if (prop.value) {
-      data.push(property('init', identifier(prop.key.name), prop.value))
+      data.push(property('init', prop.key, prop.value))
     }
   })
 

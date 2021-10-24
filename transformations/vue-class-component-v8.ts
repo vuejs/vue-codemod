@@ -205,26 +205,35 @@ function classToOptions(context: Context) {
         return
       }
 
-      const isAliased = localName !== argumentValue
-      const accessor = `${accessorType}${isAliased ? 'Alias' : ''}` as 'Action' | 'State' | 'Getter' | 'Mutation' | 'ActionAlias' | 'StateAlias' | 'GetterAlias' | 'MutationAlias'
+      // Vuex
+      const vuexAccessors = [
+        'Action',
+        'State',
+        'Getter',
+        'Mutation',
+      ]
 
-      if (vuex[accessor]) {
-        const existingModule = vuex[accessor].get(decoratorName)
-        if (existingModule) {
-          existingModule.push({
-            remoteName: argumentValue,
-            localName
-          })
-        } else {
-          vuex[accessor].set(decoratorName, [{
-            remoteName: argumentValue,
-            localName
-          }])
+      if (vuexAccessors.includes(accessorType)) {
+        const isAliased = localName !== argumentValue
+        const accessor = `${accessorType}${isAliased ? 'Alias' : ''}` as 'Action' | 'State' | 'Getter' | 'Mutation' | 'ActionAlias' | 'StateAlias' | 'GetterAlias' | 'MutationAlias'
+
+        if (vuex[accessor]) {
+          const existingModule = vuex[accessor].get(decoratorName)
+          if (existingModule) {
+            existingModule.push({
+              remoteName: argumentValue,
+              localName
+            })
+          } else {
+            vuex[accessor].set(decoratorName, [{
+              remoteName: argumentValue,
+              localName
+            }])
+          }
         }
-      } else {
-        console.log(`Unknown vuex accessor: ${accessor}`)
       }
 
+      // Prop
       const propDecorator = prop.decorators.find(d => d.expression.callee?.name === 'Prop')
 
       if (!propDecorator) return

@@ -102,7 +102,9 @@ const vueHooks = [
   // Vue-router
   'beforeRouteEnter',
   'beforeRouteUpdate',
-  'beforeRouteLeave'
+  'beforeRouteLeave',
+  // Other
+  'render',
 ]
 
 const supportedDecorators = [
@@ -124,12 +126,23 @@ function classToOptions(context: Context) {
   const prevClassComputed = prevDefaultExportDeclaration.find(ClassMethod, {
     kind: 'get'
   })
-  const prevClassMethods = prevDefaultExportDeclaration.find(ClassMethod, dec => dec.kind === 'method' && !vueHooks.includes(dec.key.name) && dec.decorators?.[0]?.expression?.callee?.name !== 'Watch')
+  const prevClassMethods = prevDefaultExportDeclaration.find(
+    ClassMethod,
+    dec => dec.kind === 'method'
+      && !vueHooks.includes(dec.key.name)
+      && dec.decorators?.[0]?.expression?.callee?.name !== 'Watch'
+      && dec.decorators?.[0]?.expression?.callee?.name !== 'Emit'
+  )
   const prevClassHooks = prevDefaultExportDeclaration.find(ClassMethod, dec => dec.kind === 'method' && vueHooks.includes(dec.key.name))
   const prevClassWatches = prevDefaultExportDeclaration.find(ClassMethod, dec => dec.decorators?.[0]?.expression?.callee?.name === 'Watch')
+  const prevClassEmits = prevDefaultExportDeclaration.find(ClassMethod, dec => dec.decorators?.[0]?.expression?.callee?.name === 'Emit')
   const componentDecorator = prevClass.get(0).node.decorators?.find(d => d.expression.callee?.name === 'Component' || d.expression.name === 'Component')
   const newClassProperties = componentDecorator?.expression?.arguments?.[0]?.properties || []
   const variableDeclarations = context.root.find(VariableDeclaration)
+
+  if (prevClassEmits.length) {
+    throw new Error('@Emit decorator is not supported!');
+  }
 
   const props: Property[] = []
   const data: Property[] = []
@@ -266,9 +279,13 @@ function classToOptions(context: Context) {
       if (rawType.type === 'ArrayExpression') {
         type = rawType
       } else if (rawType.match(/^TS(.*)Keyword$/)) {
-        const keywordMatch = rawType.match(/^TS(.*)Keyword$/)
+        let keyword = rawType.match(/^TS(.*)Keyword$/)[1]
 
-        type = identifier(keywordMatch[1])
+        if (['Any'].includes(keyword)) {
+          keyword = 'Object';
+        }
+
+        type = identifier(keyword)
       } else if (rawType === 'TSUnionType') {
         const rawUnionTypes = prop.typeAnnotation?.typeAnnotation?.types || []
         type = arrayExpression(rawUnionTypes.map(raw => {
@@ -339,10 +356,15 @@ function classToOptions(context: Context) {
           )
         }
       }
+      const propNode = property('init', prop.key, objectExpression(propProperties));
 
-      props.push(property('init', prop.key, objectExpression(propProperties)))
+      propNode.comments = prop.comments;
+      props.push(propNode)
     } else if (prop.value) {
-      data.push(property('init', prop.key, prop.value))
+      const dataNode = property('init', prop.key, prop.value);
+
+      dataNode.comments = prop.comments;
+      data.push(dataNode)
     }
   })
 
@@ -422,65 +444,6 @@ function classToOptions(context: Context) {
   const methods: any[] = []
 
   // Computed
-  vuex.Action.forEach((actionArguments, actionName: string) => {
-    if (!vuexNamespaceMap[actionName] && actionName !== 'global') {
-      throw new Error(`Unknown decorator @${actionName}. Make sure you have "const ${actionName} = namespace('${actionName}'); specified`)
-    }
-    methods.push(
-      spreadElement(callExpression(identifier('mapActions'), [
-        ...(actionName === 'global' ? [] : [
-          stringLiteral(vuexNamespaceMap[actionName])
-        ]),
-        arrayExpression(actionArguments.map(a => stringLiteral(a.remoteName)))
-      ]))
-    )
-  })
-
-  vuex.ActionAlias.forEach((actionArguments, actionName: string) => {
-    if (!vuexNamespaceMap[actionName] && actionName !== 'global') {
-      throw new Error(`Unknown decorator @${actionName}. Make sure you have "const ${actionName} = namespace('${actionName}'); specified`)
-    }
-
-    methods.push(
-      spreadElement(callExpression(identifier('mapActions'), [
-        ...(actionName === 'global' ? [] : [
-          stringLiteral(vuexNamespaceMap[actionName])
-        ]),
-        objectExpression([
-          ...actionArguments.map(arg => objectProperty(identifier(arg.localName), stringLiteral(arg.remoteName)))
-        ])
-      ]))
-    )
-  })
-
-  vuex.Mutation.forEach((actionArguments, actionName: string) => {
-    methods.push(
-      spreadElement(callExpression(identifier('mapMutations'), [
-        ...(actionName === 'global' ? [] : [
-          stringLiteral(actionName)
-        ]),
-        arrayExpression(actionArguments.map(a => stringLiteral(a.remoteName)))
-      ]))
-    )
-  })
-
-  vuex.MutationAlias.forEach((actionArguments, actionName: string) => {
-    methods.push(
-      spreadElement(callExpression(identifier('mapMutations'), [
-        ...(actionName === 'global' ? [] : [
-          stringLiteral(actionName)
-        ]),
-        objectExpression([
-          ...actionArguments.map(arg => objectProperty(identifier(arg.localName), stringLiteral(arg.remoteName)))
-        ])
-      ]))
-    )
-  })
-
-  if (methods.length) {
-    newClassProperties.push(property('init', identifier('methods'), objectExpression(methods)))
-  }
-
   vuex.State.forEach((actionArguments, actionName: string) => {
     computed.push(
       spreadElement(callExpression(identifier('mapState'), [
@@ -537,21 +500,6 @@ function classToOptions(context: Context) {
     computed.push(method)
   })
 
-//   console.log(
-//     context
-//       .root
-//       .get(0)
-//       .node
-//       .program
-//       .body[0]
-//     .declarations[0]
-//     .init
-//     .properties[0]
-//     .body
-//     .body[0]
-//     .argument
-// .typeAnnotation
-//   )
   refs.forEach((ref) => {
     let statement: any = memberExpression(
       memberExpression(
@@ -591,9 +539,6 @@ function classToOptions(context: Context) {
       ])
     )
 
-    // method.returnType = tsTypeAnnotation(
-    //   tsTypeReference(identifier(ref.typeAnnotation.typeAnnotation.typeName.name))
-    // )
     computed.push(refExpression)
   })
 
@@ -635,13 +580,70 @@ function classToOptions(context: Context) {
 
   // Hooks
   prevClassHooks.forEach(m => {
-    const method = objectMethod('method', m.node.key, [], m.node.body)
+    const method = objectMethod('method', m.node.key, m.node.params, m.node.body)
 
     method.async = m.node.async
+    method.comments = m.node.comments
+    method.returnType = m.node.returnType;
     newClassProperties.push(method)
   })
 
   // Methods
+  vuex.Action.forEach((actionArguments, actionName: string) => {
+    if (!vuexNamespaceMap[actionName] && actionName !== 'global') {
+      throw new Error(`Unknown decorator @${actionName}. Make sure you have "const ${actionName} = namespace('${actionName}'); specified`)
+    }
+    methods.push(
+      spreadElement(callExpression(identifier('mapActions'), [
+        ...(actionName === 'global' ? [] : [
+          stringLiteral(vuexNamespaceMap[actionName])
+        ]),
+        arrayExpression(actionArguments.map(a => stringLiteral(a.remoteName)))
+      ]))
+    )
+  })
+
+  vuex.ActionAlias.forEach((actionArguments, actionName: string) => {
+    if (!vuexNamespaceMap[actionName] && actionName !== 'global') {
+      throw new Error(`Unknown decorator @${actionName}. Make sure you have "const ${actionName} = namespace('${actionName}'); specified`)
+    }
+
+    methods.push(
+      spreadElement(callExpression(identifier('mapActions'), [
+        ...(actionName === 'global' ? [] : [
+          stringLiteral(vuexNamespaceMap[actionName])
+        ]),
+        objectExpression([
+          ...actionArguments.map(arg => objectProperty(identifier(arg.localName), stringLiteral(arg.remoteName)))
+        ])
+      ]))
+    )
+  })
+
+  vuex.Mutation.forEach((actionArguments, actionName: string) => {
+    methods.push(
+      spreadElement(callExpression(identifier('mapMutations'), [
+        ...(actionName === 'global' ? [] : [
+          stringLiteral(actionName)
+        ]),
+        arrayExpression(actionArguments.map(a => stringLiteral(a.remoteName)))
+      ]))
+    )
+  })
+
+  vuex.MutationAlias.forEach((actionArguments, actionName: string) => {
+    methods.push(
+      spreadElement(callExpression(identifier('mapMutations'), [
+        ...(actionName === 'global' ? [] : [
+          stringLiteral(actionName)
+        ]),
+        objectExpression([
+          ...actionArguments.map(arg => objectProperty(identifier(arg.localName), stringLiteral(arg.remoteName)))
+        ])
+      ]))
+    )
+  })
+
   prevClassMethods.forEach(m => {
     const method = objectMethod('method', m.node.key, m.node.params, m.node.body)
 
@@ -649,6 +651,10 @@ function classToOptions(context: Context) {
     method.comments = m.node.comments
     methods.push(method)
   })
+
+  if (methods.length) {
+    newClassProperties.push(property('init', identifier('methods'), objectExpression(methods)))
+  }
 
   if (vuex.Action.size || vuex.ActionAlias.size) {
     importModule('mapActions', 'vuex', context)
@@ -666,7 +672,7 @@ function classToOptions(context: Context) {
     importModule('mapMutations', 'vuex', context)
   }
 
-  importModule('Vue', 'vue', context)
+  importModule('Vue', 'vue', context);
 
   newDefaultExportDeclaration.declaration = expressionStatement(callExpression(
     memberExpression(

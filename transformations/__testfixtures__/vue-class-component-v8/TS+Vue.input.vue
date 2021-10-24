@@ -31,110 +31,148 @@
 </template>
 
 <script lang="ts">
-import { BatchFile } from '@/utils/classes/UploadResults';
-import { BUTTONS_ACTIONS, WARNING_MODALS, ROUTES } from '@/utils/consts';
-import { eventBus } from '@/utils/eventBus';
-import { Subscription } from 'rxjs';
-import Vue from 'vue';
-import Component from 'vue-class-component';
-import { Watch } from 'vue-property-decorator';
-import { Action, namespace } from 'vuex-class';
-import { BATCH_PROCESSING_STATUSES, BatchStatus, SAMPLE_STATUSES } from '../consts/consts';
-import { Filters } from '../models/UploadResultsSummaryState';
-import { VIEWS_TABS_VALUES } from '../services/utils';
+import {
+  FINDINGS_WARNING_MESSAGES_DISPLAY_KEY,
+  FINDINGS_WARNING_TYPE,
+  FINDINGS_WARNING_TYPE_TEXT,
+  QUEUE_CHANNELS,
+} from '@/utils/consts';
+import { formatLocalized } from '@/utils/utils';
+import { Component, Vue } from 'vue-property-decorator';
+import { Publisher } from 'vue-q';
+import { namespace } from 'vuex-class';
 
-const uploadResultSummaryModule = namespace('uploadResultSummaryModule');
-const plateRawDataModule = namespace('plateRawDataModule');
 const patientDetailsModule = namespace('patientDetailsModule');
-const reportsModule = namespace('reportsModule');
-const uploadResultsModule = namespace('uploadResultsModule');
-  
 
 @Component({
   components: {
-    IgcTitleLine: () => import('igentify-ui-core/lib/shared/components/IgcTitleLine/IgcTitleLine.vue'),
-    rbTitle: () => import('@/components/rbTitle.vue'),
-    IgnTitle: () => import('@/components/IgnTitle.vue'),
-    SearchInput: () => import('@/components/SearchInput.vue'),
-    ViewsTabs: () => import('@/components/ViewsTabs.vue'),
-    MutationInfo: () => import('@/components/mutation-info/MutationInfo.vue'),
+    IgrButton: () => import('igentify-ui-core/lib/rainbow/components/IgrButton/IgrButton.vue'),
+    IgcIcon: () => import('igentify-ui-core/lib/shared/components/IgcIcon/IgcIcon.vue'),
   },
 })
-export default class ActionableNotification extends Vue {
-  @Watch('$route')
-  onRouteChanged(route) {
-    if (isLoginFlow(route.name))
-      this.$refs.ignToastr.$refs.toastr.clearAll();
+export default class CardNotifications extends Vue {
+  @patientDetailsModule.State('warnings') warnings!: any[];
+
+  menuOpen = false;
+
+  get buttonStyle() {
+    return {
+      ...(this.menuOpen && this.warnings.length ? {
+        '--button-background-color': '#2196f3',
+        '--button-text-color': '#fff',
+      } : {
+        '--button-background-color': '#fff',
+        '--button-text-color': '#2196f3',
+      }),
+      '--button-label-font-size': '12px',
+      '--button-min-width': '96px',
+      '--button-tooltip-main-color': '#2196f3',
+      '--button-tooltip-border-color': '#2196f3',
+    };
   }
-  
-  created() {
-    var something: boolean;
-    eventBus.$on('on-warning-modal-click', this.onWarningModalClick);
-    configurePermissionRules();
-    configureFeatureRules();
+
+  get FINDINGS_WARNING_TYPE() {
+    return FINDINGS_WARNING_TYPE;
   }
-  
-  updated() {
-    eventBus.$on('on-warning-modal-click', this.onWarningModalClick);
-    configurePermissionRules();
-    configureFeatureRules();
+
+  getWarningIconName(type) {
+    switch (type) {
+      case FINDINGS_WARNING_TYPE.MOSAIC:
+        return 'topic_icons_warning';
+      case FINDINGS_WARNING_TYPE.SMN_REPORT_CARRIER:
+        return 'topic-icons_sample';
+      case FINDINGS_WARNING_TYPE.QUESTIONNAIRE_ALERT:
+      case FINDINGS_WARNING_TYPE.QUESTIONNAIRE_COMMENT:
+        return 'smallfont_flag';
+      case FINDINGS_WARNING_TYPE.MISSING_COUPLE_PARTNER:
+      case FINDINGS_WARNING_TYPE.PAIR_COUPLE:
+      case FINDINGS_WARNING_TYPE.UNPAIR_COUPLE:
+        return 'fontready_couple';
+      case FINDINGS_WARNING_TYPE.ADDITIONAL_TESTS_ALERT:
+        return 'smallfont_massagge';
+      default:
+        return 'topic-icons_sample';
+    }
   }
-  
-  $refs: any;
-  
-  @State('loading') loading: boolean;
-  @State('forceLoading') forceLoading: boolean;
-  @State('message') message: unknown;
-  @State('success') success: unknown;
-  
-  @Action('setMessage') setMessage: any;
-  @Action('clearMessage') clearMessage: any;
-  @Action('navigateTo') navigateTo: ({ name: string }) => void;
-  
-  @uploadResultSummaryModule.Action('realSaveSample') saveSample: (slimSample: SlimSample) => Promise<void>;
-  @uploadResultSummaryModule.Action('doSomething') doSomething: (slimSample: SlimSample) => Promise<void>;
-  @plateRawDataModule.Action('addPatient') addPatient: (slimSample: SlimSample) => Promise<void>;
- 
-  @uploadResultSummaryModule.State('data') currentData: any;
-  @uploadResultSummaryModule.State('incomingSampleStatuses') incomingSampleStatuses: any;
-  @uploadResultSummaryModule.State('search') search!: string;
-  @uploadResultSummaryModule.State('filters') filters!: Filters;
-  @uploadResultSummaryModule.State('data') data!: Array<any>;
-  @plateRawDataModule.State('plateRawData') plateRawData!: any;
-  @patientDetailsModule.State('mutationInfoResult') mutationInfoResult!: any;
-  @uploadResultsModule.State('selectedSuccefulBatchFile') selectedSuccefulBatchFile!: BatchFile;
-  @uploadResultsModule.Getter('versions') versions: Record<string, string>;
-  @uploadResultSummaryModule.State('pollSubscription') pollSubscription!: Subscription | null;
-  @uploadResultsModule.Action('initState') initState: () => void;
-  @uploadResultSummaryModule.Getter('disabledButtons') disabledButtons: boolean;
-  @uploadResultSummaryModule.Getter('batchStatus') batchStatus: BatchStatus;
-  @uploadResultSummaryModule.Action('handleReviewedFiltering') handleReviewedFiltering: any;
-  @uploadResultSummaryModule.Action('clearSearchReviewedFiltering') clearSearchReviewedFiltering: any;
-  @uploadResultSummaryModule.Action('updateSearch') updateSearch: any;
-  @uploadResultSummaryModule.Action('handleManualSearch') handleManualSearch: any;
-  @uploadResultSummaryModule.Action('setBatchId') setBatchId: any;
-  @uploadResultSummaryModule.Action('discardData') discardData: any;
-  @uploadResultSummaryModule.Action('saveData') saveFile: any;
-  @uploadResultSummaryModule.Action('updateMutationInfo') updateMutationInfo: any;
-  @uploadResultSummaryModule.Action('downloadExportedCSV') downloadExportedCSV: (any) => void;
-  @uploadResultSummaryModule.Action('updateData') updateData: () => void;
-  @patientDetailsModule.Action('clearMutationInfoResult')
-  clearMutationInfoResult: any;
-  
-  @Prop() message?: string;
-  @Prop({ default: () => NotificationType.INFO }) notificationType: NotificationType;
-  @Prop() actionType: ActionType;
-  @Prop() counter: number;
-  @Prop() actionTooltip: string;
-  
-  get someProp() {
-    var something;
-    // const vm: Vue | null = null;
-    return { ...NotifictionProps[this.notificationType], ...ActionProps[this.notificationType] };
+
+  getWarningIconStyle(type) {
+    let color = '#ffffff';
+    let backgroundColor = '#511010';
+    let fontSize = '14px';
+
+    switch (type) {
+      case FINDINGS_WARNING_TYPE.SMN_REPORT_CARRIER:
+        color = 'var(--neutral--hugo)';
+        backgroundColor = '#F5CE21';
+        break;
+      case FINDINGS_WARNING_TYPE.MISSING_COUPLE_PARTNER:
+        color = '#9C27B0';
+        backgroundColor = '#fff';
+        fontSize = '23px';
+        break;
+      case FINDINGS_WARNING_TYPE.QUESTIONNAIRE_ALERT:
+      case FINDINGS_WARNING_TYPE.QUESTIONNAIRE_COMMENT:
+        backgroundColor = '#9C27B0';
+        break;
+      case FINDINGS_WARNING_TYPE.PAIR_COUPLE:
+      case FINDINGS_WARNING_TYPE.UNPAIR_COUPLE:
+        color = 'var(--secondary--eric)';
+        backgroundColor = '#ffffff';
+        fontSize = '23px';
+        break;
+      case FINDINGS_WARNING_TYPE.ADDITIONAL_TESTS_ALERT:
+        color = '#9C27B0';
+        backgroundColor = '#ffffff';
+        fontSize = '23px';
+        break;
+    }
+
+    return {
+      color,
+      backgroundColor,
+      fontSize,
+    };
   }
-  
-  hello() {
-    console.log('Hello');
+
+  getWarningLabelText(type) {
+    return FINDINGS_WARNING_TYPE_TEXT[FINDINGS_WARNING_TYPE[type]];
+  }
+
+  getWarningDescription(errorWarning) {
+    if (errorWarning.warningType === FINDINGS_WARNING_TYPE.ADDITIONAL_TESTS_ALERT) {
+      return errorWarning.attributes.text;
+    }
+
+    if (errorWarning.attributes.reason) {
+      return `Reason: ${errorWarning?.attributes?.reason}`;
+    }
+
+    return errorWarning?.attributes?.text
+      || this.ignI18n.t(FINDINGS_WARNING_MESSAGES_DISPLAY_KEY[errorWarning.warningType], errorWarning.attributes);
+  }
+
+  getIsMissingCouplePartnerWarning(type) {
+    return type === FINDINGS_WARNING_TYPE.MISSING_COUPLE_PARTNER;
+  }
+
+  getIsCoupleAlert(warning){
+    return [
+      FINDINGS_WARNING_TYPE.PAIR_COUPLE,
+      FINDINGS_WARNING_TYPE.UNPAIR_COUPLE,
+    ].includes(warning.warningType);
+  }
+
+  getFormattedDate(date) {
+    return formatLocalized(date, 'YYYY-MM-DD');
+  }
+
+  getAdditionalTestsItems(warning) {
+    return warning.attributes.items ? JSON.parse(warning.attributes.items) : [];
+  }
+
+  @Publisher(QUEUE_CHANNELS.WARNING_CHANNEL)
+  onWarningClick(queue, warning) {
+    queue.send(warning);
   }
 }
 </script>

@@ -152,7 +152,7 @@ function classToOptions(context: Context) {
     const propName = prop.key.name
 
     if (prop.decorators) {
-      const propDecorator = prop.decorators.find(d => d.expression.callee.name === 'Prop')
+      const propDecorator = prop.decorators.find(d => d.expression.callee?.name === 'Prop')
       let type = prop.typeAnnotation?.typeAnnotation?.type.replace(/^TS(.*)Keyword$/, '$1') || 'Object'
 
       if (type === 'Any') {
@@ -368,25 +368,19 @@ function classToOptions(context: Context) {
 
   // Hooks
   prevClassHooks.forEach(m => {
-    newClassProperties.push(objectMethod('method', m.value.key, [], m.value.body));
-  })
-
-  // console.log(
-  //   context
-  //     .root
-  //     .get(0)
-  //     .node
-  //     .program
-  //     .body[0]
-  //   .body
-  //   .body[0]
-  // )
-
-  // Methods
-  prevClassMethods.forEach(m => {
     const method = objectMethod('method', m.node.key, [], m.node.body);
 
     method.async = m.node.async;
+    newClassProperties.push(method);
+  })
+
+  // Methods
+  prevClassMethods.forEach(m => {
+    // console.log(m)
+    const method = objectMethod('method', m.node.key, [], m.node.body);
+
+    method.async = m.node.async;
+    method.comments = m.node.comments;
     methods.push(method)
   })
 

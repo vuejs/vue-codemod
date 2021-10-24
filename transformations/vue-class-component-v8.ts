@@ -112,7 +112,9 @@ const supportedDecorators = [
   'State',
   'Action',
   'Getter',
-  'Mutation'
+  'Mutation',
+  'Provide',
+  'Inject'
 ]
 
 function classToOptions(context: Context) {
@@ -134,6 +136,7 @@ function classToOptions(context: Context) {
   const data: Property[] = []
   const mixins: string[] = []
   const refs: VueClassProperty[] = []
+  const provides: VueClassProperty[] = []
 
   const vuex = {
     Action: new Map<string, VuexMappingItem>(),
@@ -190,7 +193,7 @@ function classToOptions(context: Context) {
       const decoratorName = prop.decorators[0].expression.callee.object?.name || 'global'
       const localName = prop.key.name
 
-      const argumentValue = prop.decorators[0].expression.arguments?.[0]?.value || localName;
+      const argumentValue = prop.decorators[0].expression.arguments?.[0]?.value || localName
 
       if (!supportedDecorators.includes(accessorType)) {
         // Temp condition
@@ -203,6 +206,9 @@ function classToOptions(context: Context) {
       if (accessorType === 'Ref') {
         refs.push(prop)
         return
+      } else if (accessorType === 'Provide') {
+        provides.push(prop)
+        return
       }
 
       // Vuex
@@ -210,7 +216,7 @@ function classToOptions(context: Context) {
         'Action',
         'State',
         'Getter',
-        'Mutation',
+        'Mutation'
       ]
 
       if (vuexAccessors.includes(accessorType)) {
@@ -336,6 +342,44 @@ function classToOptions(context: Context) {
       property('init', identifier('mixins'),
         arrayExpression(mixins.map(mixin => identifier(mixin)))
       )
+    )
+  }
+
+  // Provide
+  if (provides.length) {
+    newClassProperties.push(
+      objectMethod(
+        'method',
+        identifier('provide'),
+        [],
+        blockStatement([
+          returnStatement(
+            objectExpression(
+              Array.from(provides)
+                .map(provide => property(
+                  'init',
+                  provides[0].decorators[0].expression.arguments[0].value
+                    ? identifier(provides[0].decorators[0].expression.arguments[0].value)
+                    : provide.key,
+                  memberExpression(
+                    thisExpression(),
+                    provide.key
+                  )
+                ))
+            )
+          )
+        ])
+      )
+    )
+
+    data.push(
+      ...Array.from(provides)
+        .map(provide => property(
+            'init',
+            provide.key,
+            provide.value
+          )
+        )
     )
   }
 

@@ -8,7 +8,8 @@ import {
   ClassProperty,
   Decorator,
   exportDefaultDeclaration,
-  ExportDefaultDeclaration, expressionStatement,
+  ExportDefaultDeclaration,
+  expressionStatement,
   Identifier,
   identifier,
   ImportDeclaration,
@@ -18,10 +19,10 @@ import {
   objectMethod, ObjectProperty,
   objectProperty,
   Property,
-  property,
+  property, returnStatement,
   spreadElement,
-  stringLiteral, variableDeclaration,
-  VariableDeclaration, variableDeclarator
+  stringLiteral, thisExpression, tsTypeAnnotation, tsTypeReference,
+  VariableDeclaration
 } from 'jscodeshift'
 import type { ASTTransformation, Context } from '../src/wrapAstTransformation'
 import wrap from '../src/wrapAstTransformation'
@@ -103,6 +104,7 @@ function classToOptions(context: Context) {
   const props: Property[] = []
   const data: Property[] = []
   const mixins: string[] = []
+  const refs: VueClassProperty[] = [];
 
   const vuex = {
     Action: new Map<string, VuexMappingItem>(),
@@ -166,20 +168,30 @@ function classToOptions(context: Context) {
         const decoratorName = prop.decorators[0].expression.callee.object?.name || 'global';
         const localName = prop.key.name;
         const argumentValue = prop.decorators[0].expression.arguments[0].value;
+
+        if (accessorType === 'Ref') {
+          refs.push(prop);
+          return;
+        }
+
         const isAliased = localName !== argumentValue;
         const accessor = `${accessorType}${isAliased ? 'Alias' : ''}` as 'Action' | 'State' | 'Getter' | 'ActionAlias' | 'StateAlias' | 'GetterAlias';
 
-        const existingModule = vuex[accessor].get(decoratorName);
-        if (existingModule) {
-          existingModule.push({
-            remoteName: argumentValue,
-            localName,
-          });
+        if (vuex[accessor]) {
+          const existingModule = vuex[accessor].get(decoratorName);
+          if (existingModule) {
+            existingModule.push({
+              remoteName: argumentValue,
+              localName,
+            });
+          } else {
+            vuex[accessor].set(decoratorName, [{
+              remoteName: argumentValue,
+              localName,
+            }])
+          }
         } else {
-          vuex[accessor].set(decoratorName, [{
-            remoteName: argumentValue,
-            localName,
-          }])
+          console.log(`Unknown vuex accessor: ${accessor}`);
         }
       }
 
@@ -330,6 +342,30 @@ function classToOptions(context: Context) {
     computed.push(objectMethod('method', c.node.key, [], c.node.body))
   })
 
+  refs.forEach((ref) => {
+    const method = objectMethod(
+      'method',
+      identifier(ref.decorators[0].expression.arguments[0].value),
+      [],
+      blockStatement([
+        returnStatement(
+          memberExpression(
+            memberExpression(
+              thisExpression(),
+              identifier('$refs'),
+            ),
+            ref.key
+          )
+        )
+      ])
+    )
+
+    method.returnType = tsTypeAnnotation(
+      tsTypeReference(identifier(ref.typeAnnotation.typeAnnotation.typeName.name))
+    );
+    computed.push(method)
+  })
+
   if (computed.length) {
     newClassProperties.push(property('init', identifier('computed'), objectExpression(computed)));
   }
@@ -376,11 +412,12 @@ function classToOptions(context: Context) {
 
   // Methods
   prevClassMethods.forEach(m => {
-    // console.log(m)
-    const method = objectMethod('method', m.node.key, [], m.node.body);
+    // console.log(m.node.decorators)
+    const method = objectMethod('method', m.node.key, m.node.params, m.node.body);
 
     method.async = m.node.async;
     method.comments = m.node.comments;
+    method.decorators = m.node.decorators;
     methods.push(method)
   })
 

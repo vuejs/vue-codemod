@@ -17,7 +17,6 @@ import {
   ImportDeclaration,
   literal,
   memberExpression,
-  Node,
   ObjectExpression,
   objectExpression,
   ObjectMethod,
@@ -69,7 +68,7 @@ function removeImports(context: Context) {
     'vuex-class',
     'vue',
     'vuex',
-    'vue-q',
+    'vue-q'
   ]
 
   context
@@ -137,6 +136,7 @@ function classToOptions(context: Context) {
   const mixins: string[] = []
   const refs: VueClassProperty[] = []
   const provides: VueClassProperty[] = []
+  const injects: VueClassProperty[] = []
 
   const vuex = {
     Action: new Map<string, VuexMappingItem>(),
@@ -207,6 +207,9 @@ function classToOptions(context: Context) {
       } else if (accessorType === 'Provide') {
         provides.push(prop)
         return
+      } else if (accessorType === 'Inject') {
+        injects.push(prop)
+        return
       }
 
       // Vuex
@@ -246,7 +249,7 @@ function classToOptions(context: Context) {
       let rawType: any
 
       if (decoratorPropArgument?.type === 'Identifier') {
-        rawType = decoratorPropArgument.name;
+        rawType = decoratorPropArgument.name
       } else if (decoratorPropArgument?.type === 'ArrayExpression') {
         rawType = propDecorator.expression.arguments?.[0]
       } else {
@@ -258,12 +261,12 @@ function classToOptions(context: Context) {
         }
       }
 
-      let type: any;
+      let type: any
 
       if (rawType.type === 'ArrayExpression') {
-        type = rawType;
+        type = rawType
       } else if (rawType.match(/^TS(.*)Keyword$/)) {
-        const keywordMatch = rawType.match(/^TS(.*)Keyword$/);
+        const keywordMatch = rawType.match(/^TS(.*)Keyword$/)
 
         type = identifier(keywordMatch[1])
       } else if (rawType === 'TSUnionType') {
@@ -287,7 +290,7 @@ function classToOptions(context: Context) {
       } else if (rawType.match(/^TS/)) {
         type = identifier('Object')
       } else {
-        type = identifier(rawType);
+        type = identifier(rawType)
       }
 
       const typedProp = tsAsExpression(
@@ -387,6 +390,24 @@ function classToOptions(context: Context) {
             provide.value
           )
         )
+    )
+  }
+
+  // Inject
+  if (injects.length) {
+    newClassProperties.push(
+      property(
+        'init',
+        identifier('inject'),
+        objectExpression(
+          Array.from(injects)
+            .map(inject => property(
+              'init',
+              inject.key,
+              stringLiteral(inject.key.name)
+            ))
+        )
+      )
     )
   }
 
@@ -540,13 +561,13 @@ function classToOptions(context: Context) {
       ref.decorators[0].expression.arguments?.[0]?.value
         ? identifier(ref.decorators[0].expression.arguments?.[0]?.value)
         : ref.key
-    );
+    )
 
     if (ref.typeAnnotation) {
       statement = tsAsExpression(
         statement,
         tsTypeReference(
-          identifier('PropType'),
+          identifier('PropType')
         )
       )
     }

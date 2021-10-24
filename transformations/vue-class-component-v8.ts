@@ -1,7 +1,9 @@
 import {
   arrayExpression,
-  arrowFunctionExpression, blockStatement,
-  booleanLiteral, callExpression,
+  arrowFunctionExpression,
+  blockStatement,
+  booleanLiteral,
+  callExpression,
   CallExpression,
   ClassDeclaration,
   ClassMethod,
@@ -13,20 +15,30 @@ import {
   Identifier,
   identifier,
   ImportDeclaration,
-  literal, memberExpression,
+  literal,
+  memberExpression,
+  Node,
   ObjectExpression,
-  objectExpression, ObjectMethod,
-  objectMethod, ObjectProperty,
+  objectExpression,
+  ObjectMethod,
+  objectMethod,
+  ObjectProperty,
   objectProperty,
   Property,
-  property, returnStatement,
+  property,
+  returnStatement,
   spreadElement,
-  stringLiteral, thisExpression, tsTypeAnnotation, tsTypeReference,
+  stringLiteral,
+  thisExpression,
+  tsAsExpression,
+  tsTypeAnnotation,
+  tsTypeParameterInstantiation,
+  tsTypeReference,
   VariableDeclaration
 } from 'jscodeshift'
 import type { ASTTransformation, Context } from '../src/wrapAstTransformation'
 import wrap from '../src/wrapAstTransformation'
-import { transformAST as removeExtraneousImport } from './remove-extraneous-import'
+import { transformAST as addImport } from './add-import'
 
 type VueClassProperty = ClassProperty & {
   optional: boolean;
@@ -36,14 +48,14 @@ type VueClassProperty = ClassProperty & {
   decorators: ({
     expression: {
       callee: Identifier,
-      arguments: ({
+      arguments: (({
         properties: Property[]
-      } & ObjectExpression)[],
+      } & ObjectExpression) | Identifier)[],
     } & CallExpression,
   } & Decorator)[];
 }
 
-type VuexMappingItem = {remoteName: string, localName: string}[]
+type VuexMappingItem = { remoteName: string, localName: string }[]
 
 export const transformAST: ASTTransformation = (context: Context) => {
   removeImports(context)
@@ -56,6 +68,8 @@ function removeImports(context: Context) {
     'vue-property-decorator',
     'vue-mixin-decorator',
     'vuex-class',
+    'vue',
+    'vuex'
   ]
 
   context
@@ -64,9 +78,15 @@ function removeImports(context: Context) {
       node.source?.value && removableModules.includes(String(node.source?.value))
     )
     .remove()
+}
 
-  removeExtraneousImport(context, {
-    localBinding: 'Vue',
+function importModule(name: string, source: string, context: Context) {
+  addImport(context, {
+    specifier: {
+      type: 'named',
+      imported: name
+    },
+    source: source
   })
 }
 
@@ -83,7 +103,16 @@ const vueHooks = [
   // Vue-router
   'beforeRouteEnter',
   'beforeRouteUpdate',
-  'beforeRouteLeave',
+  'beforeRouteLeave'
+]
+
+const supportedDecorators = [
+  'Prop',
+  'Ref',
+  'State',
+  'Action',
+  'Getter',
+  'Mutation'
 ]
 
 function classToOptions(context: Context) {
@@ -104,7 +133,7 @@ function classToOptions(context: Context) {
   const props: Property[] = []
   const data: Property[] = []
   const mixins: string[] = []
-  const refs: VueClassProperty[] = [];
+  const refs: VueClassProperty[] = []
 
   const vuex = {
     Action: new Map<string, VuexMappingItem>(),
@@ -113,6 +142,8 @@ function classToOptions(context: Context) {
     StateAlias: new Map<string, VuexMappingItem>(),
     Getter: new Map<string, VuexMappingItem>(),
     GetterAlias: new Map<string, VuexMappingItem>(),
+    Mutation: new Map<string, VuexMappingItem>(),
+    MutationAlias: new Map<string, VuexMappingItem>()
   }
   // We need this object as a reference for vuex accessors (actions/getters/etc) class members decorators
   const vuexNamespaceMap: Record<string, string> = {}
@@ -121,8 +152,7 @@ function classToOptions(context: Context) {
     if (dec.superClass?.callee?.name === 'Mixins') {
       mixins.push(dec.superClass.arguments[0].name)
     }
-  });
-
+  })
 
   if (variableDeclarations.length) {
     context
@@ -134,17 +164,17 @@ function classToOptions(context: Context) {
       .filter((item: VariableDeclaration) => item.type === 'VariableDeclaration')
       .forEach((vd: VariableDeclaration) => {
         // We assume there are no multiple declarations like "const a = 1, b = 2" __for vuex namespaces__
-        const [declaration] = vd.declarations;
+        const [declaration] = vd.declarations
 
         // We're interested in namespace('...') call expressions __only with arguments__
         if (
           declaration.init.type !== 'CallExpression'
           || !declaration.init.arguments?.[0]?.value
           || declaration.init.callee.name !== 'namespace'
-        ) return;
+        ) return
 
-        vuexNamespaceMap[declaration.id.name] = declaration.init.arguments[0].value;
-        context.root.find(VariableDeclaration, (value => value.declarations?.[0].init?.callee?.name === 'namespace')).remove();
+        vuexNamespaceMap[declaration.id.name] = declaration.init.arguments[0].value
+        context.root.find(VariableDeclaration, (value => value.declarations?.[0].init?.callee?.name === 'namespace')).remove()
       })
   }
 
@@ -154,51 +184,104 @@ function classToOptions(context: Context) {
     const propName = prop.key.name
 
     if (prop.decorators) {
-      const propDecorator = prop.decorators.find(d => d.expression.callee?.name === 'Prop')
-      let type = prop.typeAnnotation?.typeAnnotation?.type.replace(/^TS(.*)Keyword$/, '$1') || 'Object'
+      const accessorType = prop.decorators[0].expression.callee.property
+        ? prop.decorators[0].expression.callee.property?.name
+        : prop.decorators[0].expression.callee.name
+      const decoratorName = prop.decorators[0].expression.callee.object?.name || 'global'
+      const localName = prop.key.name
 
-      if (type === 'Any') {
-        type = 'Object';
+      const argumentValue = prop.decorators[0].expression.arguments?.[0]?.value || localName;
+
+      if (!supportedDecorators.includes(accessorType)) {
+        // Temp condition
+        if (accessorType === 'Consumer') {
+          return
+        }
+        throw new Error(`Decorator ${accessorType} is not supported.`)
       }
 
-      if (prop.decorators[0].expression.arguments?.[0]?.type as string === 'StringLiteral') {
-        const accessorType = prop.decorators[0].expression.callee.property
-          ? prop.decorators[0].expression.callee.property?.name
-          : prop.decorators[0].expression.callee.name;
-        const decoratorName = prop.decorators[0].expression.callee.object?.name || 'global';
-        const localName = prop.key.name;
-        const argumentValue = prop.decorators[0].expression.arguments[0].value;
+      if (accessorType === 'Ref') {
+        refs.push(prop)
+        return
+      }
 
-        if (accessorType === 'Ref') {
-          refs.push(prop);
-          return;
-        }
+      const isAliased = localName !== argumentValue
+      const accessor = `${accessorType}${isAliased ? 'Alias' : ''}` as 'Action' | 'State' | 'Getter' | 'Mutation' | 'ActionAlias' | 'StateAlias' | 'GetterAlias' | 'MutationAlias'
 
-        const isAliased = localName !== argumentValue;
-        const accessor = `${accessorType}${isAliased ? 'Alias' : ''}` as 'Action' | 'State' | 'Getter' | 'ActionAlias' | 'StateAlias' | 'GetterAlias';
-
-        if (vuex[accessor]) {
-          const existingModule = vuex[accessor].get(decoratorName);
-          if (existingModule) {
-            existingModule.push({
-              remoteName: argumentValue,
-              localName,
-            });
-          } else {
-            vuex[accessor].set(decoratorName, [{
-              remoteName: argumentValue,
-              localName,
-            }])
-          }
+      if (vuex[accessor]) {
+        const existingModule = vuex[accessor].get(decoratorName)
+        if (existingModule) {
+          existingModule.push({
+            remoteName: argumentValue,
+            localName
+          })
         } else {
-          console.log(`Unknown vuex accessor: ${accessor}`);
+          vuex[accessor].set(decoratorName, [{
+            remoteName: argumentValue,
+            localName
+          }])
+        }
+      } else {
+        console.log(`Unknown vuex accessor: ${accessor}`)
+      }
+
+      const propDecorator = prop.decorators.find(d => d.expression.callee?.name === 'Prop')
+
+      if (!propDecorator) return
+
+      const decoratorPropArgument = propDecorator.expression?.arguments?.[0]!
+      let rawType: string
+
+      if (decoratorPropArgument?.type === 'Identifier') {
+        rawType = decoratorPropArgument.name
+      } else {
+        const typeKind = propDecorator.expression.arguments[0]?.properties?.find(p => p.key.name === 'type')
+        if (typeKind) {
+          rawType = typeKind.value.name
+        } else {
+          rawType = prop.typeAnnotation?.typeAnnotation?.type || 'Object'
         }
       }
 
-      if (!propDecorator) return;
+      let type: Node = identifier(rawType)
+      const keywordMatch = rawType.match(/^TS(.*)Keyword$/)
+
+      if (keywordMatch) {
+        type = identifier(keywordMatch[1])
+      } else if (rawType === 'TSUnionType') {
+        const rawUnionTypes = prop.typeAnnotation?.typeAnnotation?.types || []
+        type = arrayExpression(rawUnionTypes.map(raw => {
+          const utKeywordMatch = raw.type.match(/^TS(.*)Keyword$/)
+          let unionType = utKeywordMatch ? utKeywordMatch[1] : 'Object'
+
+          if (raw.type === 'TSTypeReference') {
+            unionType = raw.typeName.name
+          }
+
+          if (['Undefined', 'Null'].includes(unionType)) {
+            unionType = unionType.toLowerCase()
+          }
+
+          return identifier(unionType)
+        }))
+      } else if (rawType === 'TSTypeReference') {
+        type = identifier(prop.typeAnnotation?.typeAnnotation?.typeName?.name || 'Object')
+      } else if (rawType.match(/^TS/)) {
+        type = identifier('Object')
+      }
+
+      const typedProp = tsAsExpression(
+        type,
+        tsTypeReference(
+          identifier('PropType'),
+          tsTypeParameterInstantiation([
+            prop.typeAnnotation?.typeAnnotation
+          ])
+        )
+      )
 
       const propProperties: Property[] = [
-        property('init', identifier('type'), identifier(type.match(/^TS/) ? 'Object' : type)),
+        property('init', identifier('type'), typedProp),
         property('init', identifier('required'), booleanLiteral(isRequired))
       ]
 
@@ -244,18 +327,18 @@ function classToOptions(context: Context) {
       property('init', identifier('mixins'),
         arrayExpression(mixins.map(mixin => identifier(mixin)))
       )
-    );
+    )
   }
 
   // Props
   newClassProperties.push(
     property('init', identifier('name'), stringLiteral(prevClass.get(0).node.id.name)),
     ...(props.length ? [property('init', identifier('props'), objectExpression(props))] : []),
-    ...(data.length ? [property('init', identifier('data'), arrowFunctionExpression([], objectExpression(data)))] : []),
+    ...(data.length ? [property('init', identifier('data'), arrowFunctionExpression([], objectExpression(data)))] : [])
   )
 
-  const computed: any[] = [];
-  const methods: any[] = [];
+  const computed: any[] = []
+  const methods: any[] = []
 
   // Computed
   vuex.Action.forEach((actionArguments, actionName: string) => {
@@ -267,7 +350,7 @@ function classToOptions(context: Context) {
         ...(actionName === 'global' ? [] : [
           stringLiteral(vuexNamespaceMap[actionName])
         ]),
-        arrayExpression(actionArguments.map(a => stringLiteral(a.remoteName))),
+        arrayExpression(actionArguments.map(a => stringLiteral(a.remoteName)))
       ]))
     )
   })
@@ -289,6 +372,33 @@ function classToOptions(context: Context) {
     )
   })
 
+  vuex.Mutation.forEach((actionArguments, actionName: string) => {
+    methods.push(
+      spreadElement(callExpression(identifier('mapMutations'), [
+        ...(actionName === 'global' ? [] : [
+          stringLiteral(actionName)
+        ]),
+        arrayExpression(actionArguments.map(a => stringLiteral(a.remoteName)))
+      ]))
+    )
+  })
+
+  vuex.MutationAlias.forEach((actionArguments, actionName: string) => {
+    methods.push(
+      spreadElement(callExpression(identifier('mapMutations'), [
+        ...(actionName === 'global' ? [] : [
+          stringLiteral(actionName)
+        ]),
+        objectExpression([
+          ...actionArguments.map(arg => objectProperty(identifier(arg.localName), stringLiteral(arg.remoteName)))
+        ])
+      ]))
+    )
+  })
+
+  if (methods.length) {
+    newClassProperties.push(property('init', identifier('methods'), objectExpression(methods)))
+  }
 
   vuex.State.forEach((actionArguments, actionName: string) => {
     computed.push(
@@ -296,7 +406,7 @@ function classToOptions(context: Context) {
         ...(actionName === 'global' ? [] : [
           stringLiteral(actionName)
         ]),
-        arrayExpression(actionArguments.map(a => stringLiteral(a.remoteName))),
+        arrayExpression(actionArguments.map(a => stringLiteral(a.remoteName)))
       ]))
     )
   })
@@ -320,7 +430,7 @@ function classToOptions(context: Context) {
         ...(actionName === 'global' ? [] : [
           stringLiteral(actionName)
         ]),
-        arrayExpression(actionArguments.map(a => stringLiteral(a.remoteName))),
+        arrayExpression(actionArguments.map(a => stringLiteral(a.remoteName)))
       ]))
     )
   })
@@ -339,22 +449,28 @@ function classToOptions(context: Context) {
   })
 
   prevClassComputed.forEach(c => {
-    computed.push(objectMethod('method', c.node.key, [], c.node.body))
+    const method = objectMethod('method', c.node.key, [], c.node.body)
+
+    method.async = c.node.async
+    method.comments = c.node.comments
+    computed.push(method)
   })
 
   refs.forEach((ref) => {
     const method = objectMethod(
       'method',
-      identifier(ref.decorators[0].expression.arguments[0].value),
+      ref.key,
       [],
       blockStatement([
         returnStatement(
           memberExpression(
             memberExpression(
               thisExpression(),
-              identifier('$refs'),
+              identifier('$refs')
             ),
-            ref.key
+            ref.decorators[0].expression.arguments?.[0]?.value
+              ? identifier(ref.decorators[0].expression.arguments?.[0]?.value)
+              : ref.key
           )
         )
       ])
@@ -362,68 +478,80 @@ function classToOptions(context: Context) {
 
     method.returnType = tsTypeAnnotation(
       tsTypeReference(identifier(ref.typeAnnotation.typeAnnotation.typeName.name))
-    );
+    )
     computed.push(method)
   })
 
   if (computed.length) {
-    newClassProperties.push(property('init', identifier('computed'), objectExpression(computed)));
+    newClassProperties.push(property('init', identifier('computed'), objectExpression(computed)))
   }
 
   // Watch
-  const watches: (ObjectProperty | ObjectMethod)[] = [];
+  const watches: (ObjectProperty | ObjectMethod)[] = []
   prevClassWatches.map(c => {
-    const watchName = c.node.decorators[0].expression.arguments[0].value;
-    const watchOptions = c.node.decorators[0].expression.arguments[1]?.properties || [];
-    const key = watchName.includes('.') ? stringLiteral(watchName) : identifier(watchName);
-    let watch;
+    const watchName = c.node.decorators[0].expression.arguments[0].value
+    const watchOptions = c.node.decorators[0].expression.arguments[1]?.properties || []
+    const key = watchName.includes('.') ? stringLiteral(watchName) : identifier(watchName)
+    let watch
 
     // We need a object-style watcher
     if (watchOptions.length) {
-      const method = objectMethod('method', identifier('handler'), c.node.params, c.node.body);
+      const method = objectMethod('method', identifier('handler'), c.node.params, c.node.body)
 
-      method.async = c.node.async;
+      method.async = c.node.async
       watch = objectProperty(
         key,
         objectExpression([
           ...watchOptions,
-          method,
+          method
         ])
       )
     } else {
-      watch = objectMethod('method', key, c.node.params, c.node.body);
-      watch.async = c.node.async;
+      watch = objectMethod('method', key, c.node.params, c.node.body)
+      watch.async = c.node.async
     }
 
-    watches.push(watch);
+    watches.push(watch)
   })
 
   if (watches.length) {
-    newClassProperties.push(property('init', identifier('watch'), objectExpression(watches)));
+    newClassProperties.push(property('init', identifier('watch'), objectExpression(watches)))
   }
 
   // Hooks
   prevClassHooks.forEach(m => {
-    const method = objectMethod('method', m.node.key, [], m.node.body);
+    const method = objectMethod('method', m.node.key, [], m.node.body)
 
-    method.async = m.node.async;
-    newClassProperties.push(method);
+    method.async = m.node.async
+    newClassProperties.push(method)
   })
 
   // Methods
   prevClassMethods.forEach(m => {
-    // console.log(m.node.decorators)
-    const method = objectMethod('method', m.node.key, m.node.params, m.node.body);
+    const method = objectMethod('method', m.node.key, m.node.params, m.node.body)
 
-    method.async = m.node.async;
-    method.comments = m.node.comments;
-    method.decorators = m.node.decorators;
+    method.async = m.node.async
+    method.comments = m.node.comments
     methods.push(method)
   })
 
-  if (methods.length) {
-    newClassProperties.push(property('init', identifier('methods'), objectExpression(methods)))
+  if (vuex.Action.size || vuex.ActionAlias.size) {
+    importModule('mapActions', 'vuex', context)
   }
+
+  if (vuex.Getter.size || vuex.GetterAlias.size) {
+    importModule('mapGetters', 'vuex', context)
+  }
+
+  if (vuex.State.size || vuex.StateAlias.size) {
+    importModule('mapState', 'vuex', context)
+  }
+
+  if (vuex.Mutation.size || vuex.MutationAlias.size) {
+    importModule('mapMutations', 'vuex', context)
+  }
+
+  importModule('Vue', 'vue', context)
 
   newDefaultExportDeclaration.declaration = expressionStatement(callExpression(
     memberExpression(
@@ -433,7 +561,7 @@ function classToOptions(context: Context) {
     [
       objectExpression(newClassProperties)
     ]
-  ));
+  ))
   prevDefaultExportDeclaration.replaceWith(newDefaultExportDeclaration)
 }
 

@@ -31,148 +31,213 @@
 </template>
 
 <script lang="ts">
-import {
-  FINDINGS_WARNING_MESSAGES_DISPLAY_KEY,
-  FINDINGS_WARNING_TYPE,
-  FINDINGS_WARNING_TYPE_TEXT,
-  QUEUE_CHANNELS,
-} from '@/utils/consts';
-import { formatLocalized } from '@/utils/utils';
-import { Component, Vue } from 'vue-property-decorator';
-import { Publisher } from 'vue-q';
-import { namespace } from 'vuex-class';
-
-const patientDetailsModule = namespace('patientDetailsModule');
+import { organizationServices } from '@/services/organizationServices';
+import { usersServices } from '@/services/usersServices';
+import { mixins } from '@/utils/mixins';
+import { getOrganization } from '@/utils/utils';
+import { Component, Prop, Vue, Watch } from 'vue-property-decorator';
 
 @Component({
-  components: {
-    IgrButton: () => import('igentify-ui-core/lib/rainbow/components/IgrButton/IgrButton.vue'),
-    IgcIcon: () => import('igentify-ui-core/lib/shared/components/IgcIcon/IgcIcon.vue'),
-  },
+  mixins: [mixins],
 })
-export default class CardNotifications extends Vue {
-  @patientDetailsModule.State('warnings') warnings!: any[];
+export default class PasswordInput extends Vue {
+  @Prop()
+  private contextEmail!: Dadsfasd | string | undefined | null;
+  
+  @Prop({ default: false })
+  private disabled!: boolean;
 
-  menuOpen = false;
+  @Prop()
+  private initialValue!: string;
 
-  get buttonStyle() {
-    return {
-      ...(this.menuOpen && this.warnings.length ? {
-        '--button-background-color': '#2196f3',
-        '--button-text-color': '#fff',
-      } : {
-        '--button-background-color': '#fff',
-        '--button-text-color': '#2196f3',
-      }),
-      '--button-label-font-size': '12px',
-      '--button-min-width': '96px',
-      '--button-tooltip-main-color': '#2196f3',
-      '--button-tooltip-border-color': '#2196f3',
+  @Prop({ default: '' })
+  private label!: MyModel;
+
+  @Prop()
+  private theme!: string | undefined;
+
+  @Prop()
+  private ignIcon!: string | undefined;
+
+  @Prop()
+  private autocomplete!: string | undefined;
+
+  private policyConfig: any = {};
+
+  private showTooltip = false;
+
+  private passwordValue = '';
+
+  private validated = false;
+
+  private waitedForInitialFocus = false;
+
+  private errors = [];
+
+  private passwordVisible = false;
+
+  validateEmail: any; // present in mixin, avoid ts error
+
+  /* always show keys */
+  private tooltipKeys = [];
+
+  @Watch('contextEmail')
+  emailUpdated(newEmail) {
+    // please note that validateEmail mixin returns falsy when email is valid
+    if (this.passwordValue && !this.validateEmail(newEmail)) {
+      this.checkPasswordPolicy();
+    }
+  }
+
+  @Watch('passwordValue')
+  passwordValueUpdated(newPassword) {
+    this.$emit('input', newPassword);
+
+  }
+
+  get validPassword() {
+    return this.passwordValue && this.validated && !this.errors.length;
+  }
+
+  get eyeToggleClass() {
+    return `icon-${this.passwordVisible ? 'smallfont_openeye' : 'smallfont_closedeye'}`;
+  }
+
+  created() {
+    this.passwordValue = this.initialValue;
+  }
+
+  get organizationId() {
+    const organization = getOrganization();
+
+    return organization && organization.id;
+  }
+
+  get passwordErrorString() {
+    if (!this.passwordValue) return '';
+
+    const translatedErrorRules = this.errors.map(key => {
+      return this.policyConfig[key]
+        ? this.ignI18n.t(`passwordPolicy.${key}`, this.policyConfig[key])
+        : key;
+    });
+
+    return translatedErrorRules.join(', ');
+  }
+
+  get hintString() {
+    return this.validPassword && this.ignI18n.t('passwordIsSecure');
+  }
+
+  async mounted() {
+    let policy = {
+      configuration: {},
     };
+
+    try {
+      policy = await organizationServices.getPasswordPolicy();
+    } catch (e) {
+      this.tooltipKeys = []; // clear default keys. Don't show tooltip without the config.
+      return;
+    }
+
+    this.policyConfig = policy && policy.configuration;
+
+    // normalize tooltip info
+    this.buildTooltipInfo();
   }
 
-  get FINDINGS_WARNING_TYPE() {
-    return FINDINGS_WARNING_TYPE;
-  }
+  buildTooltipInfo() {
+    const alwaysOnKeys = [];
 
-  getWarningIconName(type) {
-    switch (type) {
-      case FINDINGS_WARNING_TYPE.MOSAIC:
-        return 'topic_icons_warning';
-      case FINDINGS_WARNING_TYPE.SMN_REPORT_CARRIER:
-        return 'topic-icons_sample';
-      case FINDINGS_WARNING_TYPE.QUESTIONNAIRE_ALERT:
-      case FINDINGS_WARNING_TYPE.QUESTIONNAIRE_COMMENT:
-        return 'smallfont_flag';
-      case FINDINGS_WARNING_TYPE.MISSING_COUPLE_PARTNER:
-      case FINDINGS_WARNING_TYPE.PAIR_COUPLE:
-      case FINDINGS_WARNING_TYPE.UNPAIR_COUPLE:
-        return 'fontready_couple';
-      case FINDINGS_WARNING_TYPE.ADDITIONAL_TESTS_ALERT:
-        return 'smallfont_massagge';
-      default:
-        return 'topic-icons_sample';
+    const showBasedOnFlag = [
+      'LENGTH_RANGE',
+      'UPPERCASE',
+      'LOWERCASE',
+      'NUMBERS',
+      'SPECIAL_CHARACTER',
+      'CONTEXT_WORD',
+      'REPETITIVE_CHARACTER',
+      'SEQUENTIAL_CHARACTER',
+    ];
+
+    const numberStrings = [
+      'UPPERCASE',
+      'LOWERCASE',
+      'NUMBERS',
+      'SPECIAL_CHARACTER',
+    ];
+
+    numberStrings.forEach((key: any) => {
+      if (!this.policyConfig[key]) {
+        return;
+      }
+      this.policyConfig[key][`${key}_MIN_AS_WORD`] = this.ignI18n.t(`numberStrings.${this.policyConfig[key][`${key}_MIN`]}`);
+    });
+
+    this.tooltipKeys = [...alwaysOnKeys];
+    showBasedOnFlag.forEach(((key: string) => {
+      // check the policy to see what other rules are configured for this organization
+      if (Object.keys(this.policyConfig).includes(key)) {
+        this.tooltipKeys.push(key);
+      }
+    }));
+
+    if (this.policyConfig['BLOCK_LIST']) {
+      this.policyConfig['BLOCK_LIST']['BLOCK_LIST_DETAILS'] = this.policyConfig['BLOCK_LIST']['BLOCK_LIST_WORDS'].join(', ');
     }
   }
 
-  getWarningIconStyle(type) {
-    let color = '#ffffff';
-    let backgroundColor = '#511010';
-    let fontSize = '14px';
+  handleFocus() {
+    this.buildTooltipInfo();
 
-    switch (type) {
-      case FINDINGS_WARNING_TYPE.SMN_REPORT_CARRIER:
-        color = 'var(--neutral--hugo)';
-        backgroundColor = '#F5CE21';
-        break;
-      case FINDINGS_WARNING_TYPE.MISSING_COUPLE_PARTNER:
-        color = '#9C27B0';
-        backgroundColor = '#fff';
-        fontSize = '23px';
-        break;
-      case FINDINGS_WARNING_TYPE.QUESTIONNAIRE_ALERT:
-      case FINDINGS_WARNING_TYPE.QUESTIONNAIRE_COMMENT:
-        backgroundColor = '#9C27B0';
-        break;
-      case FINDINGS_WARNING_TYPE.PAIR_COUPLE:
-      case FINDINGS_WARNING_TYPE.UNPAIR_COUPLE:
-        color = 'var(--secondary--eric)';
-        backgroundColor = '#ffffff';
-        fontSize = '23px';
-        break;
-      case FINDINGS_WARNING_TYPE.ADDITIONAL_TESTS_ALERT:
-        color = '#9C27B0';
-        backgroundColor = '#ffffff';
-        fontSize = '23px';
-        break;
+    if (!this.waitedForInitialFocus) {
+      this.waitedForInitialFocus = true;
+      this.checkPasswordPolicy();
+    }
+    this.showTooltip = true;
+
+    this.$emit('focus');
+  }
+
+  handleBlur() {
+    this.checkPasswordPolicy();
+    this.showTooltip = false;
+
+    // attach "is valid" flag to blur event
+    this.$emit('blur', !this.errors.length);
+  }
+
+  async checkPasswordPolicy() {
+    if (!this.waitedForInitialFocus || this.passwordValue === this.initialValue) {
+      return;
     }
 
-    return {
-      color,
-      backgroundColor,
-      fontSize,
-    };
-  }
+    try {
+      // make sure we do not send email: null to BE because it breaks.
+      const email = this.contextEmail || '';
 
-  getWarningLabelText(type) {
-    return FINDINGS_WARNING_TYPE_TEXT[FINDINGS_WARNING_TYPE[type]];
-  }
+      let validation = await usersServices.validatePasswordPolicy({
+        email: !this.validateEmail(email) ? email : '', // make sure email sent is valid. otherwise BE breaks.
+        password: this.passwordValue || '',
+        organizationId: this.organizationId,
+      });
 
-  getWarningDescription(errorWarning) {
-    if (errorWarning.warningType === FINDINGS_WARNING_TYPE.ADDITIONAL_TESTS_ALERT) {
-      return errorWarning.attributes.text;
+      this.errors = validation || [];
+    } catch (e) {
+      this.errors = [
+        this.ignI18n.t('passwordValidationFailDueToServer'),
+      ];
+      this.tooltipKeys = [];
     }
 
-    if (errorWarning.attributes.reason) {
-      return `Reason: ${errorWarning?.attributes?.reason}`;
+    this.validated = true;
+
+    if (!this.errors.length) {
+      this.$emit('validation', true);
+    } else {
+      this.$emit('validation', false);
     }
-
-    return errorWarning?.attributes?.text
-      || this.ignI18n.t(FINDINGS_WARNING_MESSAGES_DISPLAY_KEY[errorWarning.warningType], errorWarning.attributes);
-  }
-
-  getIsMissingCouplePartnerWarning(type) {
-    return type === FINDINGS_WARNING_TYPE.MISSING_COUPLE_PARTNER;
-  }
-
-  getIsCoupleAlert(warning){
-    return [
-      FINDINGS_WARNING_TYPE.PAIR_COUPLE,
-      FINDINGS_WARNING_TYPE.UNPAIR_COUPLE,
-    ].includes(warning.warningType);
-  }
-
-  getFormattedDate(date) {
-    return formatLocalized(date, 'YYYY-MM-DD');
-  }
-
-  getAdditionalTestsItems(warning) {
-    return warning.attributes.items ? JSON.parse(warning.attributes.items) : [];
-  }
-
-  @Publisher(QUEUE_CHANNELS.WARNING_CHANNEL)
-  onWarningClick(queue, warning) {
-    queue.send(warning);
   }
 }
 </script>

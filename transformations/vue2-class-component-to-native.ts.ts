@@ -68,7 +68,6 @@ function removeImports(context: Context) {
     'vuex-class',
     'vue',
     'vuex',
-    'vue-q'
   ]
 
   context
@@ -117,6 +116,8 @@ const supportedDecorators = [
   'Provide',
   'Inject'
 ]
+
+const ignoredDecorators = ['Consumer']
 
 function classToOptions(context: Context) {
   const prevDefaultExportDeclaration = context.root.find(ExportDefaultDeclaration)
@@ -207,8 +208,8 @@ function classToOptions(context: Context) {
       const argumentValue = prop.decorators[0].expression.arguments?.[0]?.value || localName
 
       if (!supportedDecorators.includes(accessorType)) {
-        // Temp condition
-        if (accessorType === 'Consumer') {
+        // Your decorators to skip
+        if (accessorType.includes(ignoredDecorators)) {
           return
         }
         throw new Error(`Decorator ${accessorType} is not supported.`)

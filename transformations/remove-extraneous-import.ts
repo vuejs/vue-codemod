@@ -8,7 +8,8 @@ import type {
 import type { Collection } from 'jscodeshift/src/Collection'
 
 type Params = {
-  localBinding: string
+  localBinding: string,
+  ignoreExtend?: boolean,
 }
 
 /**
@@ -21,7 +22,7 @@ type Params = {
  */
 export const transformAST: ASTTransformation<Params> = (
   { root, j },
-  { localBinding }
+  { localBinding, ignoreExtend }
 ) => {
   const usages = root
     .find(j.Identifier, { name: localBinding })
@@ -52,6 +53,10 @@ export const transformAST: ASTTransformation<Params> = (
         parent.value !== identifierPath.node
       ) {
         return false
+      }
+
+      if (ignoreExtend) {
+        return parent.superClass?.name !== localBinding;
       }
 
       return true
@@ -97,7 +102,8 @@ export const transformAST: ASTTransformation<Params> = (
       'vue-router',
       'vuex',
       '@vue/composition-api',
-    ]
+    ];
+
     if (
       peerSpecifiers.length === 1 &&
       safelyRemovableModules.includes(source)

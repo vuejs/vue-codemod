@@ -19,13 +19,13 @@ import { ExampleType } from './ExampleType';
   },
 })
 export default class TestComponent extends Vue {
-  @Prop({ default: () => [] }) example!: ExampleType[];
+  @Prop({ default: true }) example!: ExampleType[];
 
   @Prop() prop1!: string;
 
   @Prop({ default: 0 }) prop2!: number;
 
-  @Watch({ deep: true, immediate: true})
+  @Watch('prop1', { deep: true, immediate: true})
   onProp1Changed() {
     console.log('Example watcher')
   }

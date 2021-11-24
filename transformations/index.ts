@@ -9,7 +9,7 @@ const transformationMap: {
   [name: string]: JSTransformationModule
 } = {
   'vue-class-component-v8': require('./vue-class-component-v8'),
-  'vue2-class-component-to-native-ts': require('./vue2-class-component-to-native.ts'),
+  'vue2-class-component-to-native-typescript': require('./vue2-class-component-to-native-ts.ts'),
   'new-global-api': require('./new-global-api'),
   'vue-router-v4': require('./vue-router-v4'),
   'vuex-v4': require('./vuex-v4'),

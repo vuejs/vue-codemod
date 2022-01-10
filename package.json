@@ -29,7 +29,7 @@
     "@vue/compiler-dom": "^3.0.5",
     "debug": "^4.1.1",
     "globby": "^11.0.2",
-    "jscodeshift": "^0.11.0",
+    "jscodeshift": "^0.13.1",
     "lru-cache": "^6.0.0",
     "source-map": "^0.6.1",
     "yargs": "^16.2.0"

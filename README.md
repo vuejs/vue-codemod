@@ -201,7 +201,7 @@ Aside from migrating Vue 2 apps to Vue 3, this repository also includes some gen
 - `remove-trivial-root`
   - this transformation removes trivial root components like `{ render: () => h(App) }` and use `App` as the direct root
 - `define-component`
-  - `--param.useCompositionAPI`: `false` by default. When set to `true`, it will import the `defineComponent` helper from `@vue/composition-api` instead of `vue`
+  - `--params.useCompositionApi`: `false` by default. When set to `true`, it will import the `defineComponent` helper from `@vue/composition-api` instead of `vue`
   - this transformation adds `defineComponent()` wrapper to `.vue` file exports, and replaces `Vue.extend` calls to `defineComponent`
 
 ## Custom Transformation
